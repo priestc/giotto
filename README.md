@@ -34,7 +34,10 @@ Example Application:
         return "{blog.title}\nby {blog.author}\n\n{blog.body}".format(blog=blog)
 
     class Blog(models.Model):
-        
+        body = models.TextField()
+        title = models.CharField(max_length=50)
+        author = models.CharField(max_length=50)
+
         @commandline(blog_new)
         @http(blog_html)
         @classmethod
@@ -46,8 +49,9 @@ Example Application:
 
         @commandine(commandline_blog)
         @http(blog_html)
+        @classmethod
         def view(self, id)
-            blog = self.get(id=id)
+            blog = self.objects.filter(disabled=False).get(id=id)
             if not blog:
                 raise NotFoundError("invalid blog id: %s" % id)
             return blog
