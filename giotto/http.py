@@ -18,7 +18,7 @@ class http(object):
 
 		http_routes[name] = args
 
-		def wrapper()
+		def wrapper():
 			return func()
 
 		return wrapper
@@ -30,9 +30,9 @@ def make_app(module):
 		"""
 		WSGI app for serving giotto applications
 		"""
-	    request = Request(environ)
-	    text = 'Hello %s!' % request.args.get('name', 'World')
-	    response = Response(text, mimetype='text/plain')
-	    return response(environ, start_response)
+		request = Request(environ)
+		text = 'Hello %s!' % request.args.get('name', 'World')
+		response = Response(text, mimetype='text/plain')
+		return response(environ, start_response)
 
 	return  application
