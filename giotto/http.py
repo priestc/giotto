@@ -1,3 +1,4 @@
+import inspect
 from werkzeug.wrappers import Request, Response
 from giotto import controller_maps
 from giotto.primitives import GiottoPrimitive
@@ -6,18 +7,18 @@ class GiottoHttpException(Exception):
     pass
 
 def make_app(module):
-    
+
     def application(environ, start_response):
         """
         WSGI app for serving giotto applications
         """
         request = Request(environ)
-        model_name = request.path[1:].replace('/', '.')
+        model_name = module.__name__ + '.' + request.path[1:].replace('/', '.')
         
         ret = controller_maps['http'].get(model_name, None)
 
         if not ret:
-            raise GiottoHttpException('Can not find model: %s' % model_name)
+            raise GiottoHttpException('Can not find model: %s in %s' % (model_name, controller_maps))
 
         model = ret['app']
         argspec = ret['argspec']
@@ -47,10 +48,14 @@ def primitive_from_argspec(request, argspec):
     return kwargs
 
 
+# stubs, replace with something better later
 class User(object): pass
 class AnonymousUser(object): pass
 
 def get_primitive(request, primitive):
+    """
+    Exract a primitive from the request and return it.
+    """
     if primitive.__name__ == "LOGGED_IN_USER":
         user = request.cookies.get('user')
         if user:
