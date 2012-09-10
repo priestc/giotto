@@ -1,3 +1,9 @@
+What is Giotto?
+===============
+
+Giotto is a python application framework. Not quite a web framework, but it does
+include plumbing for deploying applications through a web server.
+
 Why?
 ====
 
@@ -10,7 +16,7 @@ Features
 ========
 
 * Completely working commandline interface as well as web interface out of the box
-* giotto automatically configures the urls for you. No more dealing with messy regex
+* Giotto automatically configures the urls for you. No more dealing with messy regex
 based urls to define!
 
 Primitives
@@ -88,6 +94,7 @@ Example Application:
             return blog
 
 Usage:
+======
 
     $ curl -d "title='my blog'&author=william&body='my blog body'" http://myblog.com/Blog/create_new_blog
     <html><body>
