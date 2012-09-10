@@ -12,9 +12,9 @@ Example Application:
         For showing a blog in an http context
         """
         return """<html><body>
-                    <h1>{blog.title}</h1>
-                    <h2>by {blog.author}</h2>
-                    <p>{blog.body}</p>
+                    <h1>{blog[title]}</h1>
+                    <h2>by {blog[author]}</h2>
+                    <p>{blog[body]}</p>
                   </body></html>""".format(blog=blog)
 
     def blog_new(blog, errors=None):
@@ -31,24 +31,25 @@ Example Application:
         """
         if errors:
             return str(errors)
-        return "{blog.title}\nby {blog.author}\n\n{blog.body}".format(blog=blog)
+        return "{blog[title]}\nby {blog[author]}\n\n{blog[body]}".format(blog=blog)
 
     class Blog(models.Model):
         body = models.TextField()
         title = models.CharField(max_length=50)
         author = models.CharField(max_length=50)
 
-        @commandline(blog_new)
-        @http(blog_html)
+        @bind_controller('cmd', blog_new)
+        @bind_controller('http', blog_html)
         @classmethod
-        def crete_new_blog(cls, title, body, author)
+        def crete_new_blog(cls, title, body, author=LOGGED_IN_USER)
             if len(title) < 50:
                 raise ValidationError("title too long")
 
+            # author will be the user currently authenticated
             return cls.objects.create(title, body, author)
 
-        @commandine(commandline_blog)
-        @http(blog_html)
+        @bind_controller('cmd', commandline_blog)
+        @bind_controller('http', blog_html)
         @classmethod
         def view(self, id)
             blog = self.objects.filter(disabled=False).get(id=id)
