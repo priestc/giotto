@@ -1,11 +1,39 @@
 Why?
+====
 
 The point of giotto is to avoid writing any controllers. All you write is the
 model, and the views. Giotto takes care of the rest.
 
 Write our models once, and reuse them across any controller you want!
 
+Features
+========
+
+* Completely working commandline interface as well as web interface out of the box
+* giotto automatically configures the urls for you. No more dealing with messy regex
+based urls to define!
+
+Primitives
+==========
+
+When writing model methods, in the function declertion, you can define primitives
+which expand to data requested automatically from any controller.
+
+    def view(data)
+        return "logged in as %s" % data['user']
+
+    @bind_controller('http', view)
+    @bind_controller('cmd', view)
+    def currently_logged_in(user=primitives.LOGGED_IN_USER):
+        return {'user': user}
+
+Now when you invoke this function from either the commandline or via http, the
+value of `user` will be the currently logged in user. In a http context, the user
+will come from a cookie. From the commandline, the currently logged in user will
+be extracted from an enviornment variable.
+
 Example Application:
+====================
 
     def blog_html(blog, errors=None):
         """

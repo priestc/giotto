@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from distutils.core import setup
 
 setup(
 	name='giotto',
@@ -8,5 +8,7 @@ setup(
     author_email='cp368202@ohiou.edu',
     url='https://github.com/priestc/giotto',
     packages=['giotto'],
-    install_requires=['werkzeug'],
+    scripts=['giotto/giotto'],
+    license='LICENSE',
+    install_requires=['werkzeug', 'distribute'],
 )

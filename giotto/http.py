@@ -2,9 +2,8 @@ import inspect
 from werkzeug.wrappers import Request, Response
 from giotto import controller_maps
 from giotto.primitives import GiottoPrimitive
+from giotto.core import GiottoHttpException, User, AnonymousUser
 
-class GiottoHttpException(Exception):
-    pass
 
 def make_app(module):
 
