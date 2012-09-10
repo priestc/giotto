@@ -16,7 +16,7 @@ based urls to define!
 Primitives
 ==========
 
-When writing model methods, in the function declertion, you can define primitives
+When writing model methods, in the function declaration, you can define primitives
 which expand to data requested automatically from any controller.
 
     def view(data)
@@ -30,7 +30,9 @@ which expand to data requested automatically from any controller.
 Now when you invoke this function from either the commandline or via http, the
 value of `user` will be the currently logged in user. In a http context, the user
 will come from a cookie. From the commandline, the currently logged in user will
-be extracted from an enviornment variable.
+be extracted from an enviornment variable. How exactly this data is extracted is
+a function of the controller module (defined as 'http' and 'cmd' above), and is
+configurable.
 
 Example Application:
 ====================
