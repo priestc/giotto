@@ -8,7 +8,7 @@ setup(
     author_email='cp368202@ohiou.edu',
     url='https://github.com/priestc/giotto',
     packages=['giotto'],
-    scripts=['giotto/giotto'],
+    scripts=['giotto/giotto-commandline.py'],
     license='LICENSE',
     install_requires=['werkzeug', 'distribute'],
 )

@@ -4,6 +4,8 @@ What is Giotto?
 Giotto is a python application framework. Not quite a web framework, but it does
 include plumbing for deploying applications through a web server.
 
+Giotto's motto is "An application framework for idealists with no deadlines"
+
 Why?
 ====
 
