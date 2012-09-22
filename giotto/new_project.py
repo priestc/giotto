@@ -26,14 +26,13 @@ from distutils.core import setup
 setup(
 	name='{{ project }}',
     version='0.0.1',
-    description='',
-    author='',
-    author_email='cp368202@ohiou.edu',
-    url='https://github.com/priestc/giotto',
+    description='{{ short_description }}',
+    author='{{ author_name }}',
+    author_email='{{ author_email }}',
+    url='{{ url }}',
     packages=['giotto'],
-    scripts=['giotto/giotto-commandline.py'],
     license='LICENSE',
-    install_requires=['werkzeug', 'distribute'],
+    install_requires=['giotto'],
 )
 """
 
@@ -41,8 +40,18 @@ settings_template = """
 AUTH_STORAGE = 'redis' # 'postgres' | 'mysql' | 'mongodb' | 'oracle'
 """
 
+wsgi_template = """
+from giotto.http import make_app
+from werkzeug.serving import run_simple
+import {{ project }}
+
+app = make_app(blog)
+run_simple('127.0.0.1', 5000, app, use_debugger=True, use_reloader=True)
+"""
+
 if __name__ == '__main__':
 	rendered_setup = jinja2.render(setup_template)
 	# place setup.py file
 	# create blank directories
 	# place config file
+	# place wsgi template

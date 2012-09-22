@@ -48,7 +48,7 @@ which expand to data requested automatically from any controller.
 
     from giotto import primitives
 
-    def view(data)
+    def view(data):
         return "logged in as %s" % data['user']
 
     @bind_controller('http-1.1-get', view)
@@ -68,10 +68,11 @@ Example Application:
 
     from giotto.primitives import RAW_PAYLOAD, LOGGED_IN_USER
     from giotto.exceptions import NotFound, ImproperInput
+    from giotto import bind_controller, bind_model, get_invocation
 
     def blog_html(blog, errors=None):
         """
-        For showing a blog in an HTML context
+        For showing a blog in an HTML context.
         """
         return """<html><body>
                     <h1>{blog[title]}</h1>
@@ -82,9 +83,9 @@ Example Application:
     def blog_new(blog, errors=None):
         """
         After a blog is created from the command line, return a message
-        telling the usser the new blog url 
+        telling the usser the new blog url.
         """
-        url = get_invocation('http-1.1-get', blog.__class__.view, {'id': blog.id})
+        url = get_invocation('http-1.1-get', 'view_blog', args={'id': blog.id})
         return "New blog created! see at %s" % url
 
     def commandline_blog(blog, errors=None):
@@ -93,47 +94,111 @@ Example Application:
         """
         if errors:
             return str(errors)
-        return "{blog[title]}\nby {blog[author]}\n\n{blog[body]}".format(blog=blog)
+        return "{blog.title}\nby {blog.author.name}\n\n{blog.body}".format(blog=blog)
 
+
+    class Blog(object):
+        """
+        The model for the Blog application. This class handles saving to the database
+        and validating data coming in and out of the database. An instance of this
+        class represents a blog.
+        """
+
+        body = ''
+        author = None
+        title = ''
+
+        def validate(self):
+            """
+            Validate a blog instance. Return the things wrong with it.
+            """
+            errors = []
+            if len(title) > 50:
+                errors.append("title too long")
+            if body == '':
+                errors.append("body can't be empty")
+
+            return errors or None
+
+        @classmethod
+        def get(cls, **kwargs):
+            """
+            Get blog data from the database and return it.
+            """
+            if 'id' in kwarg.keys():
+                return redis.get(id=kwargs['id'])
+            raise NotImplementedError('only get by id supported at this time')
+
+        @classmethod
+        def new(cls, title, body, author_id):
+            """
+            Create a new blog and make sure the data is valid. Returns the database
+            ID of the newly created blog.
+            """
+            author = Author.get(id=author_id) # another model
+            blog = cls(title=title, body=body, author=author)
+            
+            errors = blog.validate()
+            if errors:
+                raise InvalidInput("\n".join(errors))
+            
+            new_blog = redis.save(blog)
+            return new_blog
+
+        @classmethod
+        def edit_blog(cls, id, title, author, body):
+            blog = cls.get(id=id)
+            blog.title = title
+            blog.author = author
+            blog.body = body
+
+            errors = blog.validate()
+            if errors:
+                redis.save(blog)
+            else:
+                raise InvalidInput("/n".join(errors))
+            return blog
 
     @bind_controller('cmd', blog_new)
     @bind_controller('http-1.1-post', blog_html)
-    def crete_new_blog(title, body, author=LOGGED_IN_USER)
-        if len(title) > 50:
-            raise ImproperInput("title too long")
+    @bind_model(Blog.new)
+    def create_new_blog(title, body, author=LOGGED_IN_USER)
+        # when creating blogs, the author is always automatically set to the
+        # currently logged in user. Giotto handles extracting `title`, and
+        # `body` from either the HTTP 1.1 POST or the commandline arguments
+        # so you don't have to worry about it.
+        # if you wanted to do some further processing of input data, it can
+        # be done here.
+        return {'author': author, 'title': title, 'body': body}
 
-        # Call the model to save the blog in whatever data store is used
-        return Blog.create(title, body, author)
-
-    @bind_controller('cmd', commandline_blog)
-    @bind_controller('http-1.1-get', blog_html)
-    def view_blog(id)
-        # call to model
-        blog = Blog.filter(disabled=False).get(id=id)
-        if not blog:
-            raise NotFound("invalid blog id: %s" % id)
-        return blog
+    @bind_controller_view('cmd', commandline_blog)
+    @bind_controller_view('http-1.1-get', blog_html)
+    @bind_model(Blog.get)
+    def view_blog(id):
+        if not id.isdigit():
+            raise InvalidInput('invalid blog id')
+        return {id: id}
 
 Usage:
 ======
 
-    $ curl -d "title='my blog'&author=william&body='my blog body'" http://myblog.com/Blog/create_new_blog
+    $ curl -d "title=title&author=william&body=body" http://myblog.com/create_new_blog
     <html><body>
-        <h1>my blog</h1>
+        <h1>title</h1>
         <h2>by william</h2>
-        <p>my blog body</p>
+        <p>body</p>
     </body></html>
 
-    $ giotto Blog.create_new_blog --title='Second blog' --author=todd --body="another blog"
+    $ giotto create_new_blog --title='Second blog' --author=todd --body="another blog"
     New blog created! see at http://myblog.com/Blog/view?id=2
 
-    $ giotto Blog.view --id=2
+    $ giotto view_blog --id=2
     Second blog
     by todd
 
     another blog
 
-    $ giotto Blog.create_new_blog --title='way more than 50 chars!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+    $ giotto create_new_blog --title='way more than 50 chars!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
     Error: ('title too long')
 
     
