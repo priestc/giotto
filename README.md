@@ -7,7 +7,7 @@ include plumbing for deploying applications through a web server.
 Giotto's motto is "An application framework for idealists with no deadlines"
 
 This document is a work in progress. Since Giotto is still being conceptualized
-and written, this document will
+and written, this document will change often.
 
 Why?
 ====
