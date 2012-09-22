@@ -190,7 +190,7 @@ Usage:
         <h1>title</h1>
         <h2>by william</h2>
         <p>body</p>
-    </body></html>
+    </body></html>   
 
     $ giotto create_new_blog --title='Second blog' --author=todd --body="another blog"
     New blog created! see at http://myblog.com/view_blog?id=2
@@ -200,6 +200,13 @@ Usage:
     by todd
 
     another blog
+
+    $ curl http://myblog.com/view_blog?id=2
+    <html><body>
+        <h1>title</h1>
+        <h2>by william</h2>
+        <p>body</p>
+    </body></html>    
 
     Error Reporting
     ---------------
