@@ -74,6 +74,9 @@ Example Application:
         """
         For showing a blog in an HTML context.
         """
+        if errors:
+            return "<html>{{ errors }}</html>"
+
         return """<html><body>
                     <h1>{blog[title]}</h1>
                     <h2>by {blog[author]}</h2>
@@ -93,7 +96,7 @@ Example Application:
         For showing a blog on the commandline.
         """
         if errors:
-            return str(errors)
+            return errors
         return "{blog.title}\nby {blog.author.name}\n\n{blog.body}".format(blog=blog)
 
 
@@ -190,7 +193,7 @@ Usage:
     </body></html>
 
     $ giotto create_new_blog --title='Second blog' --author=todd --body="another blog"
-    New blog created! see at http://myblog.com/Blog/view?id=2
+    New blog created! see at http://myblog.com/view_blog?id=2
 
     $ giotto view_blog --id=2
     Second blog
@@ -198,7 +201,17 @@ Usage:
 
     another blog
 
-    $ giotto create_new_blog --title='way more than 50 chars!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-    Error: ('title too long')
+    Error Reporting
+    ---------------
 
-    
+    $ giotto create_new_blog --title='way more than 50 chars!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+    Error: ('title too long', 'body can't be empty')
+
+    $ curl -i -d "title=reallylongtitlethatisover50chars!!!!!!!!!!!!!!!!!!!!!" http://myblog.com/create_new_blog
+    HTTP/1.1 400 Bad Request
+    Server: nginx/1.0.12
+    Date: Mon, 20 Feb 2012 11:15:49 GMT
+    Content-Type: text/html;charset=utf-8
+
+    <html>title too long
+    body can't be empty</html>
