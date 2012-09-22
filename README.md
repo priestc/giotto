@@ -185,6 +185,11 @@ Example Application:
 Usage:
 ======
 
+Creating blogs
+--------------
+
+From http:
+
     $ curl -d "title=title&author=william&body=body" http://myblog.com/create_new_blog
     <html><body>
         <h1>title</h1>
@@ -192,14 +197,23 @@ Usage:
         <p>body</p>
     </body></html>   
 
+From command line:
+
     $ giotto create_new_blog --title='Second blog' --author=todd --body="another blog"
     New blog created! see at http://myblog.com/view_blog?id=2
+
+Viewing blogs
+-------------
+
+From commandline:
 
     $ giotto view_blog --id=2
     Second blog
     by todd
 
     another blog
+
+From http:
 
     $ curl http://myblog.com/view_blog?id=2
     <html><body>
@@ -208,11 +222,15 @@ Usage:
         <p>body</p>
     </body></html>    
 
-    Error Reporting
-    ---------------
+Error Reporting
+---------------
+
+From command line:
 
     $ giotto create_new_blog --title='way more than 50 chars!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
     Error: ('title too long', 'body can't be empty')
+
+From http:
 
     $ curl -i -d "title=reallylongtitlethatisover50chars!!!!!!!!!!!!!!!!!!!!!" http://myblog.com/create_new_blog
     HTTP/1.1 400 Bad Request
