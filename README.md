@@ -6,6 +6,9 @@ include plumbing for deploying applications through a web server.
 
 Giotto's motto is "An application framework for idealists with no deadlines"
 
+This document is a work in progress. Since Giotto is still being conceptualized
+and written, this document will
+
 Why?
 ====
 
@@ -13,6 +16,22 @@ The point of giotto is to avoid writing any controllers. All you write is the
 model, and the views. Giotto takes care of the rest.
 
 Write our models once, and reuse them across any controller you want!
+
+Philosophy
+==========
+
+* Convention Over Configuration - It may seem like a bummer at first to not be
+able to fine-tune configure every aspect of giotto. But in the long run, this
+approach is best, as each giotto user does things the same way. Giotto does not
+let you shoot yourself in the foot.
+
+* Forward thinking backwards compatability - Giotto will release major versions
+that break backwards compatability more often than most projects. For instance,
+Giotto 2.x will not be backwards compatable to Giotto 1.x, etc. Point releases will
+occur
+
+* Document driven - It is very important that all aspects of giotto are documented
+before they are written.
 
 Features
 ========
@@ -30,7 +49,7 @@ which expand to data requested automatically from any controller.
     def view(data)
         return "logged in as %s" % data['user']
 
-    @bind_controller('http', view)
+    @bind_controller('http-1.1-get', view)
     @bind_controller('cmd', view)
     def currently_logged_in(user=primitives.LOGGED_IN_USER):
         return {'user': user}
