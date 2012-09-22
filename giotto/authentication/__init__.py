@@ -10,7 +10,7 @@ def get_user(id):
 
 def new_user(password):
 	"""
-	Create a new user instance
+	Create a new user instance. Passed in is the password of this user
 	"""
 	encrypted_password = bcrypt # FIXME
 	user = GiottoUser(user_id)
