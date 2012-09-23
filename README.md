@@ -70,6 +70,10 @@ Example Application:
     from giotto.exceptions import NotFound, ImproperInput
     from giotto import bind_controller, bind_model, get_invocation
 
+    ###############
+    ## Views
+    ###############
+
     def blog_html(blog, errors=None):
         """
         For showing a blog in an HTML context.
@@ -99,6 +103,9 @@ Example Application:
             return errors
         return "{blog.title}\nby {blog.author.name}\n\n{blog.body}".format(blog=blog)
 
+    ###############
+    ## Models
+    ###############
 
     class Blog(object):
         """
@@ -162,6 +169,10 @@ Example Application:
                 raise InvalidInput("/n".join(errors))
             return blog
 
+    ###############
+    ## Controllers
+    ###############
+
     @bind_controller('cmd', blog_new)
     @bind_controller('http-1.1-post', blog_html)
     @bind_model(Blog.new)
@@ -188,6 +199,11 @@ Usage:
 Creating blogs
 --------------
 
+From command line:
+
+    $ giotto create_new_blog --title='Second blog' --author=todd --body="another blog"
+    New blog created! see at http://myblog.com/view_blog?id=2
+
 From http:
 
     $ curl -d "title=title&author=william&body=body" http://myblog.com/create_new_blog
@@ -197,15 +213,10 @@ From http:
         <p>body</p>
     </body></html>   
 
-From command line:
-
-    $ giotto create_new_blog --title='Second blog' --author=todd --body="another blog"
-    New blog created! see at http://myblog.com/view_blog?id=2
-
 Viewing blogs
 -------------
 
-From commandline:
+From command line:
 
     $ giotto view_blog --id=2
     Second blog
