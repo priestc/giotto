@@ -2,11 +2,14 @@ import inspect
 from werkzeug.wrappers import Request, Response
 from giotto import controller_maps
 from giotto.primitives import GiottoPrimitive
-from giotto.core import GiottoHttpException, User, AnonymousUser
+from giotto.core import GiottoHttpException, config
 
+global config
 
 def make_app(module):
 
+    config = module.config
+    
     def application(environ, start_response):
         """
         WSGI app for serving giotto applications
@@ -27,7 +30,7 @@ def make_app(module):
         response = Response(html, mimetype='text/html')
         return response(environ, start_response)
 
-    return  application
+    return application
 
 def primitive_from_argspec(request, argspec):
     """

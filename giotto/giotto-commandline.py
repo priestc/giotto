@@ -3,11 +3,12 @@
 import sys
 
 module_name = sys.argv[1]
-model = sys.argv[2]
+controller = sys.argv[2]
 args = sys.argv[3:]
 
 module = __import__(module_name, globals(), locals(), [], -1)
-model_name = module.__name__ + '.' + model
+controller_name = module.__name__ + '.' + controller
+controller = getattr(module.controller, controller)
 
 raise SystemExit()
 
