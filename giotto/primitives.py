@@ -9,3 +9,8 @@ class RAW_PAYLOAD(GiottoPrimitive):
 	"""
 	The raw load of data that came in from the user. Represented as a dict.
 	"""
+
+class USER_COUNTRY(GiottoPrimitive):
+    """
+    Represents the user's country based on GeoIP.
+    """

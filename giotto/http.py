@@ -12,18 +12,17 @@ def make_app(module):
         WSGI app for serving giotto applications
         """
         request = Request(environ)
-        model_name = module.__name__ + '.' + request.path[1:].replace('/', '.')
+        controller_name = module.__name__ + '.controllers.' + request.path[1:].replace('/', '.')
         
-        ret = controller_maps['http'].get(model_name, None)
+        ret = controller_maps['http'].get(controller_name, None)
 
         if not ret:
-            raise GiottoHttpException('Can not find model: %s in %s' % (model_name, controller_maps))
+            raise GiottoHttpException('Can not find controller: %s in %s' % (controller_name, controller_maps))
 
-        model = ret['app']
+        controller = ret['app']
         argspec = ret['argspec']
-
-        model_args = primitive_from_argspec(request, argspec)
-        html = model(**model_args)
+        controller_args = primitive_from_argspec(request, argspec)
+        html = controller(**controller_args)
 
         response = Response(html, mimetype='text/html')
         return response(environ, start_response)

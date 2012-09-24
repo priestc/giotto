@@ -1,4 +1,4 @@
-from distutils.core import setup
+from setuptools import setup
 
 setup(
 	name='giotto',
@@ -11,5 +11,5 @@ setup(
     packages=['giotto'],
     scripts=['giotto/giotto-commandline.py'],
     license='LICENSE',
-    install_requires=['werkzeug', 'distribute', 'jinja2', 'bcrypt'],
+    install_requires=['werkzeug', 'distribute', 'jinja2', 'py-bcrypt', 'decorator'],
 )

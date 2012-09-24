@@ -50,6 +50,7 @@ run_simple('127.0.0.1', 5000, app, use_debugger=True, use_reloader=True)
 """
 
 if __name__ == '__main__':
+    
 	rendered_setup = jinja2.render(setup_template)
 	# place setup.py file
 	# create blank directories
