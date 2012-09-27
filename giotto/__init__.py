@@ -7,32 +7,32 @@ controller_maps = defaultdict(lambda: {})
 
 class bind_controller_view(object):
     """
-    Bind a model method to a view for the HTTP controller context
+    Bind a controller tip to a view for the HTTP controller context
     """
 
     def __init__(self, controller, view):
         self.view = view
         self.controller = controller
 
-    def __call__(self, func):
-        argspec = inspect.getargspec(func)
-        module = func.__module__
-        name = func.__name__
+    def __call__(self, controller_tip):
+        argspec = inspect.getargspec(controller_tip)
+        module = controller_tip.__module__
+        name = controller_tip.__name__
 
-        @wraps(func)
+        @wraps(controller_tip)
         def wrapper(**kwargs):
-            return self.view(func(**kwargs))
+            return (self.view, controller_tip(**kwargs))
 
         n = module + "." + name
         controller_maps[self.controller][n] = {'app': wrapper, 'argspec': argspec}
 
-        return func
+        return controller_tip
 
 def bind_model(model, cache=None):
     @decorator.decorator
-    def inner_bind_model(controller, *args, **kw):
-        data = controller(*args, **kw)
-        return model(**data)
+    def inner_bind_model(controller_tip, *args, **kw):
+        data = controller_tip(*args, **kw)
+        return (model, data)
 
     return inner_bind_model
 

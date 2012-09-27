@@ -3,8 +3,22 @@ from werkzeug.wrappers import Request, Response
 from giotto import controller_maps
 from giotto.primitives import GiottoPrimitive
 from giotto.core import GiottoHttpException, config
+from giotto.exceptions import InvalidInput
 
 global config
+
+
+def execute_controller(request, module, controller_maps):
+    controller_name = module.__name__ + '.controllers.' + request.path[1:].replace('/', '.')
+    ret = controller_maps['http'].get(controller_name, None)
+    if not ret:
+        raise GiottoHttpException('Can not find controller: %s in %s' % (controller_name, controller_maps))
+
+    controller = ret['app']
+    argspec = ret['argspec']
+    controller_args = primitive_from_argspec(request, argspec)
+    m, v = controller(**controller_args)
+    return m, v, controller_args
 
 def make_app(module):
 
@@ -15,20 +29,39 @@ def make_app(module):
         WSGI app for serving giotto applications
         """
         request = Request(environ)
-        controller_name = module.__name__ + '.controllers.' + request.path[1:].replace('/', '.')
-        
-        ret = controller_maps['http'].get(controller_name, None)
 
-        if not ret:
-            raise GiottoHttpException('Can not find controller: %s in %s' % (controller_name, controller_maps))
+        ## do input middleware here
 
-        controller = ret['app']
-        argspec = ret['argspec']
-        controller_args = primitive_from_argspec(request, argspec)
-        html = controller(**controller_args)
+        view, model_pair, controller_args = execute_controller(request, module, controller_maps)
 
-        response = Response(html, mimetype='text/html')
-        return response(environ, start_response)
+        # if a model was attached to this controller, the controller will return
+        # the model and controller as a tuple, otherwise if there is no model,
+        # the the model_pair will be just the controller_args
+
+        try:
+            if type(model_pair) is tuple:
+                model = model_pair[0](**model_pair[1])
+            else:
+                # no model, use a empty callable
+                model = lambda: x
+        except InvalidInput as exc:
+            # the model failed because of invalid input.
+            # render with view with the error data.
+            import debug
+            content, mimetype = view.render(None, errors=exc.errors, input=controller_args)
+        else:
+            if hasattr(view, 'render'):
+                # if the view has a render method, use that, otherwise render the view by
+                # calling it
+                content, mimetype = view.render(model)
+            else:
+                content = view(model(**controller_args))
+                mimetype = "text/plain"
+
+        ## do output middleware here
+
+        wsgi_response = Response(content, mimetype=mimetype)
+        return wsgi_response(environ, start_response)
 
     return application
 
