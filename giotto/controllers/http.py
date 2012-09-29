@@ -2,23 +2,62 @@ import inspect
 from werkzeug.wrappers import Request, Response
 from giotto import controller_maps
 from giotto.primitives import GiottoPrimitive
-from giotto.core import GiottoHttpException, config
+from giotto.core import GiottoHttpException, GiottoApp, config
 from giotto.exceptions import InvalidInput
 
 global config
 
+class BaseHTTP(GiottoApp):
+    def __init__(self, module, request):
+        self.request = request
+        self.module = module
 
-def execute_controller(request, module, controller_maps):
-    controller_name = module.__name__ + '.controllers.' + request.path[1:].replace('/', '.')
-    ret = controller_maps['http'].get(controller_name, None)
-    if not ret:
-        raise GiottoHttpException('Can not find controller: %s in %s' % (controller_name, controller_maps))
+    def get_controller_tip_path(self):
+        """
+        Return the full path of the controller tip,
+        e.g. blog.controllers.create_blog
+        """
+        path = self.request.path
+        return self.module.__name__ + '.controllers.' + path[1:].replace('/', '.')
 
-    controller = ret['app']
-    argspec = ret['argspec']
-    controller_args = primitive_from_argspec(request, argspec)
-    m, v = controller(**controller_args)
-    return m, v, controller_args
+    def get_view_args(self, model, controller_args):
+        """
+        Return the arguments that will go into the view.
+        """
+        return model(**controller_args)
+
+class HttpGet(BaseHTTP):
+    name = 'http-get'
+
+    def data(self, arg):
+        return self.request.args[arg]
+
+    def get_primitive(self, name):
+        if name == 'RAW_DATA':
+            return self.request.args
+
+    def handle_error(self, exc):
+        previous_program = self.request.referrer
+        previous_error = exc.errors
+        previous_input = self.controller_args
+
+
+class HttpPost(BaseHTTP):
+    name = 'http-post'
+
+    def data(self, arg):
+        return self.request.form[arg]
+
+    def get_primitive(self, name):
+        if name == 'RAW_DATA':
+            return self.request.form
+
+
+
+
+
+
+
 
 def make_app(module):
 
@@ -32,23 +71,21 @@ def make_app(module):
 
         ## do input middleware here
 
-        view, model_pair, controller_args = execute_controller(request, module, controller_maps)
+        if request.method == "POST":
+            app = HttpPost(module, request)
+        elif request.method == 'GET':
+            app = HttpGet(module, request)
 
-        # if a model was attached to this controller, the controller will return
-        # the model and controller as a tuple, otherwise if there is no model,
-        # the the model_pair will be just the controller_args
+        model, view, controller = app.get_model_view_controller()
+
+        import debug
 
         try:
-            if type(model_pair) is tuple:
-                model = model_pair[0](**model_pair[1])
-            else:
-                # no model, use a empty callable
-                model = lambda: x
+            output = controller.get_response()
         except InvalidInput as exc:
             # the model failed because of invalid input.
             # render with view with the error data.
-            import debug
-            content, mimetype = view.render(None, errors=exc.errors, input=controller_args)
+            output = controller.handle_error(exc)
         else:
             if hasattr(view, 'render'):
                 # if the view has a render method, use that, otherwise render the view by
@@ -65,7 +102,7 @@ def make_app(module):
 
     return application
 
-def primitive_from_argspec(request, argspec):
+def primitive_from_argspec(data, argspec):
     """
     Fill in primitives from the argspec
     """
