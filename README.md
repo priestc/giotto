@@ -33,6 +33,13 @@ occur
 * Document driven - It is very important that all aspects of giotto are documented
 before they are written.
 
+* Giotto should make you do the right thing - It should be very hard to create
+complex spaghetti code when using giotto.
+
+* Everything that other frameworks can do, giotto should be able to do - Numerous
+times in the development process, giotto's API had radically changed when it has
+become known that other frameworks can do things much easier than giotto.
+
 Features
 ========
 
