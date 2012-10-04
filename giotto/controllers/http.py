@@ -1,7 +1,4 @@
-import inspect
 from werkzeug.wrappers import Request, Response
-from giotto import controller_maps
-from giotto.primitives import GiottoPrimitive
 from giotto.core import GiottoHttpException, GiottoApp, config
 from giotto.exceptions import InvalidInput
 
@@ -52,13 +49,6 @@ class HttpPost(BaseHTTP):
         if name == 'RAW_DATA':
             return self.request.form
 
-
-
-
-
-
-
-
 def make_app(module):
 
     config = module.config
@@ -76,60 +66,42 @@ def make_app(module):
         elif request.method == 'GET':
             app = HttpGet(module, request)
 
-        model, view, controller = app.get_model_view_controller()
-
-        import debug
-
         try:
-            output = controller.get_response()
+            output = app.get_response()
         except InvalidInput as exc:
             # the model failed because of invalid input.
             # render with view with the error data.
-            output = controller.handle_error(exc)
-        else:
-            if hasattr(view, 'render'):
-                # if the view has a render method, use that, otherwise render the view by
-                # calling it
-                content, mimetype = view.render(model)
-            else:
-                content = view(model(**controller_args))
-                mimetype = "text/plain"
+            output = app.handle_error(exc)
 
         ## do output middleware here
 
-        wsgi_response = Response(content, mimetype=mimetype)
+        if type(output) is not dict:
+            res = {
+                'mimetype': "text/plain",
+                'status': 200,
+                'response': output,
+            }
+        else:
+            res = output
+
+        wsgi_response = Response(**res)
         return wsgi_response(environ, start_response)
 
     return application
 
-def primitive_from_argspec(data, argspec):
-    """
-    Fill in primitives from the argspec
-    """
-    kwargs = dict(zip(*[reversed(l) for l in (argspec.args, argspec.defaults or [])]))
-    args2 = [item for item in argspec.args if item not in kwargs.keys()]
-
-    for item, value in kwargs.iteritems():
-        if GiottoPrimitive in value.mro():
-            kwargs[item] = get_primitive(request, value)
-
-    for arg in args2:
-        kwargs[arg] = request.args[arg]
-
-    return kwargs
 
 
-# stubs, replace with something better later
-class User(object): pass
-class AnonymousUser(object): pass
 
-def get_primitive(request, primitive):
-    """
-    Exract a primitive from the request and return it.
-    """
-    if primitive.__name__ == "LOGGED_IN_USER":
-        user = request.cookies.get('user')
-        if user:
-            return User()
-        else:
-            return AnonymousUser()
+
+
+
+
+
+
+
+
+
+
+
+
+

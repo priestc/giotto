@@ -74,19 +74,6 @@ Example Application:
     ## Views
     ###############
 
-    def blog_html(blog, errors=None):
-        """
-        For showing a blog in an HTML context.
-        """
-        if errors:
-            return "<html>{{ errors }}</html>"
-
-        return """<html><body>
-                    <h1>{blog[title]}</h1>
-                    <h2>by {blog[author]}</h2>
-                    <p>{blog[body]}</p>
-                  </body></html>""".format(blog=blog)
-
     def blog_new(blog, errors=None):
         """
         After a blog is created from the command line, return a message
@@ -140,7 +127,7 @@ Example Application:
             raise NotImplementedError('only get by id supported at this time')
 
         @classmethod
-        def new(cls, title, body, author_id):
+        def create(cls, title, body, author_id):
             """
             Create a new blog and make sure the data is valid. Returns the database
             ID of the newly created blog.
@@ -169,29 +156,51 @@ Example Application:
                 raise InvalidInput("/n".join(errors))
             return blog
 
-    ###############
-    ## Controllers
-    ###############
+    ########
+    ## Apps
+    ########
 
-    @bind_controller('cmd', blog_new)
-    @bind_controller('http-1.1-post', blog_html)
-    @bind_model(Blog.new)
-    def create_new_blog(title, body, author=LOGGED_IN_USER)
-        # when creating blogs, the author is always automatically set to the
-        # currently logged in user. Giotto handles extracting `title`, and
-        # `body` from either the HTTP 1.1 POST or the commandline arguments
-        # so you don't have to worry about it.
-        # if you wanted to do some further processing of input data, it can
-        # be done here.
-        return {'author': author, 'title': title, 'body': body}
+    from giotto.exceptions import InputError
+    from giotto.control import Redirection
 
-    @bind_controller_view('cmd', commandline_blog)
-    @bind_controller_view('http-1.1-get', blog_html)
-    @bind_model(Blog.get)
-    def view_blog(id):
-        if not id.isdigit():
-            raise InvalidInput('invalid blog id')
-        return {id: id}
+    from models import Blog
+    from views import HTML, commandline_blog
+
+    class ShowBlog(GiottoApp):
+        name = "show_blog"
+        model = Blog.get
+        controller_tip = ('id', )
+
+    class ShowBlogHttp(ShowBlog):
+        controller = 'http-get'
+        view = HTML('blog.html')
+        output_middleware = [HTMLMinify]
+
+    class ShowBlogCMD(ShowBlog):
+        controller = 'cmd'
+        view = commandline_blog
+
+    # ---
+
+    class NewBlog(GoittoApp):
+        name = "create_new_blog"
+
+    class NewBlogHTMLForm(NewBog):
+        controller = 'http-get'
+        controller_tip = ('title', 'body')
+        model = lambda x: x
+        view = HTML('new_blog.html')
+
+    class NewBlogSubmit(NewBlog):
+        conroller = 'http-post'
+        controller_tip = ('title', 'body', LOGGED_IN_USER)
+        model = Blog.create
+        view = Redirection('show_blog')
+
+        def on_error(exc, controller_tip):
+            if exc is InputError:
+                return Redirection(NewBlogHTMLForm, args=controller_tip)
+
 
 Usage:
 ======

@@ -17,7 +17,8 @@ def make_html_renderer(jinja_env):
             Render the template, and return as a string.
             """
             template = jinja_env.get_template(self.template)
-            return template.render(errors=errors, input={}, obj=model), self.mimetype
+            content = template.render(errors=errors, input={}, obj=model)
+            return {'response': content, 'mimetype': self.mimetype}
 
     return HTML
 
@@ -32,4 +33,4 @@ class JSON(object):
         except TypeError:
             j = json.dumps(model.__dict__)
 
-        return j, "application/json"
+        return {'response': j, "mimetype": "application/json"}
