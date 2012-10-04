@@ -44,31 +44,36 @@ Features
 ========
 
 * Completely working commandline interface as well as web interface out of the box
+
 * Giotto automatically configures the urls for you. No more dealing with messy regex
 based urls to define!
 
 Primitives
 ==========
 
-When writing model methods, in the function declaration, you can define primitives
-which expand to data requested automatically from any controller.
+Each controller implements a set of 'primitives' that your controller tips can
+use without coupling your application to any one controller. Eample:
 
-    from giotto import primitives
+    class ShowBlogHTTP(GiottoApp):
+        name = 'show_blog'
+        controller = 'http-get'
+        controller_tip = ('id', LOGGED_IN_USER)
+        model = Blog.get
+        view = HTML('blog.html')
 
-    def view(data):
-        return "logged in as %s" % data['user']
+In the above snippet, `LOGGED_IN_USER` is a special 'primitive' object that
+represents the currently logged in user. In an HTTP context, this data comes from
+a cookie that is set my some authentication middleware. We can subclass this
+application, and change the controller:
 
-    @bind_controller('http-1.1-get', view)
-    @bind_controller('cmd', view)
-    def currently_logged_in(user=primitives.LOGGED_IN_USER):
-        return {'user': user}
+    class ShowBlogCMD(ShowBlogHTTP):
+        controller = 'cmd'
+        view = JSON
 
-Now when you invoke this function from either the commandline or via http, the
-value of `user` will be the currently logged in user. In a http context, the user
-will come from a cookie. From the commandline, the currently logged in user will
-be extracted from an enviornment variable. How exactly this data is extracted is
-a function of the controller module (defined as 'http' and 'cmd' above), and is
-configurable.
+In this case, `LOGGED_IN_USER` comes from the CMD controller, and is implented
+by looking at the enviornment of the commandline where this program is invoked.
+The details of how this information gets to the model is an implementation
+detail of the controller class, and is of no concern for the model developer.
 
 Example Application:
 ====================
