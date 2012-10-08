@@ -54,19 +54,25 @@ Primitives
 Each controller implements a set of 'primitives' that your controller tips can
 use without coupling your application to any one controller. Eample:
 
-    class ShowBlogHTTP(GiottoApp):
+    class ShowBlog(GiottoApp):
         name = 'show_blog'
+        model = (Blog.get, )
+
+    class ShowBlogHTTP(ShowBlog)
         controller = 'http-get'
-        controller_tip = ('id', LOGGED_IN_USER)
-        model = Blog.get
         view = HTML('blog.html')
 
-In the above snippet, `LOGGED_IN_USER` is a special 'primitive' object that
-represents the currently logged in user. In an HTTP context, this data comes from
-a cookie that is set my some authentication middleware. We can subclass this
-application, and change the controller:
+    class Blog(object):
+        @classmethod
+        def get(cls, id, retrieving_user=LOGGED_IN_USER):
+            ...
 
-    class ShowBlogCMD(ShowBlogHTTP):
+In the above snippet, `LOGGED_IN_USER` on the model method is a special
+'primitive' object that represents the currently logged in user. In an HTTP
+context, this data comes from a cookie that is set my some authentication
+middleware. We can subclass this application, and change the controller:
+
+    class ShowBlogCMD(ShowBlog):
         controller = 'cmd'
         view = JSON
 
@@ -86,15 +92,7 @@ Example Application:
     ## Views
     ###############
 
-    def blog_new(blog, errors=None):
-        """
-        After a blog is created from the command line, return a message
-        telling the usser the new blog url.
-        """
-        url = get_invocation('http-1.1-get', 'view_blog', args={'id': blog.id})
-        return "New blog created! see at %s" % url
-
-    def commandline_blog(blog, errors=None):
+    def commandline_blog(blog):
         """
         For showing a blog on the commandline.
         """
