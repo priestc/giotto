@@ -4,87 +4,113 @@ from giotto.exceptions import InvalidInput
 
 global config
 
-class BaseHTTP(GiottoApp):
-    def __init__(self, module, request):
+class GiottoController(object):
+    def __init__(self, request, programs):
         self.request = request
-        self.module = module
+        self.programs = list(programs)
 
-    def get_controller_tip_path(self):
+    def get_program(self):
         """
-        Return the full path of the controller tip,
-        e.g. blog.controllers.create_blog
+        Search through all installed programs and return the one that matches
+        this request.
         """
-        path = self.request.path
-        return self.module.__name__ + '.controllers.' + path[1:].replace('/', '.')
+        for p in self.programs:
+            name_match = p.name == self.get_program_name()
+            controller_match = p.controller == self.get_controller()
+            if name_match and controller_match:
+                return p
 
-    def get_view_args(self, model, controller_args):
+        raise Exception("Can't find program for: %s in: %s" % (
+            self.__repr__(), self.show_program_names())
+        )
+
+    def _get_generic_response_data(self):
         """
-        Return the arguments that will go into the view.
+        Return the data to create a response object appropriate for the
+        controller. This function is called by get_concrete_response_data
         """
-        return model(**controller_args)
+        program = self.get_program()
 
-class HttpGet(BaseHTTP):
-    name = 'http-get'
+        raw_data = self.get_data()
+        model = getattr(program, 'model', None)
+        view = program.view
 
-    def data(self, arg):
-        return self.request.args[arg]
+        if model:
+            data = self.get_primitives(model, raw_data)
+            view_data = model[0](**data)
+        else:
+            view_data = self.get_primitives(view, raw_data)
 
-    def get_primitive(self, name):
-        if name == 'RAW_DATA':
-            return self.request.args
+        return self.render_view(view_data)
 
-    def handle_error(self, exc):
-        previous_program = self.request.referrer
-        previous_error = exc.errors
-        previous_input = self.controller_args
+    def show_program_names(self):
+        """
+        Print out a list of all program names for debugging purposes
+        """
+        out = []
+        print list(self.programs)
+        for p in self.programs:
+            disp = "%s - %s" % (p.name, p.controller)
+            out.append(disp)
+        return "\n".join(out)
 
+class HTTPController(GiottoController):
 
-class HttpPost(BaseHTTP):
-    name = 'http-post'
+    def __repr__(self):
+        controller = self.get_controller()
+        model = self.get_program_name()
+        data = self.get_data()
+        return "<%s %s - %s - %s>" % (self.__class__.__name__, controller, model, data)
 
-    def data(self, arg):
-        return self.request.form[arg]
+    def get_program_name(self):
+        return self.request.path[1:].replace('/', '.')
 
-    def get_primitive(self, name):
-        if name == 'RAW_DATA':
-            return self.request.form
+    def get_controller(self):
+        return 'http-%s' % self.request.method.lower()
 
-def make_app(module):
+    def get_data(self):
+        data = {}
+        if self.request.method == 'GET':
+            data = self.request.args
+        elif self.request.method == 'POST':
+            data = self.request.form
+        return data
 
-    config = module.config
+    def get_concrete_response_data(self):
+        result = self._get_generic_response_data()
+
+        # convert to a format appropriate to the wsgi Response api.
+        return {
+            'response': result['body'],
+            'mimetype': result['mimetype']
+        }
+
+    def render_view(self, view_data):
+        """
+        Render the view with data from the model and/or controller.
+        """
+        program = self.get_program()
+
+        if hasattr(program.view, 'render'):
+            response = program.view.render(view_data)
+        else:
+            response = program.view(view_data)
+
+        return response
+
+    def get_primitives(self, source, raw_data):
+        return raw_data
+
+def make_app(programs):
     
     def application(environ, start_response):
         """
         WSGI app for serving giotto applications
         """
         request = Request(environ)
-
-        ## do input middleware here
-
-        if request.method == "POST":
-            app = HttpPost(module, request)
-        elif request.method == 'GET':
-            app = HttpGet(module, request)
-
-        try:
-            output = app.get_response()
-        except InvalidInput as exc:
-            # the model failed because of invalid input.
-            # render with view with the error data.
-            output = app.handle_error(exc)
-
-        ## do output middleware here
-
-        if type(output) is not dict:
-            res = {
-                'mimetype': "text/plain",
-                'status': 200,
-                'response': output,
-            }
-        else:
-            res = output
-
-        wsgi_response = Response(**res)
+        controller = HTTPController(request, programs)
+        response_data = controller.get_concrete_response_data()
+        wsgi_response = Response(**response_data)
         return wsgi_response(environ, start_response)
 
     return application

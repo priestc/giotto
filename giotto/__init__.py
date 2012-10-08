@@ -1,0 +1,2 @@
+class GiottoProgram(object):
+    pass

@@ -18,7 +18,7 @@ def make_html_renderer(jinja_env):
             """
             template = jinja_env.get_template(self.template)
             content = template.render(errors=errors, input={}, obj=model)
-            return {'response': content, 'mimetype': self.mimetype}
+            return {'body': content, 'mimetype': self.mimetype}
 
     return HTML
 

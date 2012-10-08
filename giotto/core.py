@@ -101,3 +101,97 @@ def bind_model(model, cache=None):
         return (model, data)
 
     return inner_bind_model
+
+
+
+
+
+class GiottoProgram(object):
+    name = ''
+    model = lambda x: x
+    view = lambda x: x
+
+    def __init__(self, request):
+        self.request = request
+
+    def convert_to_real_app(self):
+        """
+        Convert this class into a 'real' giotto cntroller app, based on the
+        controller attribute.
+        """
+        for controllers in get_all_controllers():
+            if controller.name == self.name:
+                return controller
+
+
+class GiottoController(object):
+    pass
+
+
+class HTTPController(GiottoController):
+    def __init__(self, generic):
+        pass
+
+    def get_response(self, request):
+        c = self.get_controller_args(self.request)
+        m = self.model(c)
+        v = self.view(m)
+        return GiottoResponse(v)
+
+
+
+def itersubclasses(cls, _seen=None):
+    """
+    itersubclasses(cls)
+
+    Generator over all subclasses of a given class, in depth first order.
+
+    >>> list(itersubclasses(int)) == [bool]
+    True
+    >>> class A(object): pass
+    >>> class B(A): pass
+    >>> class C(A): pass
+    >>> class D(B,C): pass
+    >>> class E(D): pass
+    >>> 
+    >>> for cls in itersubclasses(A):
+    ...     print(cls.__name__)
+    B
+    D
+    E
+    C
+    >>> # get ALL (new-style) classes currently defined
+    >>> [cls.__name__ for cls in itersubclasses(object)] #doctest: +ELLIPSIS
+    ['type', ...'tuple', ...]
+    """
+    
+    if not isinstance(cls, type):
+        raise TypeError('itersubclasses must be called with '
+                        'new-style classes, not %.100r' % cls)
+    if _seen is None: _seen = set()
+    try:
+        subs = cls.__subclasses__()
+    except TypeError: # fails only when cls is type
+        subs = cls.__subclasses__(cls)
+    for sub in subs:
+        if sub not in _seen:
+            _seen.add(sub)
+            yield sub
+            for sub in itersubclasses(sub, _seen):
+                yield sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
