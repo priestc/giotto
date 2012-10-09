@@ -7,6 +7,7 @@ from giotto.exceptions import InvalidInput
 from giotto.primitives import GiottoPrimitive
 
 def do_argspec(source):
+    source = source.render
     argspec = inspect.getargspec(source)
     kwargs = dict(zip(*[reversed(l) for l in (argspec.args, argspec.defaults or [])]))
     args = [x for x in argspec.args if x not in kwargs.keys()]
@@ -75,7 +76,7 @@ class GiottoController(object):
         args, kwargs = do_argspec(source)
         output = {}
         for arg in args:
-            target = raw_data[arg]
+            target = raw_data.get(arg, None)
             output[arg] = target
 
         for key, value in kwargs.iteritems():
@@ -122,6 +123,7 @@ class GiottoController(object):
             response = self.program.view(view_data)
 
         return response
+
 
 class HTTPController(GiottoController):
     name = 'http'

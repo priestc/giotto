@@ -3,7 +3,7 @@ class GiottoProgram(object):
     name = None
     controller = None
     cache = 0
-    model = None
+    model = (None, )
     view = None
     output_middleware = []
 
