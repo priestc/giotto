@@ -1,0 +1,81 @@
+#!/usr/bin/env python
+"""
+Makes a file for invoking a giotto project for a given controller
+
+Usage:
+    $ giotto_xcontroller [--http] [--cmd]
+"""
+
+import sys
+import stat
+import os
+from jinja2 import Template
+
+cmd = "--cmd" in sys.argv
+http = "--http" in sys.argv
+
+template = """#!/usr/bin/env python
+
+from giotto import GiottoProgram, GiottoAbstractProgram
+from giotto.views import TEXT
+
+class HelloWorld(GiottoProgram):
+    name = ""
+    controller = 'http-get'
+    view = TEXT("Hello {{ '{{' }}obj.name|default('World'){{ '}}' }}")
+
+def multiply(x, y):
+    return {'x': x, 'y': y, "product": x * y}
+
+class BaseMultiply(GiottoAbstractProgram):
+    name = "multiply"
+    model = (multiply, )
+
+class MultiplyHTTP(BaseMultiply):
+    controller = 'http-get'
+    view = TEXT("<span style='color: blue'>{{ '{{' }}obj.x{{ '}}' }} * \\
+        {{ '{{' }}obj.y{{ '}}' }}</span> == <span style='color: red'>{{ '{{' }}obj.product{{ '}}' }}</span>")
+
+class MultiplyCMD(BaseMultiply):
+    controller = 'cmd'
+    view = TEXT("{{ '{{' }}obj.x{{ '}}' }} * {{ '{{' }}obj.y{{ '}}' }} == {{ '{{' }}obj.product{{ '}}' }}")
+
+################### generated code below
+
+import sys
+from giotto.core import itersubclasses
+programs = list(itersubclasses(GiottoProgram))
+controller = sys.argv[1]
+"""
+
+if http:
+    template = template + \
+"""
+if controller == 'http':
+    from werkzeug.serving import run_simple
+    from giotto.controllers.http import make_app
+    app = make_app(programs)
+    run_simple('127.0.0.1', 5000, app, use_debugger=True, use_reloader=True)
+"""
+
+if cmd:
+    template = template + \
+"""
+if controller == 'cmd':
+    pass
+
+"""
+
+template = template + \
+"""
+else:
+    raise NotImplementedError("Uninitiated controller: %s" %sys.argv[1])
+"""
+
+if __name__ == '__main__':
+    rendered = Template(template).render()
+    f = open('giotto', 'w')
+    f.write(rendered)
+    f.close()
+    st = os.stat('giotto')
+    os.chmod('giotto', st.st_mode | stat.S_IEXEC)

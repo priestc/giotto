@@ -1,14 +1,19 @@
 from werkzeug.wrappers import Request, Response
-from giotto.core import GiottoHttpException, GiottoApp, config
+from giotto import GiottoAbstractProgram, GiottoProgram
+from giotto.core import GiottoHttpException, GiottoApp
 from giotto.exceptions import InvalidInput
-
-global config
 
 class GiottoController(object):
     def __init__(self, request, programs):
         self.request = request
+
         # all programs available to this controller
-        self.programs = programs
+        self.programs = []
+        for p in programs:
+            first_two = p.mro()[0:2]
+            if GiottoAbstractProgram not in first_two:
+                # exclude abstract programs
+                self.programs.append(p)
 
         # the program that corresponds to this invocation
         self.program = self._get_program()

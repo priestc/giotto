@@ -1,55 +1,66 @@
-In this tutorial, we will create a blog aplication that lets you:
-
-1. Login as an author
-2. Create new blogs
-3. Display blogs as either an unauthenticated user, or as the author
-4. Display an analytics page for each blog that shows basic statistics such as pageviews and 'likes'
-
 First, install giotto:
 
     $ pip install giotto
 
-Then run the startproject command:
+Now create a controller file:
 
-    $ giotto startproject blog
+    $ giotto_controller --http --cmd
 
-This will create a new module in the current directory. Inside that directory
-contains a skeleton for a giotto project:
+This will create a "controller file" which will act as a gateway between your
+application and the outside world. The fine generated wll be called 'giotto'
+and it is what you will use to interact with your application.
 
-    giotto-blog
-        setup.py
-        wsgi.py
-        blog
-            __jnit__.py
-            config.py
-            controllers.py
-            models.py
-            views.py
+The `--http` and `--cmd` flags tells giotto to 'instantiate' those two controller
+classes into your controller file. Your application can now be interacted with
+from the command line or through HTTP. If you only want to interact with you app
+through the commandline, then you could leave off the `--http`.
 
-Now, lets build the controller for showing new blogs. In controllers.py, add the
-following lines:
+Inside the `giotto` file, you will see the following:
 
-    @bind_controller_view('cmd', 'basic_blog')
-    @bind_model(Blog.get)
-    def show_blog(id)
-        return locals()
+    from giotto import GiottoProgram, GiottoAbstractProgram
+    from giotto.views import TEXT
 
-Here we are defining a _controller tip_ called `show_blog`. This controller tip
-has one argument, `id`. This controller tip is invoked through the command line,
-and when it is, it is displayed using the `basic_blog` view.
+    class HelloWorld(GiottoProgram):
+        name = ""
+        controller = 'http-get'
+        view = TEXT("Hello {{obj.name }}")
 
-That takes care of the controller (for now). Now we need to create the model. In
-`models.py`, add the following:
+    def multiply(x, y):
+        return {'x': x, 'y': y, "product": x * y}
 
-    from sqlalchemy.ext.declarative import declarative_base
-    Base = declarative_base()
-    
-    class Blog(Base):
-        __tablename__ = 'blogs'
+    class BaseMultiply(GiottoAbstractProgram):
+        name = "multiply"
+        model = (multiply, )
 
-        id = Column(Integer, Sequence('blog_id_seq'), primary_key=True)
-        title = Column(String(50))
-        author = Column(String(50)) #FIXME
-        body = Column(String
+    class MultiplyHTTP(BaseMultiply):
+        controller = 'http-get'
+        view = TEXT("<span style='color: blue'>{{obj.x}} * \
+            {{obj.y}}</span> == <span style='color: red'>{{obj.product}}</span>")
 
-        
+    class MultiplyCMD(BaseMultiply):
+        controller = 'cmd'
+        view = TEXT("{{obj.x}} * {{obj.y}} == {{obj.product}}")
+
+These classes are called "Giotto Programs". They represent pieces of a larger
+application. Each program contains a controller, a model (optional) and a view.
+You can also add middleware and cache, but we'll deal with those later.
+
+These giotto programs are added by default when you add a new controller, so
+you can remove them if you want. To see these programs in action, run the
+following command:
+
+    $ giotto http
+
+This will run the development server (you must have werkzeug installed). Now
+point your browser to: http://localhost:5000/
+
+You should see "Hello World" printed in the browser window. Now try with custom
+name by pointing your browser to http://localhost:5000/?name=Tommy
+
+The browser should now display "Hello Tommy".
+
+Now lets take a look at the `multiply` program. Point your browser to:
+http://localhost:5000/multiply?x=4&y=8
+
+The browser should now be displaying `4 * 8 = 32` with the 32 in red and the
+4 * 8 in blue.
