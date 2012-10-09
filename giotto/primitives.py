@@ -1,22 +1,9 @@
-class GiottoPrimitive(object): pass
+class GiottoPrimitive(object): 
+    def __init__(self, name):
+        self.name = name
 
-class LOGGED_IN_USER(GiottoPrimitive):
-	"""
-	Represents the user logged in to the application.
-	"""
-
-class RAW_DATA(GiottoPrimitive):
-	"""
-	The raw load of data that came in from the user. Represented as a dict.
-	"""
-
-class USER_COUNTRY(GiottoPrimitive):
-    """
-    Represents the user's country based on GeoIP.
-    """
-
-class PREVIOUS_INPUT(GiottoPrimitive):
-    pass
-
-class PREVIOUS_ERRORS(GiottoPrimitive):
-    pass
+LOGGED_IN_USER = GiottoPrimitive("LOGGED_IN_USER")
+RAW_PAYLOAD = GiottoPrimitive("RAW_PAYLOAD")
+USER_COUNTRY = GiottoPrimitive("USER_COUNTRY")
+PREVIOUS_INPUT = GiottoPrimitive("PREVIOUS_INPUT")
+PREVIOUS_ERRORS = GiottoPrimitive("PREVIOUS_ERRORS")

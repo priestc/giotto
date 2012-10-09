@@ -1,7 +1,16 @@
+import inspect
+
 from werkzeug.wrappers import Request, Response
 from giotto import GiottoAbstractProgram, GiottoProgram
 from giotto.core import GiottoHttpException, GiottoApp
 from giotto.exceptions import InvalidInput
+from giotto.primitives import GiottoPrimitive
+
+def do_argspec(source):
+    argspec = inspect.getargspec(source)
+    kwargs = dict(zip(*[reversed(l) for l in (argspec.args, argspec.defaults or [])]))
+    args = [x for x in argspec.args if x not in kwargs.keys()]
+    return args, kwargs
 
 class GiottoController(object):
     def __init__(self, request, programs):
@@ -24,7 +33,9 @@ class GiottoController(object):
         controller = self.get_controller_name()
         model = self.get_program_name()
         data = self.get_data()
-        return "<%s %s - %s - %s>" % (self.__class__.__name__, controller, model, data)
+        return "<%s %s - %s - %s>" % (
+            self.__class__.__name__, controller, model, data
+        )
 
     def _get_program(self):
         """
@@ -44,19 +55,36 @@ class GiottoController(object):
     def _get_generic_response_data(self):
         """
         Return the data to create a response object appropriate for the
-        controller. This function is called by get_concrete_response_data
+        controller. This function is called by get_concrete_response_data.
         """
         raw_data = self.get_data()
-        model = getattr(self.program, 'model', None)
+        # model is defined in the program as a one-item tuple
+        model = getattr(self.program, 'model', [None])[0]
         view = self.program.view
 
         if model:
-            data = self.get_primitives(model, raw_data)
-            view_data = model[0](**data)
+            data = self.get_model_args(model, raw_data)
+            view_data = model(**data)
         else:
-            view_data = self.get_primitives(view, raw_data)
+            # there is no model, so we will use the view as the model.
+            view_data = self.get_model_args(view, raw_data)
 
         return self.render_view(view_data)
+
+    def get_model_args(self, source, raw_data):
+        args, kwargs = do_argspec(source)
+        output = {}
+        for arg in args:
+            target = raw_data[arg]
+            output[arg] = target
+
+        for key, value in kwargs.iteritems():
+            if isinstance(value, GiottoPrimitive):
+                output[key] = self.get_primitive(value.name)
+            else:
+                output[key] = value
+
+        return output
 
     def execute_input_middleware_stream(self):
         middlewares = getattr(self.program, 'input_middleware', [])
@@ -124,8 +152,9 @@ class HTTPController(GiottoController):
         # now do middleware
         return self.execute_output_middleware_stream(response) 
 
-    def get_primitives(self, source, raw_data):
-        return raw_data
+    def get_primitive(self, primitive):
+        if primitive == 'RAW_PAYLOAD':
+            return self.get_data()
 
 def make_app(programs):
     
