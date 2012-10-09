@@ -107,9 +107,11 @@ def bind_model(model, cache=None):
 
 
 class GiottoProgram(object):
+    input_middleware = []
     name = ''
     model = lambda x: x
     view = lambda x: x
+    output_midleware = []
 
     def __init__(self, request):
         self.request = request
