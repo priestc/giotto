@@ -11,15 +11,48 @@ class CMDController(GiottoController):
     name = 'cmd'
 
     def get_program_name(self):
-        return self.request[1]
+        prog = self.request[1]
+        if prog.startswith('--'):
+            # if the first argument is a commandline-style keyword argument,
+            # then the program name is blank. (root program)
+            prog = ''
+        return prog
 
     def get_controller_name(self):
         return 'cmd'
 
     def get_data(self):
-        arguments = self.request[2:]
-        d=defaultdict(list)
+        """
+        Replace the 
+        """
+        arguments = self.request[1:]
+        if not arguments[0].startswith('--'):
+            # first argument is the program name
+            arguments = arguments[1:]
+
+        d = defaultdict(list)
         for k, v in ((k.lstrip('-'), v) for k,v in (a.split('=') for a in arguments)):
             d[k].append(v)
 
-        return d
+        ret = {}
+        for k, v in d.iteritems():
+            # replace single item lists with just the item.
+            if len(v) == 1 and type(v) is list:
+                ret[k] = v[0]
+            else:
+                ret[k] = v
+        return ret
+
+    def get_concrete_response(self):
+        result = self._get_generic_response_data()
+        
+        response = {
+            'stdout': [result['body']],
+            'stderr': [],
+        }
+
+        # now do middleware
+        return self.execute_output_middleware_stream(response) 
+
+    def get_primitive(self, name):
+        return "ff"
