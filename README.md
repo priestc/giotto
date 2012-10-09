@@ -1,3 +1,5 @@
+![logo](http://i.imgur.com/Ckokr.png)
+
 What is Giotto?
 ===============
 
