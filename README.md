@@ -166,20 +166,21 @@ Example Application:
                 raise InvalidInput("/n".join(errors))
             return blog
 
-    ########
-    ## Apps
-    ########
+    ############
+    ## Programs
+    ############
 
+    from giotto import GiottoProgram
     from giotto.exceptions import InputError
+    from giotto.middleware import HTMLMinify
     from giotto.control import Redirection
 
-    from models import Blog
+    from blog.models import Blog
     from views import HTML, commandline_blog
 
-    class ShowBlog(GiottoApp):
+    class ShowBlog(GiottoProgram):
         name = "show_blog"
-        model = Blog.get
-        controller_tip = ('id', )
+        model = (Blog.get, )
 
     class ShowBlogHttp(ShowBlog):
         controller = 'http-get'
@@ -192,24 +193,59 @@ Example Application:
 
     # ---
 
-    class NewBlog(GoittoApp):
+    class NewBlog(GoittoProgram):
         name = "create_new_blog"
 
     class NewBlogHTMLForm(NewBog):
         controller = 'http-get'
-        controller_tip = ('title', 'body')
-        model = lambda x: x
         view = HTML('new_blog.html')
 
     class NewBlogSubmit(NewBlog):
         conroller = 'http-post'
-        controller_tip = ('title', 'body', LOGGED_IN_USER)
-        model = Blog.create
+        model = (Blog.create, )
         view = Redirection('show_blog')
 
         def on_error(exc, controller_tip):
             if exc is InputError:
                 return Redirection(NewBlogHTMLForm, args=controller_tip)
+
+
+Middleware
+==========
+
+All middleware classes must implement a method for each controller name. For
+input middleware, each method should take one argument, `request`, and return a
+new `request` object. Output middleware should take two arguments, `request` and
+`response`, and should return a new `response` object.
+
+    class SomeInputMiddleware(object):
+        def http(self, request):
+            do_some_stuf()
+            return request
+
+        def cmd(self, request):
+            do_some_stuf()
+            return request
+
+        def sms(self, request):
+            do_some_stuf()
+            return request
+
+    class SomeOutputMiddleware(object):
+        def http(self, request, reqponse):
+            do_some_stuf()
+            return response
+
+        def cmd(self, request, response):
+            do_some_stuf()
+            return response
+
+        def sms(self, request, response):
+            do_some_stuf()
+            return response
+
+The appropriate method will be called depending on how the program has been
+invoked.
 
 
 Usage:
