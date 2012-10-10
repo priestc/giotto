@@ -52,7 +52,19 @@ class CMDController(GiottoController):
         }
 
         # now do middleware
-        return self.execute_output_middleware_stream(response) 
+        response = self.execute_output_middleware_stream(response)
+        stdout = response['stdout']
+
+        if hasattr(stdout, 'write'):
+            # returned is a file, print out the contents through stdout
+            print stdout.write()
+        else:
+            for line in stdout:
+                print line
+
+        for line in response['stderr']:
+            sys.stderr.write(line)
+
 
     def get_primitive(self, name):
         return "ff"
