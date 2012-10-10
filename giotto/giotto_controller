@@ -3,7 +3,7 @@
 Makes a file for invoking a giotto project for a given controller
 
 Usage:
-    $ giotto_xcontroller [--http] [--cmd]
+    $ giotto_controller [--http] [--cmd]
 """
 
 import sys
@@ -12,20 +12,15 @@ import os
 from jinja2 import Template
 
 cmd = "--cmd" in sys.argv
-http = "--http" in sys.argv
+http_dev = "--http-dev" in sys.argv
 
 template = """#!/usr/bin/env python
 
 from giotto import GiottoProgram, GiottoAbstractProgram
 from giotto.views import TEXT
 
-class HelloWorld(GiottoProgram):
-    name = ""
-    controller = 'http-get'
-    view = TEXT("Hello {{ '{{' }}obj.name|default('World'){{ '}}' }}")
-
 def multiply(x, y):
-    return {'x': x, 'y': y, "product": x * y}
+    return {'x': x, 'y': y, 'product': int(x) * int(y)}
 
 class BaseMultiply(GiottoAbstractProgram):
     name = "multiply"
@@ -33,12 +28,14 @@ class BaseMultiply(GiottoAbstractProgram):
 
 class MultiplyHTTP(BaseMultiply):
     controller = 'http-get'
-    view = TEXT("<span style='color: blue'>{{ '{{' }}obj.x{{ '}}' }} * \\
-        {{ '{{' }}obj.y{{ '}}' }}</span> == <span style='color: red'>{{ '{{' }}obj.product{{ '}}' }}</span>")
+    {% raw %}view = TEXT(
+        '<html><body>{{obj.x}} * {{obj.y}} == {{obj.product}}</body></html>',
+        mimetype="text/html"
+    ){% endraw %}
 
 class MultiplyCMD(BaseMultiply):
     controller = 'cmd'
-    view = TEXT("{{ '{{' }}obj.x{{ '}}' }} * {{ '{{' }}obj.y{{ '}}' }} == {{ '{{' }}obj.product{{ '}}' }}")
+    {% raw %}view = TEXT("{{obj.x}} * {{obj.y}} == {{obj.product}}"){% endraw %}
 
 ################### generated code below
 
@@ -48,29 +45,13 @@ programs = list(itersubclasses(GiottoProgram))
 controller = sys.argv[1]
 """
 
-if http:
-    template = template + \
-"""
-if controller == 'http':
-    from werkzeug.serving import run_simple
-    from giotto.controllers.http import make_app
-    app = make_app(programs)
-    run_simple('127.0.0.1', 5000, app, use_debugger=True, use_reloader=True)
-"""
+if http_dev:
+    from giotto.controllers.http import http_execution_snippet
+    template = template + http_execution_snippet
 
 if cmd:
-    template = template + \
-"""
-else:
-    from giotto.controllers.cmd import CMDController
-    controller = CMDController(request=sys.argv, programs=programs)
-    response = controller.get_concrete_response()
-    for line in response['stdout']:
-        print line
-
-    for line in response['stderr']:
-        sys.stderr.write(line)
-"""
+    from giotto.controllers.cmd import cmd_execution_snippet
+    template = template + cmd_execution_snippet
 
 if __name__ == '__main__':
     rendered = Template(template).render()

@@ -11,7 +11,7 @@ Giotto's motto is "An application framework for idealists with no deadlines"
 This document is a work in progress. Since Giotto is still being conceptualized
 and written, this document will change often.
 
-to discuss giotto, please visit the [googlegroup](https://groups.google.com/forum/#!forum/giotto-framework)
+to discuss giotto, please visit the [google group](https://groups.google.com/forum/#!forum/giotto-framework)
 
 Why?
 ====

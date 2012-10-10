@@ -1,6 +1,13 @@
 from collections import defaultdict
 from giotto.controllers import GiottoController
 
+cmd_execution_snippet = """
+else:
+    from giotto.controllers.cmd import CMDController
+    controller = CMDController(request=sys.argv, programs=programs)
+    controller.get_concrete_response()
+"""
+
 class CMDController(GiottoController):
     """
     Basic command line cntroller class. self.request will be the value found

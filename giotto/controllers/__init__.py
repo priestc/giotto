@@ -64,8 +64,6 @@ class GiottoController(object):
         # model is defined in the program as a one-item tuple
         model = getattr(self.program, 'model', [None])[0]
         view = self.program.view
-        if self.cache:
-            pass
         if model:
             data = self.get_model_args(model, raw_data)
             view_data = model(**data)
