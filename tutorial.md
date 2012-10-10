@@ -64,3 +64,13 @@ http://localhost:5000/multiply?x=4&y=8
 
 The browser should now be displaying `4 * 8 = 32` with the 32 in red and the
 4 * 8 in blue.
+
+Lets take a look at this program as viewed from the commandline.
+
+Form the shell, run the following command:
+
+    $ giotto multiply --x=4 --y=8
+
+The output should be exactly the same. The model function that is being called
+here is exactly the same as the web version. The only difference is the way
+the result is 'viewed'.

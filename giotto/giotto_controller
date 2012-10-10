@@ -61,15 +61,15 @@ if controller == 'http':
 if cmd:
     template = template + \
 """
-if controller == 'cmd':
-    pass
-
-"""
-
-template = template + \
-"""
 else:
-    raise NotImplementedError("Uninitiated controller: %s" %sys.argv[1])
+    from giotto.controllers.cmd import CMDController
+    controller = CMDController(request=sys.argv, programs=programs)
+    response = controller.get_concrete_response()
+    for line in response['stdout']:
+        print line
+
+    for line in response['stderr']:
+        sys.stderr.write(line)
 """
 
 if __name__ == '__main__':
