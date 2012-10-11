@@ -14,7 +14,12 @@ class HTTPController(GiottoController):
     default_mimetype = 'text/html'
 
     def get_mimetype(self):
-        accept = self.request
+        accept = self.request.headers['Accept']
+        has_json_in_view = hasattr(self.program.view[0], 'application_json')
+        if accept == '*/*' and self.request.is_xhr and has_json_in_view:
+            # return json on ajax calls if no accept headers are present.
+            # only if the view has implemented a application/json method
+            return "application/json"
         return self.default_mimetype
 
     def get_program_name(self):
