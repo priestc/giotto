@@ -3,7 +3,7 @@
 Makes a file for invoking a giotto project for a given controller
 
 Usage:
-    $ giotto_controller [--http] [--cmd] [--irc]
+    $ giotto_controller [--http] [--cmd] [--irc] [--demo]
 """
 
 import sys
@@ -14,51 +14,79 @@ from jinja2 import Template
 cmd = "--cmd" in sys.argv
 http_dev = "--http-dev" in sys.argv
 irc = '--irc' in sys.argv
+demo = '--demo' in sys.argv
 
-template = '''#!/usr/bin/env python
-
-from giotto import GiottoProgram
-from giotto.views import GiottoTemplateView
+demo_template = '''from giotto.views import GiottoTemplateView
 
 class ColoredMultiplyView(GiottoTemplateView):
+    def text_plain(self, result):
+        {% raw %}return "{{ obj.x }} * {{ obj.y }} == {{ obj.product }}"{% endraw %}
+
+    def application_json(self, result):
+        import json
+        return json.dumps(result)
 
     def text_html(self, result):
         return """<!DOCTYPE html>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
         <html>
             <body>
-                {% raw %}<span style="color: blue">{{obj.x}} * {{obj.y}}</span> == 
-                <span style="color: red">{{obj.product}}</span>{% endraw %}
+                {% raw %}<span style="color: blue">{{ obj.x }} * {{ obj.y }}</span> == 
+                <span style="color: red">{{ obj.product }}</span>{% endraw %}
             </body>
         </html>"""
 
     def text_cmd(self, result):
         from colorama import init, Fore
         init()
-        {% raw %}return "{blue}{x} * {y}{reset} == {red}{product}{reset}".format(
+        return "{blue}{x} * {y}{reset} == {red}{product}{reset}".format(
             blue=Fore.BLUE,
             red=Fore.RED,
             reset=Fore.RESET,
             x=result['x'],
             y=result['y'],
             product=result['product'],
-        ){% endraw %}
+        )
+
+    def text_irc(self, result):
+        return "{blue}{x} * {y}{reset} == {red}{product}{reset}".format(
+            blue="\x0302",
+            red="\x0304",
+            reset="\x03",
+            x=result['x'],
+            y=result['y'],
+            product=result['product'],
+        )
+
 
 def multiply(x, y):
-    return {'x': x, 'y': y, 'product': int(x) * int(y)}
+    return {'x': int(x), 'y': int(y), 'product': int(x) * int(y)}
 
-class BaseMultiply(GiottoProgram):
+
+class Multiply(GiottoProgram):
     name = "multiply"
+    controllers = ('http-get', 'cmd', 'irc')
     model = [multiply]
     view = [ColoredMultiplyView]
-    controllers = ('http-get', 'cmd')
+'''
+
+
+template = '''#!/usr/bin/env python
+# coding: utf-8
+
+from giotto import GiottoProgram
+{demo}
 
 ################### generated code below
 
 import sys
-from giotto.core import itersubclasses
+from giotto.utils import itersubclasses
 programs = list(itersubclasses(GiottoProgram))
 controller = sys.argv[1]
 '''
+
+if demo:
+    template = template.format(demo=demo_template)
 
 if http_dev:
     from giotto.controllers.http import http_execution_snippet

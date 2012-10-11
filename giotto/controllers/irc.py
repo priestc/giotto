@@ -16,7 +16,7 @@ if controller == 'irc':
         'ident': 'giotto',
         'realname': 'Giotto',
         'owner': '',
-        'channelist': '#test',
+        'channel_list': '#test',
         'magic_token': '!giotto',
     }
     from giotto.controllers.irc import listen
