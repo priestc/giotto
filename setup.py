@@ -2,9 +2,9 @@ from setuptools import setup
 
 setup(
 	name='giotto',
-    version='0.0.1',
+    version='0.0.2',
     description='MVC microframework',
-    long_description=open('README.md'),
+    long_description=open('README.md').read(),
     author='Chris Priest',
     author_email='cp368202@ohiou.edu',
     url='https://github.com/priestc/giotto',
