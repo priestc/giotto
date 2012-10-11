@@ -7,5 +7,9 @@ class GiottoProgram(object):
     view = None
     output_middleware = []
 
-class GiottoAbstractProgram(GiottoProgram):
-    pass
+    @classmethod
+    def is_match(cls, controller, name):
+        """
+        Does this program match the current invocation prameters? 
+        """
+        return cls.name == name and controller in cls.controllers

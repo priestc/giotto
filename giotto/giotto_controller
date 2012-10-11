@@ -14,28 +14,42 @@ from jinja2 import Template
 cmd = "--cmd" in sys.argv
 http_dev = "--http-dev" in sys.argv
 
-template = """#!/usr/bin/env python
+template = '''#!/usr/bin/env python
 
-from giotto import GiottoProgram, GiottoAbstractProgram
-from giotto.views import TEXT
+from giotto import GiottoProgram
+from giotto.views import GiottoTemplateView
+
+class ColoredMultiplyView(GiottoTemplateView):
+
+    def text_html(self, result):
+        return """<!DOCTYPE html>
+        <html>
+            <body>
+                {% raw %}<span style="color: blue">{{obj.x}} * {{obj.y}}</span> == 
+                <span style="color: red">{{obj.product}}</span>{% endraw %}
+            </body>
+        </html>"""
+
+    def text_cmd(self, result):
+        from colorama import init, Fore
+        init()
+        {% raw %}return "{blue}{x} * {y}{reset} == {red}{product}{reset}".format(
+            blue=Fore.BLUE,
+            red=Fore.RED,
+            reset=Fore.RESET,
+            x=result['x'],
+            y=result['y'],
+            product=result['product'],
+        ){% endraw %}
 
 def multiply(x, y):
     return {'x': x, 'y': y, 'product': int(x) * int(y)}
 
-class BaseMultiply(GiottoAbstractProgram):
+class BaseMultiply(GiottoProgram):
     name = "multiply"
-    model = (multiply, )
-
-class MultiplyHTTP(BaseMultiply):
-    controller = 'http-get'
-    {% raw %}view = TEXT(
-        '<html><body>{{obj.x}} * {{obj.y}} == {{obj.product}}</body></html>',
-        mimetype="text/html"
-    ){% endraw %}
-
-class MultiplyCMD(BaseMultiply):
-    controller = 'cmd'
-    {% raw %}view = TEXT("{{obj.x}} * {{obj.y}} == {{obj.product}}"){% endraw %}
+    model = [multiply]
+    view = [ColoredMultiplyView]
+    controllers = ('http-get', 'cmd')
 
 ################### generated code below
 
@@ -43,7 +57,7 @@ import sys
 from giotto.core import itersubclasses
 programs = list(itersubclasses(GiottoProgram))
 controller = sys.argv[1]
-"""
+'''
 
 if http_dev:
     from giotto.controllers.http import http_execution_snippet

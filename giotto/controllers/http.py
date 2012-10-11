@@ -11,6 +11,11 @@ if controller == 'http-dev':
 
 class HTTPController(GiottoController):
     name = 'http'
+    default_mimetype = 'text/html'
+
+    def get_mimetype(self):
+        accept = self.request
+        return self.default_mimetype
 
     def get_program_name(self):
         return self.request.path[1:].replace('/', '.')
@@ -28,7 +33,6 @@ class HTTPController(GiottoController):
 
     def get_concrete_response(self):
         result = self._get_generic_response_data()
-
         # convert to a format appropriate to the wsgi Response api.
         response = Response(
             response=result['body'],

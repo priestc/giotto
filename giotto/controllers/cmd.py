@@ -16,7 +16,8 @@ class CMDController(GiottoController):
     and the rest being commandline arguments.
     """
     name = 'cmd'
-
+    default_mimetype = 'text/cmd'
+    
     def get_program_name(self):
         prog = self.request[1]
         if prog.startswith('--'):
@@ -30,7 +31,8 @@ class CMDController(GiottoController):
 
     def get_data(self):
         """
-        Replace the 
+        Parse the raw commandline arguments (from sys.argv) to a dictionary
+        that is understandable to the rest of the framework.
         """
         arguments = self.request[1:]
         if not arguments[0].startswith('--'):

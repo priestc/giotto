@@ -36,15 +36,34 @@ class JSON(object):
 
         return {'response': j, "mimetype": "application/json"}
 
-class TEXT(object):
-    def __init__(self, text, mimetype='text/plain'):
-        self.text = text
-        self.mimetype = mimetype
+class GiottoView(object):
+    def __init__(self, result):
+        """
+        result == the output from the model
+        """
+        self.result = result
 
-    def render(self, model):
-        """
-        Render the template, and return as a string.
-        """
-        template = Template(self.text)
-        content = template.render(obj=model)
-        return {'body': content, 'mimetype': self.mimetype}
+    def render(self, mimetype):
+        method = mimetype.replace('/', '_')
+        renderer = getattr(self, method)
+        data = renderer(self.result)
+        return {'body': data, 'mimetype': mimetype}
+
+class GiottoTemplateView(GiottoView):
+    """
+    A view renderer where each mimetype renderer returns a jinja template that
+    will get rendered automatically. The context_name attribute denotes the
+    name of the model object in the template.
+    """
+    context_name = 'obj'
+    def render(self, mimetype):
+        result = super(GiottoTemplateView, self).render(mimetype)
+        template = result['body']
+        if hasattr(template, 'lower'):
+            jinja_template = Template(template)
+            rendered = jinja_template.render(obj=self.result)
+            result['body'] = rendered
+            return result
+        raise TypeError('Template must be a string')
+
+

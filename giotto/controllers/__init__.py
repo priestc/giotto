@@ -46,9 +46,9 @@ class GiottoController(object):
         this request.
         """
         for p in self.programs:
-            name_match = p.name == self.get_program_name()
-            controller_match = p.controller == self.get_controller_name()
-            if name_match and controller_match:
+            controller = self.get_controller_name()
+            name = self.get_program_name()
+            if p.is_match(controller, name):
                 return p
 
         raise Exception("Can't find program for: %s in: %s" % (
@@ -72,6 +72,9 @@ class GiottoController(object):
             view_data = self.get_model_args(view, raw_data)
 
         return self.render_view(view_data)
+
+    def get_mimetype(self):
+        return self.default_mimetype
 
     def get_model_args(self, source, raw_data):
         """
@@ -115,7 +118,7 @@ class GiottoController(object):
         """
         out = []
         for p in self.programs:
-            disp = "%s - %s" % (p.name, p.controller)
+            disp = "%s - %s" % (p.name, p.controllers)
             out.append(disp)
         return "\n".join(out)
 
@@ -123,9 +126,9 @@ class GiottoController(object):
         """
         Render the view with data from the model and/or controller.
         """
-        if hasattr(self.program.view, 'render'):
-            response = self.program.view.render(view_data)
-        else:
-            response = self.program.view(view_data)
+        ViewClass = self.program.view[0]
+        view = ViewClass(view_data)
+
+        response = view.render(self.get_mimetype())
 
         return response
