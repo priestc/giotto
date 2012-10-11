@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 def itersubclasses(cls, _seen=None):
     """
     itersubclasses(cls)
@@ -38,7 +40,27 @@ def itersubclasses(cls, _seen=None):
             for sub in itersubclasses(sub, _seen):
                 yield sub
 
+def parse_kwargs(kwargs):
+    """
+    Convert a list of kwargs into a dictionary. Duplicates of the same keyword
+    get added to an list within the dictionary.
 
+    >>> parse_kwargs(['--var1=1', '--var2=2', '--var1=3']
+    {'var1': [1, 3], 'var2': 2}
+    """
+    
+    d = defaultdict(list)
+    for k, v in ((k.lstrip('-'), v) for k,v in (a.split('=') for a in kwargs)):
+        d[k].append(v)
+
+    ret = {}
+    for k, v in d.iteritems():
+        # replace single item lists with just the item.
+        if len(v) == 1 and type(v) is list:
+            ret[k] = v[0]
+        else:
+            ret[k] = v
+    return ret
 
 
 

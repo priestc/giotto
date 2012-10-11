@@ -1,7 +1,7 @@
 import inspect
 
-from giotto import GiottoAbstractProgram, GiottoProgram
-from giotto.exceptions import InvalidInput
+from giotto import GiottoProgram
+from giotto.exceptions import InvalidInput, ProgramNotFound
 from giotto.primitives import GiottoPrimitive
 
 def do_argspec(source):
@@ -20,12 +20,7 @@ class GiottoController(object):
         self.request = request
 
         # all programs available to this controller
-        self.programs = []
-        for p in programs:
-            first_two = p.mro()[0:2]
-            if GiottoAbstractProgram not in first_two:
-                # exclude abstract programs
-                self.programs.append(p)
+        self.programs = programs
 
         # the program that corresponds to this invocation
         self.program = self._get_program()
@@ -51,7 +46,7 @@ class GiottoController(object):
             if p.is_match(controller, name):
                 return p
 
-        raise Exception("Can't find program for: %s in: %s" % (
+        raise ProgramNotFound("Can't find program for: %s in: %s" % (
             self.__repr__(), self.show_program_names())
         )
 

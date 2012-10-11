@@ -3,7 +3,7 @@
 Makes a file for invoking a giotto project for a given controller
 
 Usage:
-    $ giotto_controller [--http] [--cmd]
+    $ giotto_controller [--http] [--cmd] [--irc]
 """
 
 import sys
@@ -13,6 +13,7 @@ from jinja2 import Template
 
 cmd = "--cmd" in sys.argv
 http_dev = "--http-dev" in sys.argv
+irc = '--irc' in sys.argv
 
 template = '''#!/usr/bin/env python
 
@@ -62,6 +63,10 @@ controller = sys.argv[1]
 if http_dev:
     from giotto.controllers.http import http_execution_snippet
     template = template + http_execution_snippet
+
+if irc:
+    from giotto.controllers.irc import irc_execution_snippet
+    template = template + irc_execution_snippet
 
 if cmd:
     from giotto.controllers.cmd import cmd_execution_snippet

@@ -3,3 +3,6 @@ class InvalidInput(Exception):
 
 class InvalidProgram(Exception):
     pass
+
+class ProgramNotFound(Exception):
+    pass

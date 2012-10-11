@@ -1,4 +1,4 @@
-from collections import defaultdict
+from giotto.core import parse_kwargs
 from giotto.controllers import GiottoController
 
 cmd_execution_snippet = """
@@ -17,7 +17,7 @@ class CMDController(GiottoController):
     """
     name = 'cmd'
     default_mimetype = 'text/cmd'
-    
+
     def get_program_name(self):
         prog = self.request[1]
         if prog.startswith('--'):
@@ -38,19 +38,7 @@ class CMDController(GiottoController):
         if not arguments[0].startswith('--'):
             # first argument is the program name
             arguments = arguments[1:]
-
-        d = defaultdict(list)
-        for k, v in ((k.lstrip('-'), v) for k,v in (a.split('=') for a in arguments)):
-            d[k].append(v)
-
-        ret = {}
-        for k, v in d.iteritems():
-            # replace single item lists with just the item.
-            if len(v) == 1 and type(v) is list:
-                ret[k] = v[0]
-            else:
-                ret[k] = v
-        return ret
+        return parse_kwargs(arguments)
 
     def get_concrete_response(self):
         result = self._get_generic_response_data()
