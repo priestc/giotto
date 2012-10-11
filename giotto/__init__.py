@@ -1,11 +1,11 @@
 class GiottoProgram(object):
-    input_middleware = []
     name = None
-    controller = None
+    input_middleware = ()
+    controllers = ()
     cache = 0
-    model = (None, )
-    view = None
-    output_middleware = []
+    model = ()
+    view = ()
+    output_middleware = ()
 
     @classmethod
     def is_match(cls, controller, name):
