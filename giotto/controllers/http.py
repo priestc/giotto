@@ -20,7 +20,7 @@ class HTTPController(GiottoController):
             # return json on ajax calls if no accept headers are present.
             # only if the view has implemented a application/json method
             return "application/json"
-        if accept != '*/*':
+        if accept != '*/*' and not accept.startswith('text/html'):
             return accept
         return self.default_mimetype
 
