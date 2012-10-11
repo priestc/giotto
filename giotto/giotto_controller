@@ -85,8 +85,10 @@ programs = list(itersubclasses(GiottoProgram))
 controller = sys.argv[1]
 '''
 
-if demo:
-    template = template.format(demo=demo_template)
+if not demo:
+    demo_template = "\n# Insert/Import GiottoPrograms here"
+
+template = template.format(demo=demo_template)
 
 if http_dev:
     from giotto.controllers.http import http_execution_snippet
