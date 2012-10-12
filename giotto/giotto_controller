@@ -81,9 +81,9 @@ from giotto import GiottoProgram
 
 ################### configure cache
 
-from giotto.cache import GiottoMemcache
+from giotto.cache import CacheWithMemcache
 
-cache = GiottoMemcache(
+cache = CacheWithMemcache(
     host='localhost'
 )
 

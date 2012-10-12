@@ -1,4 +1,12 @@
-import pylibmc
+try:
+    import pylibmc
+except ImportError:
+    pylibmc = None
+
+try:
+    import redis
+except ImportError:
+    redis = None
 
 class GiottoCache(object):
     def set(self, key, obj):
@@ -7,8 +15,10 @@ class GiottoCache(object):
     def get(self, key, obj):
         raise NotImplementedError
 
-class GiottoMemcache(GiottoCache):
-    def __init__(self, host, behavior={}):
+class CacheWithMemcache(GiottoCache):
+    def __init__(self, host=['localhost'], behavior={}):
+        if not pylibmc:
+            raise ImportError('pylibmc not installed! install with: pip install pylibmc')
         if hasattr(host, 'lower'):
             host = [host]
         kwargs = {'servers': host, 'binary': True}
@@ -21,3 +31,16 @@ class GiottoMemcache(GiottoCache):
 
     def get(self, key):
         return self.client.get(key)
+
+class CacheWithRedis(GiottoCache):
+    def __init__(self, host='localhost', port=6379, db=0):
+        if not redis:
+            raise ImportError('redis python wrapper not installed! install with: pip install redis')
+        self.redis = redis.StrictRedis(host=host, port=port, db=db)
+
+    def set(self, key, obj, expire):
+        self.redis.setex(key, expire, obj)
+
+    def get(self, key):
+        # is there a better way to do this?
+        return eval(self.redis.get(key) or 'None')

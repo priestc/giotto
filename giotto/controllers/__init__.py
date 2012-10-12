@@ -75,7 +75,7 @@ class GiottoController(object):
             # and just return the mock
             return self.render_view(self.program.model_mock)
 
-        if self.cache:
+        if self.program.cache:
             rendered = self.cache.get(cache_key)
             if rendered:
                 # return hit from cache
@@ -90,7 +90,7 @@ class GiottoController(object):
 
         rendered = self.render_view(view_data)
 
-        if self.cache:
+        if self.program.cache:
             self.cache.set(cache_key, rendered, self.program.cache)
 
         return rendered
