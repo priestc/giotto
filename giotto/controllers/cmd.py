@@ -2,10 +2,9 @@ from giotto.core import parse_kwargs
 from giotto.controllers import GiottoController
 
 cmd_execution_snippet = """
-else:
-    from giotto.controllers.cmd import CMDController
-    controller = CMDController(request=sys.argv, programs=programs, model_mock=mock)
-    controller.get_concrete_response()
+from giotto.controllers.cmd import CMDController
+controller = CMDController(request=sys.argv, programs=programs, model_mock=mock, cache=cache)
+controller.get_concrete_response()
 """
 
 class CMDController(GiottoController):

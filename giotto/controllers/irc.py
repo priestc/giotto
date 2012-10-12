@@ -20,7 +20,7 @@ if controller == 'irc':
         'magic_token': '!giotto',
     }
     from giotto.controllers.irc import listen
-    listen(programs, config, model_mock=mock)
+    listen(programs, config, model_mock=mock, cache=cache)
 """
 
 class IRCController(GiottoController):
@@ -69,7 +69,7 @@ def parse_line(line):
     }
     return request
 
-def listen(programs, config):
+def listen(programs, config, model_mock=False, cache=None):
     """
     IRC listening process.
     """
@@ -113,7 +113,7 @@ def listen(programs, config):
             
             if 'program' in request:
                 try:
-                    controller = IRCController(request, programs)
+                    controller = IRCController(request, programs, model_mock, cache)
                     result = controller.get_concrete_response()
                 except ProgramNotFound:
                     print "No program found: %s" % request['message']

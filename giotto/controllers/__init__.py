@@ -17,9 +17,10 @@ def do_argspec(source):
     return args, kwargs
 
 class GiottoController(object):
-    def __init__(self, request, programs, model_mock=False):
+    def __init__(self, request, programs, model_mock=False, cache=None):
         self.request = request
         self.model_mock = model_mock
+        self.cache = cache
 
         # all programs available to this controller
         self.programs = programs
@@ -64,15 +65,21 @@ class GiottoController(object):
         Return the data to create a response object appropriate for the
         controller. This function is called by get_concrete_response_data.
         """
+        cache_key = self.get_cache_key()
         raw_data = self.get_data()
-        # model is defined in the program as a one-item tuple
-        model = getattr(self.program, 'model', [None])[0]
+        model = self.get_model()
         view = self.program.view
         
         if self.model_mock:
             # if the model mock option is True, then bypass the model
             # and just return the mock
             return self.render_view(self.program.model_mock)
+
+        if self.cache:
+            rendered = self.cache.get(cache_key)
+            if rendered:
+                # return hit from cache
+                return rendered
 
         if model:
             data = self.get_model_args(model, raw_data)
@@ -81,7 +88,12 @@ class GiottoController(object):
             # there is no model, so we will use the view as the model.
             view_data = self.get_model_args(view, raw_data)
 
-        return self.render_view(view_data)
+        rendered = self.render_view(view_data)
+
+        if self.cache:
+            self.cache.set(cache_key, rendered, self.program.cache)
+
+        return rendered
 
     def get_mimetype(self):
         return self.default_mimetype
@@ -145,7 +157,7 @@ class GiottoController(object):
         """
         Render the view with data from the model and/or controller.
         """
-        ViewClass = self.program.view[0]
+        ViewClass = self.program.view
         view = ViewClass(view_data)
 
         response = view.render(self.get_mimetype())

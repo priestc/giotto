@@ -68,7 +68,8 @@ class Multiply(GiottoProgram):
     controllers = ('http-get', 'cmd', 'irc')
     model = [multiply]
     model_mock = {'x': 24, 'y': 56, 'product': 32343}
-    view = [ColoredMultiplyView]
+    cache = None
+    view = ColoredMultiplyView
 '''
 
 
@@ -77,6 +78,14 @@ template = '''#!/usr/bin/env python
 
 from giotto import GiottoProgram
 {demo}
+
+################### configure cache
+
+from giotto.cache import GiottoMemcache
+
+cache = GiottoMemcache(
+    host='localhost'
+)
 
 ################### generated code below
 

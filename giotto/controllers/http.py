@@ -5,7 +5,7 @@ http_execution_snippet = """
 if controller == 'http-dev':
     from werkzeug.serving import run_simple
     from giotto.controllers.http import make_app
-    app = make_app(programs, model_mock=mock)
+    app = make_app(programs, model_mock=mock, cache=cache)
     run_simple('127.0.0.1', 5000, app, use_debugger=True, use_reloader=True)
 """
 
@@ -15,7 +15,7 @@ class HTTPController(GiottoController):
 
     def get_mimetype(self):
         accept = self.request.headers['Accept']
-        has_json_in_view = hasattr(self.program.view[0], 'application_json')
+        has_json_in_view = hasattr(self.program.view, 'application_json')
         if accept == '*/*' and self.request.is_xhr and has_json_in_view:
             # return json on ajax calls if no accept headers are present.
             # only if the view has implemented a application/json method
@@ -53,14 +53,14 @@ class HTTPController(GiottoController):
         if primitive == 'RAW_PAYLOAD':
             return self.get_data()
 
-def make_app(programs, model_mock=False):
+def make_app(programs, model_mock=False, cache=None):
     
     def application(environ, start_response):
         """
         WSGI app for serving giotto applications
         """
         request = Request(environ)
-        controller = HTTPController(request, programs, model_mock=model_mock)
+        controller = HTTPController(request, programs, model_mock=model_mock, cache=cache)
         wsgi_response = controller.get_concrete_response()
         return wsgi_response(environ, start_response)
 
