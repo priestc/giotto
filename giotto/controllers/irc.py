@@ -16,7 +16,7 @@ if controller == 'irc':
         'ident': 'giotto',
         'realname': 'Giotto',
         'owner': '',
-        'channel_list': '#test',
+        'channel_list': '#botwar',
         'magic_token': '!giotto',
     }
     from giotto.controllers.irc import listen
@@ -117,6 +117,9 @@ def listen(programs, config, model_mock=False, cache=None):
                     result = controller.get_concrete_response()
                 except ProgramNotFound:
                     print "No program found: %s" % request['message']
+                except Exception as exc:
+                    cls = exc.__class__.__name__
+                    say(request['sent_to'], "04%s - %s: %s" % (request['program'], cls, exc))
                 else:
                     msg = "%s: %s" % (request['sent_from_username'], result['response'])
                     say(request['sent_to'], msg)
