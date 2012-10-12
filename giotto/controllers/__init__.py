@@ -16,8 +16,9 @@ def do_argspec(source):
     return args, kwargs
 
 class GiottoController(object):
-    def __init__(self, request, programs):
+    def __init__(self, request, programs, model_mock=False):
         self.request = request
+        self.model_mock = model_mock
 
         # all programs available to this controller
         self.programs = programs
@@ -59,6 +60,12 @@ class GiottoController(object):
         # model is defined in the program as a one-item tuple
         model = getattr(self.program, 'model', [None])[0]
         view = self.program.view
+        
+        if self.model_mock:
+            # if the model mock option is True, then bypass the model
+            # and just return the mock
+            return self.render_view(self.program.model_mock)
+
         if model:
             data = self.get_model_args(model, raw_data)
             view_data = model(**data)
@@ -77,6 +84,8 @@ class GiottoController(object):
         the case of a program that has no model, the view object) and replace
         all primitives with appropriate data.
         """
+        if self.model_mock:
+            return {}
         args, kwargs = do_argspec(source)
         output = {}
         for arg in args:

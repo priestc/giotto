@@ -20,7 +20,7 @@ if controller == 'irc':
         'magic_token': '!giotto',
     }
     from giotto.controllers.irc import listen
-    listen(programs, config)
+    listen(programs, config, model_mock=mock)
 """
 
 class IRCController(GiottoController):

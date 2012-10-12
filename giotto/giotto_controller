@@ -67,6 +67,7 @@ class Multiply(GiottoProgram):
     name = "multiply"
     controllers = ('http-get', 'cmd', 'irc')
     model = [multiply]
+    model_mock = {'x': 24, 'y': 56, 'product': 32343}
     view = [ColoredMultiplyView]
 '''
 
@@ -83,6 +84,7 @@ import sys
 from giotto.utils import itersubclasses
 programs = list(itersubclasses(GiottoProgram))
 controller = sys.argv[1]
+mock = '--model-mock' in sys.argv
 '''
 
 if not demo:

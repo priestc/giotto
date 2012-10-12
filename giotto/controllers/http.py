@@ -5,7 +5,7 @@ http_execution_snippet = """
 if controller == 'http-dev':
     from werkzeug.serving import run_simple
     from giotto.controllers.http import make_app
-    app = make_app(programs)
+    app = make_app(programs, model_mock=mock)
     run_simple('127.0.0.1', 5000, app, use_debugger=True, use_reloader=True)
 """
 
@@ -53,14 +53,14 @@ class HTTPController(GiottoController):
         if primitive == 'RAW_PAYLOAD':
             return self.get_data()
 
-def make_app(programs):
+def make_app(programs, model_mock=False):
     
     def application(environ, start_response):
         """
         WSGI app for serving giotto applications
         """
         request = Request(environ)
-        controller = HTTPController(request, programs)
+        controller = HTTPController(request, programs, model_mock=model_mock)
         wsgi_response = controller.get_concrete_response()
         return wsgi_response(environ, start_response)
 

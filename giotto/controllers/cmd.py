@@ -4,7 +4,7 @@ from giotto.controllers import GiottoController
 cmd_execution_snippet = """
 else:
     from giotto.controllers.cmd import CMDController
-    controller = CMDController(request=sys.argv, programs=programs)
+    controller = CMDController(request=sys.argv, programs=programs, model_mock=mock)
     controller.get_concrete_response()
 """
 
