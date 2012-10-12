@@ -1,4 +1,5 @@
 import inspect
+import json
 
 from giotto import GiottoProgram
 from giotto.exceptions import InvalidInput, ProgramNotFound
@@ -51,6 +52,13 @@ class GiottoController(object):
             self.__repr__(), self.show_program_names())
         )
 
+    def get_cache_key(self):
+        data = self.get_model_args(self.get_model(), self.get_data())
+        controller_args = json.dumps(data, separators=(',', ':'), sort_keys=True)
+        program = self._get_program().name
+        mimetype = self.get_mimetype()
+        return "%s(%s)(%s)" % (controller_args, program, mimetype)
+
     def _get_generic_response_data(self):
         """
         Return the data to create a response object appropriate for the
@@ -77,6 +85,13 @@ class GiottoController(object):
 
     def get_mimetype(self):
         return self.default_mimetype
+
+    def get_model(self):
+        if self.program.model:
+            # remove ugly wrapping list (to avoid becoming an instance mothod
+            return self.program.model[0]
+        else:
+            return self.program.view[0]
 
     def get_model_args(self, source, raw_data):
         """
