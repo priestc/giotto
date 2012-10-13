@@ -1,6 +1,7 @@
 from giotto.controllers import GiottoController
 from werkzeug.wrappers import Request, Response
-
+from giotto.utils import super_accept_to_mimetype
+from giotto.exceptions import NoViewMethod
 http_execution_snippet = """
 if controller == 'http-dev':
     from werkzeug.serving import run_simple
@@ -14,18 +15,28 @@ class HTTPController(GiottoController):
     default_mimetype = 'text/html'
 
     def get_mimetype(self):
+        sa = self.get_super_accept()
+        if sa:
+            return sa
         accept = self.request.headers['Accept']
         has_json_in_view = hasattr(self.program.view, 'application_json')
         if accept == '*/*' and self.request.is_xhr and has_json_in_view:
             # return json on ajax calls if no accept headers are present.
             # only if the view has implemented a application/json method
             return "application/json"
+
         if accept != '*/*' and not accept.startswith('text/html'):
             return accept
         return self.default_mimetype
 
     def get_program_name(self):
-        return self.request.path[1:].replace('/', '.')
+        splitted = self.request.path[1:].split('.')
+        return splitted[0]
+
+    def get_super_accept(self):
+        splitted = self.request.path[1:].split('.')
+        if len(splitted) > 1:
+            return super_accept_to_mimetype(splitted[1])
 
     def get_controller_name(self):
         return 'http-%s' % self.request.method.lower()
@@ -39,9 +50,19 @@ class HTTPController(GiottoController):
         return data
 
     def get_concrete_response(self):
-        result = self._get_generic_response_data()
+        code = 200
+        try:
+            result = self._get_generic_response_data()
+        except NoViewMethod:
+            code = 415
+            result = {
+                'mimetype': 'text/plain',
+                'body': 'Unsupported Media Type: %s' % self.get_mimetype()
+            }
+        
         # convert to a format appropriate to the wsgi Response api.
         response = Response(
+            status=code,
             response=result['body'],
             mimetype=result['mimetype'],
         )

@@ -95,8 +95,17 @@ class GiottoController(object):
 
         return rendered
 
+    def get_super_accept(self):
+        """
+        'Super accept' is an accept header that supercedes the default and/or
+        controller specefic mimetype This is needed because web browsers suck
+        and don't use the accept headers correctly.
+        """
+        return None
+
+
     def get_mimetype(self):
-        return self.default_mimetype
+        return self.get_super_accept() or self.default_mimetype
 
     def get_model(self):
         if self.program.model:
@@ -159,7 +168,7 @@ class GiottoController(object):
         """
         ViewClass = self.program.view
         view = ViewClass(view_data)
-
+        
         response = view.render(self.get_mimetype())
 
         return response

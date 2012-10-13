@@ -6,3 +6,6 @@ class InvalidProgram(Exception):
 
 class ProgramNotFound(Exception):
     pass
+
+class NoViewMethod(Exception):
+    pass

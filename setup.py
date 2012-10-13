@@ -11,5 +11,5 @@ setup(
     packages=['giotto'],
     scripts=['giotto/giotto_controller'],
     license='LICENSE',
-    install_requires=['werkzeug', 'jinja2', 'py-bcrypt', 'decorator'],
+    install_requires=['werkzeug', 'python-magic', 'jinja2', 'py-bcrypt', 'decorator'],
 )

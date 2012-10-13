@@ -62,7 +62,17 @@ def parse_kwargs(kwargs):
             ret[k] = v
     return ret
 
-
+def super_accept_to_mimetype(ext):
+    if ext in ('jpeg', 'jpg'):
+        return 'image/jpeg'
+    if ext == 'gif':
+        return 'image/gif'
+    if ext == 'txt':
+        return 'text/plain'
+    if ext in ('html', 'htm'):
+        return 'text/html'
+    if ext == 'json':
+        return 'application/json'
 
 
 
