@@ -26,6 +26,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="Giotto 0.0.2 documentation" href="index.html" />
+    <link rel="next" title="View Classes" href="view_classes.html" />
     <link rel="prev" title="Welcome to Giotto’s documentation!" href="index.html" /> 
   </head>
   <body>
@@ -35,6 +36,9 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="view_classes.html" title="View Classes"
+             accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Welcome to Giotto’s documentation!"
              accesskey="P">previous</a> |</li>
@@ -135,11 +139,12 @@ Point your browser to: <a class="reference external" href="http://localhost:5000
 <p>The browser should now be displaying <cite>4 * 8 == 32</cite>. With the part before the <cite>==</cite>
 in blue, and the part after in red.</p>
 <p>The following order of events are occuring:</p>
-<ol class="arabic simple">
-<li>HTTP request comes into the dev server.</li>
-<li>HTTP request gets passed into the giotto wsgi application.</li>
-</ol>
-<p>3. Giotto inspects the request and dispatches the request off to the <tt class="docutils literal"><span class="pre">Multiply</span></tt> program.
+<ol class="arabic">
+<li><p class="first">HTTP request comes into the dev server.</p>
+</li>
+<li><p class="first">HTTP request gets passed into the giotto wsgi application.</p>
+</li>
+<li><p class="first">Giotto inspects the request and dispatches the request off to the <tt class="docutils literal"><span class="pre">Multiply</span></tt> program.
 Giotto knows to dispatch the request to the Multiply program
 because:</p>
 <blockquote>
@@ -148,10 +153,13 @@ because:</p>
 <li>The url matches the <tt class="docutils literal"><span class="pre">name</span></tt> attribute on the program class.</li>
 </ol>
 </div></blockquote>
-<ol class="arabic simple" start="4">
-<li>Calls the model with the arguments from the GET vars.</li>
-<li>Takes the output from the model and passes it into the view object.</li>
-<li>Calls the appropriate rendering method on the view class, depending on (in this case) the <tt class="docutils literal"><span class="pre">Accept</span></tt> headers.</li>
+</li>
+<li><p class="first">Calls the model with the arguments from the GET vars.</p>
+</li>
+<li><p class="first">Takes the output from the model and passes it into the view object.</p>
+</li>
+<li><p class="first">Calls the appropriate rendering method on the view class, depending on (in this case) the <tt class="docutils literal"><span class="pre">Accept</span></tt> headers.</p>
+</li>
 </ol>
 <p>Now, open up your browser&#8217;s javascript console (firebug if you&#8217;re a firefox user).
 Type in the following:</p>
@@ -199,16 +207,16 @@ This feature is useful for front end designers who do not need to run the full m
     <span class="n">view</span> <span class="o">=</span> <span class="p">[</span><span class="n">ColoredMultiplyView</span><span class="p">]</span>
 </pre></div>
 </div>
-<p>Restart the cache server (this time leave off the <tt class="docutils literal"><span class="pre">--model-mock</span></tt> flag.
-Also, add pause to the model method:</p>
+<p>Restart the cache server (this time leave off the <tt class="docutils literal"><span class="pre">--model-mock</span></tt> flag).
+Also, add a pause to the model method:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">multiply</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
     <span class="kn">import</span> <span class="nn">time</span><span class="p">;</span> <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">{</span><span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="s">&#39;y&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="s">&#39;product&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">)}</span>
 </pre></div>
 </div>
-<p>This will simulate a heavy calculating model. You also need to have either Redis
-or Memcache installed and running. Configure the cache by uncommenting the <tt class="docutils literal"><span class="pre">cache</span></tt>
-variable in the concrete controller file:</p>
+<p>This will simulate a heavy calculating model.
+You also need to have either Redis or Memcache installed and running.
+Configure the cache by uncommenting the <tt class="docutils literal"><span class="pre">cache</span></tt> variable in the concrete controller file:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">giotto.cache</span> <span class="kn">import</span> <span class="n">CacheWithMemcache</span>
 
 <span class="n">cache</span> <span class="o">=</span> <span class="n">CacheWithMemcache</span><span class="p">(</span>
@@ -239,6 +247,9 @@ Now when you load a page, it will take 5 seconds for the first render, and subse
   <h4>Previous topic</h4>
   <p class="topless"><a href="index.html"
                         title="previous chapter">Welcome to Giotto&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="view_classes.html"
+                        title="next chapter">View Classes</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/tutorial.txt"
@@ -267,6 +278,9 @@ Now when you load a page, it will take 5 seconds for the first render, and subse
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="view_classes.html" title="View Classes"
+             >next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Welcome to Giotto’s documentation!"
              >previous</a> |</li>

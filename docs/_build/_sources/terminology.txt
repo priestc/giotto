@@ -3,3 +3,6 @@
 ===========
 Terminology
 ===========
+
+Contrete Controller
+Controller Class

@@ -103,8 +103,8 @@ The following order of events are occuring:
 1. HTTP request comes into the dev server.
 2. HTTP request gets passed into the giotto wsgi application.
 3. Giotto inspects the request and dispatches the request off to the ``Multiply`` program.
-Giotto knows to dispatch the request to the Multiply program
-because:
+   Giotto knows to dispatch the request to the Multiply program
+   because:
     a. The program is configured to use the 'http-get' controller, and this is a HTTP GET request.
     b. The url matches the ``name`` attribute on the program class.
 4. Calls the model with the arguments from the GET vars.
