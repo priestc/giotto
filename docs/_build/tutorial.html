@@ -1,0 +1,281 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Getting Started with Giotto &mdash; Giotto 0.0.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Giotto 0.0.2 documentation" href="index.html" />
+    <link rel="prev" title="Welcome to Giotto’s documentation!" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Giotto’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Giotto 0.0.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="getting-started-with-giotto">
+<span id="ref-tutorial"></span><h1>Getting Started with Giotto<a class="headerlink" href="#getting-started-with-giotto" title="Permalink to this headline">¶</a></h1>
+<p>First, install giotto:</p>
+<div class="highlight-python"><pre>$ pip install giotto</pre>
+</div>
+<p>Now create a &#8220;Concrete Controller&#8221; file:</p>
+<div class="highlight-python"><pre>$ giotto_controller --http-dev --cmd --demo</pre>
+</div>
+<p>This &#8220;Concrete Controller&#8221; is an instance of a &#8220;Controller Class&#8221;
+which will act as a gateway between your application and the outside world.
+The file generated will be called &#8216;giotto&#8217;.</p>
+<p>The <tt class="docutils literal"><span class="pre">--http-dev</span></tt> and <tt class="docutils literal"><span class="pre">--cmd</span></tt> flags tells giotto to include the plumbing for those
+two controller classes into the concrete controller file.
+Your application can now be interacted with from the command line
+or through HTTP dev server.
+If you only want to interact with you app through the command line,
+then you could leave off the <tt class="docutils literal"><span class="pre">--http-dev</span></tt> (and vice versa).
+The option <tt class="docutils literal"><span class="pre">--demo</span></tt> tells giotto to include a simple &#8220;multiply&#8221; program to demonstrate how giotto works.</p>
+<p>Inside the <cite>giotto</cite> file, you will see the following (plus some extra plumbing
+at the bottom):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">ColoredMultiplyView</span><span class="p">(</span><span class="n">GiottoTemplateView</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">text_plain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;{{ obj.x }} * {{ obj.y }} == {{ obj.product }}&quot;</span>
+
+    <span class="k">def</span> <span class="nf">application_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">json</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">text_html</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;&quot;&quot;&lt;!DOCTYPE html&gt;</span>
+<span class="s">        &lt;script src=&quot;https://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js&quot;&gt;&lt;/script&gt;</span>
+<span class="s">        &lt;html&gt;</span>
+<span class="s">            &lt;body&gt;</span>
+<span class="s">                &lt;span style=&quot;color: blue&quot;&gt;{{ obj.x }} * {{ obj.y }}&lt;/span&gt; ==</span>
+<span class="s">                &lt;span style=&quot;color: red&quot;&gt;{{ obj.product }}&lt;/span&gt;</span>
+<span class="s">            &lt;/body&gt;</span>
+<span class="s">        &lt;/html&gt;&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">text_cmd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">colorama</span> <span class="kn">import</span> <span class="n">init</span><span class="p">,</span> <span class="n">Fore</span>
+        <span class="n">init</span><span class="p">()</span>
+        <span class="k">return</span> <span class="s">&quot;{blue}{x} * {y}{reset} == {red}{product}{reset}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">blue</span><span class="o">=</span><span class="n">Fore</span><span class="o">.</span><span class="n">BLUE</span><span class="p">,</span>
+            <span class="n">red</span><span class="o">=</span><span class="n">Fore</span><span class="o">.</span><span class="n">RED</span><span class="p">,</span>
+            <span class="n">reset</span><span class="o">=</span><span class="n">Fore</span><span class="o">.</span><span class="n">RESET</span><span class="p">,</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">result</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">],</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">result</span><span class="p">[</span><span class="s">&#39;y&#39;</span><span class="p">],</span>
+            <span class="n">product</span><span class="o">=</span><span class="n">result</span><span class="p">[</span><span class="s">&#39;product&#39;</span><span class="p">],</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">text_irc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;{blue}{x} * {y}{reset} == {red}{product}{reset}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">blue</span><span class="o">=</span><span class="s">&quot;</span><span class="se">\x03</span><span class="s">02&quot;</span><span class="p">,</span>
+            <span class="n">red</span><span class="o">=</span><span class="s">&quot;</span><span class="se">\x03</span><span class="s">04&quot;</span><span class="p">,</span>
+            <span class="n">reset</span><span class="o">=</span><span class="s">&quot;</span><span class="se">\x03</span><span class="s">&quot;</span><span class="p">,</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">result</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">],</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">result</span><span class="p">[</span><span class="s">&#39;y&#39;</span><span class="p">],</span>
+            <span class="n">product</span><span class="o">=</span><span class="n">result</span><span class="p">[</span><span class="s">&#39;product&#39;</span><span class="p">],</span>
+        <span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">multiply</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="s">&#39;y&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="s">&#39;product&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">)}</span>
+
+
+<span class="k">class</span> <span class="nc">Multiply</span><span class="p">(</span><span class="n">GiottoProgram</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;multiply&quot;</span>
+    <span class="n">controllers</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;http-get&#39;</span><span class="p">,</span> <span class="s">&#39;cmd&#39;</span><span class="p">,</span> <span class="s">&#39;irc&#39;</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="p">[</span><span class="n">multiply</span><span class="p">]</span>
+    <span class="n">view</span> <span class="o">=</span> <span class="p">[</span><span class="n">ColoredMultiplyView</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>The first class, the one that inherits from <tt class="docutils literal"><span class="pre">GiottoTemplateView</span></tt> is the view object,
+the function <tt class="docutils literal"><span class="pre">multiply</span></tt> is the model,
+and the last class (the one that subclasses <cite>GiottoProgram</cite>) is called the &#8220;program&#8221;.
+A &#8220;program&#8221; acts as an atomic unit of a giotto application that binds a group of controllers to a model and view.
+Each program contains a controller, a model (optional) and a view.
+You can also add middleware and cache (among other things), but we&#8217;ll deal with those later.</p>
+<p>To see our example <tt class="docutils literal"><span class="pre">multiply</span></tt> program in action, run the http-dev server by running
+the following command:</p>
+<div class="highlight-python"><pre>$ python giotto http-dev</pre>
+</div>
+<p>This will run the development server (you must have werkzeug installed).
+Now lets take a look at the <tt class="docutils literal"><span class="pre">multiply</span></tt> program.
+Point your browser to: <a class="reference external" href="http://localhost:5000/multiply?x=4&amp;y=8">http://localhost:5000/multiply?x=4&amp;y=8</a></p>
+<p>The browser should now be displaying <cite>4 * 8 == 32</cite>. With the part before the <cite>==</cite>
+in blue, and the part after in red.</p>
+<p>The following order of events are occuring:</p>
+<ol class="arabic simple">
+<li>HTTP request comes into the dev server.</li>
+<li>HTTP request gets passed into the giotto wsgi application.</li>
+</ol>
+<p>3. Giotto inspects the request and dispatches the request off to the <tt class="docutils literal"><span class="pre">Multiply</span></tt> program.
+Giotto knows to dispatch the request to the Multiply program
+because:</p>
+<blockquote>
+<div><ol class="loweralpha simple">
+<li>The program is configured to use the &#8216;http-get&#8217; controller, and this is a HTTP GET request.</li>
+<li>The url matches the <tt class="docutils literal"><span class="pre">name</span></tt> attribute on the program class.</li>
+</ol>
+</div></blockquote>
+<ol class="arabic simple" start="4">
+<li>Calls the model with the arguments from the GET vars.</li>
+<li>Takes the output from the model and passes it into the view object.</li>
+<li>Calls the appropriate rendering method on the view class, depending on (in this case) the <tt class="docutils literal"><span class="pre">Accept</span></tt> headers.</li>
+</ol>
+<p>Now, open up your browser&#8217;s javascript console (firebug if you&#8217;re a firefox user).
+Type in the following:</p>
+<div class="highlight-python"><pre>$.ajax({url: window.location.href, success: function(a) {console.log(a)}})</pre>
+</div>
+<p>You should see a json representation of the page. The HTTP controller automatically
+changes the return mimetype to &#8220;application/json&#8221; when the request comes from
+ajax.</p>
+<p>Lets take a look at this program as viewed from the command line. Press <cite>ctrl+c</cite>
+to stop the dev server.</p>
+<p>Form the shell, run the following command:</p>
+<div class="highlight-python"><pre>$ python giotto multiply --x=4 --y=8</pre>
+</div>
+<p>The output should be exactly the same. It should say <cite>4 * 8 == 32</cite> with the <cite>32</cite>
+in red and the <cite>4 * 8</cite> in blue.
+The model that is being called here is exactly the same as we saw being called from the browser.
+The only difference is the way the result is visualized,
+and the way data moves between the user and the computer.</p>
+<div class="section" id="using-mocks">
+<h2>Using Mocks<a class="headerlink" href="#using-mocks" title="Permalink to this headline">¶</a></h2>
+<p>On the GiottoProgram class, add a <tt class="docutils literal"><span class="pre">model_mock</span></tt> attribute:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Multiply</span><span class="p">(</span><span class="n">GiottoProgram</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;multiply&quot;</span>
+    <span class="n">controllers</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;http-get&#39;</span><span class="p">,</span> <span class="s">&#39;cmd&#39;</span><span class="p">,</span> <span class="s">&#39;irc&#39;</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="p">[</span><span class="n">multiply</span><span class="p">]</span>
+    <span class="n">model_mock</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s">&#39;y&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s">&#39;product&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">}</span>
+    <span class="n">view</span> <span class="o">=</span> <span class="p">[</span><span class="n">ColoredMultiplyView</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>When you run the dev server include the <tt class="docutils literal"><span class="pre">--model-mock</span></tt> flag:</p>
+<blockquote>
+<div>% python giotto http-dev &#8211;model-mock</div></blockquote>
+<p>Now no matter what arguments you place in the url, the output will always be <tt class="docutils literal"><span class="pre">10</span> <span class="pre">*</span> <span class="pre">10</span> <span class="pre">==</span> <span class="pre">100</span></tt>.
+This feature is useful for front end designers who do not need to run the full model stack.</p>
+</div>
+<div class="section" id="cache">
+<h2>Cache<a class="headerlink" href="#cache" title="Permalink to this headline">¶</a></h2>
+<p>Add a <tt class="docutils literal"><span class="pre">cache</span></tt> attribute to the program:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Multiply</span><span class="p">(</span><span class="n">GiottoProgram</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;multiply&quot;</span>
+    <span class="n">controllers</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;http-get&#39;</span><span class="p">,</span> <span class="s">&#39;cmd&#39;</span><span class="p">,</span> <span class="s">&#39;irc&#39;</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="p">[</span><span class="n">multiply</span><span class="p">]</span>
+    <span class="n">model_mock</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s">&#39;y&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s">&#39;product&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">}</span>
+    <span class="n">cache</span> <span class="o">=</span> <span class="mi">3600</span>
+    <span class="n">view</span> <span class="o">=</span> <span class="p">[</span><span class="n">ColoredMultiplyView</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Restart the cache server (this time leave off the <tt class="docutils literal"><span class="pre">--model-mock</span></tt> flag.
+Also, add pause to the model method:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">multiply</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">time</span><span class="p">;</span> <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="s">&#39;y&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="s">&#39;product&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">)}</span>
+</pre></div>
+</div>
+<p>This will simulate a heavy calculating model. You also need to have either Redis
+or Memcache installed and running. Configure the cache by uncommenting the <tt class="docutils literal"><span class="pre">cache</span></tt>
+variable in the concrete controller file:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">giotto.cache</span> <span class="kn">import</span> <span class="n">CacheWithMemcache</span>
+
+<span class="n">cache</span> <span class="o">=</span> <span class="n">CacheWithMemcache</span><span class="p">(</span>
+    <span class="n">host</span><span class="o">=</span><span class="s">&#39;localhost&#39;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>To use the redis cache, change the class to <tt class="docutils literal"><span class="pre">CacheWithRedis</span></tt>.
+Now when you load a page, it will take 5 seconds for the first render, and subsequent renders will be served from cache.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Getting Started with Giotto</a><ul>
+<li><a class="reference internal" href="#using-mocks">Using Mocks</a></li>
+<li><a class="reference internal" href="#cache">Cache</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to Giotto&#8217;s documentation!</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/tutorial.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Giotto’s documentation!"
+             >previous</a> |</li>
+        <li><a href="index.html">Giotto 0.0.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Chris Priest.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
