@@ -18,15 +18,15 @@ and run the server by using the concrete controller file as the wsgi file::
 gunicorn
 --------
 
-Install gunicorn:
+Install gunicorn::
 
-    pip imnstall gunicorn
+    pip install gunicorn
 
-Gunicorn works slightly different that uwsgi.
+Gunicorn works slightly differently than uwsgi.
 Some modifications of the automatically generated concrete controller is required.
 
-Rename the ``giotto-http`` to ``http_gunicorn.py``.
+Rename the ``giotto-http`` to ``http_gunicorn.py``. (remove the '-' and add '.py' to the end)
 
-The run the following command:
+The run the following command::
 
     gunicorn --workers=1 --log-level=debug giotto_gunicorn:application
