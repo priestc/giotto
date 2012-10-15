@@ -167,8 +167,8 @@ class GiottoController(object):
         Render the view with data from the model and/or controller.
         """
         ViewClass = self.program.view
-        view = ViewClass(view_data)
-        
+        view = ViewClass(view_data, self)
+
         response = view.render(self.get_mimetype())
 
         return response

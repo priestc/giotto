@@ -1,7 +1,10 @@
+import urllib
+
 from giotto.controllers import GiottoController
 from werkzeug.wrappers import Request, Response
 from giotto.utils import super_accept_to_mimetype
 from giotto.exceptions import NoViewMethod
+
 http_execution_snippet = """
 if controller == 'http-dev':
     from werkzeug.serving import run_simple
@@ -13,6 +16,16 @@ if controller == 'http-dev':
 class HTTPController(GiottoController):
     name = 'http'
     default_mimetype = 'text/html'
+
+    def get_invocation(self, program, data, ext=""):
+        if ext and not ext.startswith('.'):
+            ext = '.%s' % ext
+
+        if type(data) is list:
+            params = "/".join(data)
+        else:
+            params = '?' + urllib.urlencode(data)
+        return "%s%s%s" % (program, ext, params)
 
     def get_mimetype(self):
         sa = self.get_super_accept()

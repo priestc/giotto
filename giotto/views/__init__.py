@@ -6,12 +6,13 @@ from jinja2 import Template
 from giotto.exceptions import NoViewMethod
 
 class GiottoView(object):
-    def __init__(self, result):
+    def __init__(self, result, controller):
         """
         result == the output from the model
         """
         self.result = result
-
+        self.controller = controller
+        
     def application_json(self, result):
         try:
             j = json.dumps(result)

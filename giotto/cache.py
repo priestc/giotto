@@ -1,3 +1,4 @@
+import pickle
 try:
     import pylibmc
 except ImportError:
@@ -39,8 +40,10 @@ class CacheWithRedis(GiottoCache):
         self.redis = redis.StrictRedis(host=host, port=port, db=db)
 
     def set(self, key, obj, expire):
-        self.redis.setex(key, expire, obj)
+        self.redis.setex(key, expire, pickel.dumps(obj))
 
     def get(self, key):
-        # is there a better way to do this?
-        return eval(self.redis.get(key) or 'None')
+        pickled_value = self.redis.get(key)
+        if pickled_value is None:
+            return None
+        return pickle.loads(pickled_value)
