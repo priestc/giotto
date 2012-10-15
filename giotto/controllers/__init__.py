@@ -2,7 +2,7 @@ import inspect
 import json
 
 from giotto import GiottoProgram
-from giotto.exceptions import InvalidInput, ProgramNotFound
+from giotto.exceptions import InvalidInput, ProgramNotFound, MockNotFound
 from giotto.primitives import GiottoPrimitive
 
 def do_argspec(source):
@@ -60,6 +60,12 @@ class GiottoController(object):
         mimetype = self.get_mimetype()
         return "%s(%s)(%s)" % (controller_args, program, mimetype)
 
+    def get_model_mock(self):
+        try:
+            return self.program.model[1]
+        except IndexError:
+            raise MockNotFound
+
     def _get_generic_response_data(self):
         """
         Return the data to create a response object appropriate for the
@@ -73,7 +79,7 @@ class GiottoController(object):
         if self.model_mock:
             # if the model mock option is True, then bypass the model
             # and just return the mock
-            return self.render_view(self.program.model_mock)
+            return self.render_view(self.get_model_mock())
 
         if self.program.cache:
             rendered = self.cache.get(cache_key)

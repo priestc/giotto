@@ -2,10 +2,14 @@ from giotto.core import parse_kwargs
 from giotto.controllers import GiottoController
 
 cmd_execution_snippet = """
+args = sys.argv
+mock = '--model-mock' in args
+if mock:
+    # remove the mock argument so the controller doesn't get confused
+    args.pop(args.index('--model-mock'))
 from giotto.controllers.cmd import CMDController
 controller = CMDController(request=sys.argv, programs=programs, model_mock=mock, cache=cache)
-controller.get_concrete_response()
-"""
+controller.get_concrete_response()"""
 
 class CMDController(GiottoController):
     """

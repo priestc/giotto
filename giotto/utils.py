@@ -1,3 +1,4 @@
+import argparse
 from collections import defaultdict
 
 def itersubclasses(cls, _seen=None):
@@ -74,7 +75,16 @@ def super_accept_to_mimetype(ext):
     if ext == 'json':
         return 'application/json'
 
-
+def parse_controller_args(argv):
+    """
+    Parse the commandline argument for the concrete controller.
+    """
+    parser = argparse.ArgumentParser(description='Giotto Concrete Controller')
+    parser.add_argument('--http', action='store_true', help='Add the HTTP controller')
+    parser.add_argument('--irc', action='store_true', help='Add the IRC controller')
+    parser.add_argument('--cmd', help='Add the command line controller', nargs='+')
+    parser.add_argument('--model-mock', action='store_true', help='Run with models mocked')
+    return parser.parse_args(argv[1:])
 
 
 

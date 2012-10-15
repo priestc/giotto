@@ -9,7 +9,7 @@ setup(
     author_email='cp368202@ohiou.edu',
     url='https://github.com/priestc/giotto',
     packages=['giotto'],
-    scripts=['giotto/giotto_controller'],
+    scripts=['giotto/giotto_project'],
     license='LICENSE',
     install_requires=['werkzeug', 'python-magic', 'jinja2', 'py-bcrypt', 'decorator'],
 )

@@ -24,6 +24,7 @@ Contents:
    view_classes
    cache
    model_mocking
+   deployment
 
 
 

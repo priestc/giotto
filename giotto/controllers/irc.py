@@ -8,20 +8,22 @@ from giotto.exceptions import ProgramNotFound
 from giotto.core import parse_kwargs
 
 irc_execution_snippet = """
-if controller == 'irc':
-    config = {
-        'host': 'chat.freenode.org',
-        'port': 6667,
-        'nick': 'giotto-bot',
-        'ident': 'giotto',
-        'realname': 'Giotto',
-        'owner': '',
-        'channel_list': '#botwar',
-        'magic_token': '!giotto ',
-    }
-    from giotto.controllers.irc import listen
-    listen(programs, config, model_mock=mock, cache=cache)
-"""
+parser = argparse.ArgumentParser(description='Giotto Project Creator')
+parser.add_argument('--mock', action='store_true', help='Mock out the model')
+args = parser.parse_args()
+
+config = {
+    'host': 'chat.freenode.org',
+    'port': 6667,
+    'nick': 'giotto-bot',
+    'ident': 'giotto',
+    'realname': 'Giotto',
+    'owner': '',
+    'channel_list': '#botwar',
+    'magic_token': '!giotto ',
+}
+from giotto.controllers.irc import listen
+listen(programs, config, model_mock=args.mock, cache=cache)"""
 
 class IRCController(GiottoController):
     name = 'irc'

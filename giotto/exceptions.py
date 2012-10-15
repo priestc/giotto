@@ -9,3 +9,6 @@ class ProgramNotFound(Exception):
 
 class NoViewMethod(Exception):
     pass
+
+class MockNotFound(Exception):
+    pass

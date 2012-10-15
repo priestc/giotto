@@ -6,12 +6,12 @@ from giotto.utils import super_accept_to_mimetype
 from giotto.exceptions import NoViewMethod
 
 http_execution_snippet = """
-if controller == 'http-dev':
-    from werkzeug.serving import run_simple
-    from giotto.controllers.http import make_app
-    app = make_app(programs, model_mock=mock, cache=cache)
-    run_simple('127.0.0.1', 5000, app, use_debugger=True, use_reloader=True)
-"""
+mock = '--mock' in sys.argv
+from werkzeug.serving import run_simple
+from giotto.controllers.http import make_app
+application = make_app(programs, model_mock=mock, cache=cache)
+if '--run' in sys.argv:
+    run_simple('127.0.0.1', 5000, application, use_debugger=True, use_reloader=True)"""
 
 class HTTPController(GiottoController):
     name = 'http'

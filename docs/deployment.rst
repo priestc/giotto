@@ -1,4 +1,4 @@
-.. _ref-deploying_giotto:
+.. _ref-deployment:
 
 ================
 Deploying Giotto
