@@ -7,7 +7,9 @@ Welcome to Giotto's documentation!
 ==================================
 
 Giotto on pypi: http://pypi.python.org/pypi/giotto/
+
 Giotto on Github: https://github.com/priestc/giotto
+
 Giotto pycon presentation: http://www.slideshare.net/priestc/visualizing-mvc-and-an-introduction-to-giotto
 
 Contents:
