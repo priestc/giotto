@@ -22,6 +22,7 @@ Contents:
    terminology
    built_in_controller_classes
    view_classes
+   middleware
    cache
    model_mocking
    deployment

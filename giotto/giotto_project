@@ -1,0 +1,80 @@
+#!/usr/bin/env python
+import argparse
+import sys
+import stat
+import os
+from jinja2 import Template
+from giotto.demo import demo_application
+
+try:
+    import programs
+except ImportError:
+    programs = None
+
+parser = argparse.ArgumentParser(
+    description="""Giotto Project Creator. Use this utility to creat a new Giotto project,
+     or to add a new concrete controller to an existing project"""
+)
+parser.add_argument('--demo', action='store_true', help='Add the demo application')
+parser.add_argument('--http', action='store_true', help='Add the HTTP controller')
+parser.add_argument('--irc', action='store_true', help='Add the IRC controller')
+parser.add_argument('--cmd', action='store_true', help='Add the command line controller')
+args = parser.parse_args()
+
+template_controller = '''\
+#!/usr/bin/env python
+# coding: utf-8
+
+import argparse
+import sys
+from giotto.utils import itersubclasses
+from programs import *
+
+programs = list(itersubclasses(GiottoProgram))
+cache = None
+
+'''
+
+blank_application = '''
+from giotto import GiottoProgram
+
+# define programs here
+'''
+
+if not programs:
+    # create a blank applications file (if one doesn't already exist)
+    f = open('programs.py', 'w')
+    if args.demo:
+        f.write(demo_application)
+    else:
+        f.write(blank_application)
+
+if args.http:
+    from giotto.controllers.http import http_execution_snippet
+    filename = 'giotto-http'
+    f = open(filename, 'w')
+    st = os.stat(filename)
+    f.write(template_controller + http_execution_snippet)
+    os.chmod(filename, st.st_mode | stat.S_IEXEC)
+
+if args.irc:
+    from giotto.controllers.irc import irc_execution_snippet
+    filename = 'giotto-irc'
+    f = open(filename, 'w')
+    f.write(template_controller + irc_execution_snippet)
+    st = os.stat(filename)
+    os.chmod(filename, st.st_mode | stat.S_IEXEC)
+
+if args.cmd:
+    from giotto.controllers.cmd import cmd_execution_snippet
+    filename = 'giotto-cmd'
+    f = open(filename, 'w')
+    f.write(template_controller + cmd_execution_snippet)
+    st = os.stat(filename)
+    os.chmod(filename, st.st_mode | stat.S_IEXEC)
+
+
+
+
+
+

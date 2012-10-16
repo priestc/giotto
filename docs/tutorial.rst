@@ -8,24 +8,25 @@ First, install giotto::
 
     $ pip install giotto
 
-Now create a "Concrete Controller" file::
+Now create a new directory::
 
-    $ giotto_controller --http-dev --cmd --demo
+    $ mkdir demo
 
-This "Concrete Controller" is an instance of a "Controller Class"
+and inside that directory, run this command::
+
+    $ cd demo
+    $ giotto_project --http --cmd --demo
+
+This will create a ``programs.py`` file, which contains your program objects.
+It will also create a series of "concrete controller files",
 which will act as a gateway between your application and the outside world.
-The file generated will be called 'giotto'.
+The concrete controller files will be called ``giotto-http`` and ``giotto-cmd``
 
-The ``--http-dev`` and ``--cmd`` flags tells giotto to include the plumbing for those
-two controller classes into the concrete controller file.
-Your application can now be interacted with from the command line
-or through HTTP dev server.
-If you only want to interact with you app through the command line,
-then you could leave off the ``--http-dev`` (and vice versa).
+If you only want to interact with you application through the command line,
+then you could leave off the ``--http`` flag when calling ``giotto_project`` (and vice versa).
 The option ``--demo`` tells giotto to include a simple "multiply" program to demonstrate how giotto works.
 
-Inside the `giotto` file, you will see the following (plus some extra plumbing 
-at the bottom)::
+Inside the ``programs.py`` file, you will see the following::
 
     class ColoredMultiplyView(GiottoTemplateView):
         def text_plain(self, result):
@@ -75,41 +76,47 @@ at the bottom)::
     class Multiply(GiottoProgram):
         name = "multiply"
         controllers = ('http-get', 'cmd', 'irc')
-        model = [multiply]
-        view = [ColoredMultiplyView]
+        model = [multiply, {'x': 3, 'y': 3, 'product': 9}]
+        cache = None
+        view = ColoredMultiplyView
 
+All Giotto applications are made up a collection of Giotto Programs. Each program class
+defines a model, a view, and a set of controllers.
 
-The first class, the one that inherits from ``GiottoTemplateView`` is the view object,
-the function ``multiply`` is the model,
-and the last class (the one that subclasses `GiottoProgram`) is called the "program".
-A "program" acts as an atomic unit of a giotto application that binds a group of controllers to a model and view.
-Each program contains a controller, a model (optional) and a view.
-You can also add middleware and cache (among other things), but we'll deal with those later.
+A "Giotto application" is the overall project,
+such as a blog application, a content management system, or a twitter clone.
+A "Giotto Program" is a "page" within an application.
+An example of a program is "create blog", "view tweet" or "register user".
 
-To see our example ``multiply`` program in action, run the http-dev server by running
-the following command::
+A Giotto program is made up of (at minimum) a model, a view, and a set of controllers.
+In the above example, our application only contains one program called "mutiply".
+All it does is take two numbers, and multiply them together.
 
-    $ python giotto http-dev
+To see our example ``multiply`` program in action,
+start up the development server by running the following command::
+
+    $ giotto-http --run
 
 This will run the development server (you must have werkzeug installed).
-Now lets take a look at the ``multiply`` program.
 Point your browser to: http://localhost:5000/multiply?x=4&y=8
 
 The browser should now be displaying `4 * 8 == 32`. With the part before the `==`
 in blue, and the part after in red.
 
-The following order of events are occuring:
+The following order of events are occurring:
 
-1. HTTP request comes into the dev server.
-2. HTTP request gets passed into the giotto wsgi application.
-3. Giotto inspects the request and dispatches the request off to the ``Multiply`` program.
+#. You make a web request to the development server that is hooked up to our demo application, with the help of Giotto.
+#. HTTP request is received by Giotto.
+#. Giotto inspects the request and dispatches the request off to the ``Multiply`` program.
    Giotto knows to dispatch the request to the Multiply program
    because:
-    a. The program is configured to use the 'http-get' controller, and this is a HTTP GET request.
-    b. The url matches the ``name`` attribute on the program class.
-4. Calls the model with the arguments from the GET vars.
-5. Takes the output from the model and passes it into the view object.
-6. Calls the appropriate rendering method on the view class, depending on (in this case) the ``Accept`` headers.
+
+    a) The program is configured to use the 'http-get' controller, and this is a HTTP GET request.
+    b) The url matches the ``name`` attribute on the program class.
+
+#. Calls the model with the arguments from the GET vars.
+#. Takes the output from the model and passes it into the view object.
+#. Calls the appropriate rendering method on the view class, depending on (in this case) the ``Accept`` headers.
 
 Now, open up your browser's javascript console (firebug if you're a firefox user).
 Type in the following::
@@ -125,13 +132,14 @@ to stop the dev server.
 
 Form the shell, run the following command::
 
-    $ python giotto multiply --x=4 --y=8
+    $ giotto-cmd multiply x=4 y=8
 
 The output should be exactly the same. It should say `4 * 8 == 32` with the `32`
-in red and the `4 * 8` in blue. 
+in red and the `4 * 8` in blue.
+
 The model that is being called here is exactly the same as we saw being called from the browser.
 The only difference is the way the result is visualized,
-and the way data moves between the user and the computer.
+and the data moves between the user and the computer through the command lone, instead of a browser..
 
 -----------
 Using Mocks
@@ -142,16 +150,17 @@ On the GiottoProgram class, add a ``model_mock`` attribute::
     class Multiply(GiottoProgram):
         name = "multiply"
         controllers = ('http-get', 'cmd', 'irc')
-        model = [multiply]
-        model_mock = {'x': 10, 'y': 10, 'product': 100}
+        model = [multiply, {'x': 10, 'y': 10, 'product': 100}]
         view = [ColoredMultiplyView]
 
-When you run the dev server include the ``--model-mock`` flag:
+When you run the dev server include the ``--model-mock`` flag::
 
-    % python giotto http-dev --model-mock
+    $ giotto-http --run --model-mock
 
 Now no matter what arguments you place in the url, the output will always be ``10 * 10 == 100``.
-This feature is useful for front end designers who do not need to run the full model stack.
+If your model makes calls to the database or third party service,
+the ``model-mock`` option will bypass all of that.
+This feature is useful for front end designers who do not need to run the full model stack in order to create HTML templates.
 
 -----
 Cache
@@ -162,8 +171,7 @@ Add a ``cache`` attribute to the program::
     class Multiply(GiottoProgram):
         name = "multiply"
         controllers = ('http-get', 'cmd', 'irc')
-        model = [multiply]
-        model_mock = {'x': 10, 'y': 10, 'product': 100}
+        model = [multiply, {'x': 10, 'y': 10, 'product': 100}]
         cache = 3600
         view = [ColoredMultiplyView]
 
@@ -176,7 +184,7 @@ Also, add a pause to the model method::
 
 This will simulate a heavy calculating model.
 You also need to have either Redis or Memcache installed and running.
-Configure the cache by uncommenting the ``cache`` variable in the concrete controller file::
+Configure the cache by adding the following to the ``cache`` variable in the concrete controller file::
 
     from giotto.cache import CacheWithMemcache
 
@@ -185,7 +193,8 @@ Configure the cache by uncommenting the ``cache`` variable in the concrete contr
     )
 
 To use the redis cache, change the class to ``CacheWithRedis``.
-Now when you load a page, it will take 5 seconds for the first render, and subsequent renders will be served from cache.
+Now when you load a page, it will take 5 seconds for the first render,
+and subsequent renders will be served from cache.
 
 
 
