@@ -8,6 +8,10 @@ First, install giotto::
 
     $ pip install giotto
 
+You can also get the latest version from the github::
+
+    $ pip install git+git://github.com/priestc/giotto.git
+
 Now create a new directory::
 
     $ mkdir demo
