@@ -6,20 +6,16 @@ from jinja2 import Template
 from giotto.exceptions import NoViewMethod
 
 class GiottoView(object):
+    """
+    Base class for all Giotto view objects. All Giotto Views must at least descend
+    from this class, as ths class contains piping that the controller calls.
+    """
     def __init__(self, result, controller):
         """
         result == the output from the model
         """
         self.result = result
         self.controller = controller
-        
-    def application_json(self, result):
-        try:
-            j = json.dumps(result)
-        except TypeError:
-            j = json.dumps(result.__dict__)
-
-        return j
 
     def render(self, mimetype):
         status = 200
@@ -45,7 +41,36 @@ class GiottoView(object):
 
         return {'body': data, 'mimetype': mimetype, 'status': status}
 
-class GiottoTemplateView(GiottoView):
+class BasicView(GiottoView):
+    """
+    Basic viewer that contains generic functionality for showing any data.
+    """
+    def application_json(self, result):
+        try:
+            j = json.dumps(result)
+        except TypeError:
+            j = json.dumps(result.__dict__)
+
+        return j
+
+    def text_html(self, result):
+        out = []
+        for key, value in result.iteritems():
+            row = "<tr><td>{0}</td><td>{1}</td></tr>".format(key, value)
+            out.append(row)
+
+        out = "\n".join(out)
+        return """<html><body><table>{0}</table></body></html>""".format(out)
+
+    def text_plain(self, result):
+        out = []
+        for key, value in result.iteritems():
+            row = "{0} - {1}".format(key, value)
+            out.append(row)
+
+        return "\n".join(out)
+
+class GiottoTemplateView(BasicView):
     """
     A view renderer where each mimetype renderer returns a jinja template that
     will get rendered automatically. The context_name attribute denotes the

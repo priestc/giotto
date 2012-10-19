@@ -17,10 +17,11 @@ def do_argspec(source):
     return args, kwargs
 
 class GiottoController(object):
-    def __init__(self, request, programs, model_mock=False, cache=None):
+    def __init__(self, request, programs, model_mock=False):
+        from giotto import config
         self.request = request
         self.model_mock = model_mock
-        self.cache = cache
+        self.cache = config.cache
 
         # all programs available to this controller
         self.programs = programs
@@ -55,7 +56,12 @@ class GiottoController(object):
 
     def get_cache_key(self):
         data = self.get_model_args(self.get_model(), self.get_data())
-        controller_args = json.dumps(data, separators=(',', ':'), sort_keys=True)
+        try:
+            controller_args = json.dumps(data, separators=(',', ':'), sort_keys=True)
+        except TypeError:
+            # controller contains info that can't be json serialized:
+            controller_args = str(data)
+
         program = self._get_program().name
         mimetype = self.get_mimetype()
         return "%s(%s)(%s)" % (controller_args, program, mimetype)
@@ -118,7 +124,7 @@ class GiottoController(object):
             # remove ugly wrapping list (to avoid becoming an instance mothod
             return self.program.model[0]
         else:
-            return self.program.view[0]
+            return lambda: {}
 
     def get_model_args(self, source, raw_data):
         """

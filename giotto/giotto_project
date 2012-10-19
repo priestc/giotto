@@ -6,11 +6,6 @@ import os
 from jinja2 import Template
 from giotto.demo import demo_application
 
-try:
-    import programs
-except ImportError:
-    programs = None
-
 parser = argparse.ArgumentParser(
     description="""Giotto Project Creator. Use this utility to creat a new Giotto project,
      or to add a new concrete controller to an existing project"""
@@ -21,6 +16,19 @@ parser.add_argument('--irc', action='store_true', help='Add the IRC controller')
 parser.add_argument('--cmd', action='store_true', help='Add the command line controller')
 args = parser.parse_args()
 
+config_template = '''from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+
+Base = declarative_base()
+
+from sqlite3 import dbapi2 as sqlite
+engine = create_engine('sqlite+pysqlite:///file.db', module=sqlite)
+
+Session = sessionmaker(bind=engine)
+session = Session()
+cache = None'''
+
 template_controller = '''\
 #!/usr/bin/env python
 # coding: utf-8
@@ -28,26 +36,34 @@ template_controller = '''\
 import argparse
 import sys
 from giotto.utils import itersubclasses
+from giotto.utils import initialize_giotto
 from programs import *
 
 programs = list(itersubclasses(GiottoProgram))
-cache = None
-
+import config
+initialize_giotto(config)
 '''
 
-blank_application = '''
-from giotto import GiottoProgram
+blank_application = '''from giotto import GiottoProgram
 
-# define programs here
-'''
+# define programs here'''
 
-if not programs:
-    # create a blank applications file (if one doesn't already exist)
+try:
+    open('programs.py', 'r')
+except IOError:
+    # create a blank programs file (if one doesn't already exist)
     f = open('programs.py', 'w')
     if args.demo:
         f.write(demo_application)
     else:
         f.write(blank_application)
+
+try:
+    open('config.py', 'r')
+except IOError:
+    # create a blank config file (if one doesn't already exist)
+    f = open('congif.py', 'w')
+    f.write(config_template)
 
 if args.http:
     from giotto.controllers.http import http_execution_snippet

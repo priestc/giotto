@@ -9,7 +9,8 @@ http_execution_snippet = """
 mock = '--mock' in sys.argv
 from werkzeug.serving import run_simple
 from giotto.controllers.http import make_app
-application = make_app(programs, model_mock=mock, cache=cache)
+application = make_app(programs, model_mock=mock)
+initialize_giotto(config)
 if '--run' in sys.argv:
     run_simple('127.0.0.1', 5000, application, use_debugger=True, use_reloader=True)"""
 
@@ -86,6 +87,8 @@ class HTTPController(GiottoController):
     def get_primitive(self, primitive):
         if primitive == 'RAW_PAYLOAD':
             return self.get_data()
+        if primitive == 'LOGGED_IN_USER':
+            return self.request.user
 
 def make_app(programs, model_mock=False, cache=None):
     

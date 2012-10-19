@@ -23,7 +23,8 @@ config = {
     'magic_token': '!giotto ',
 }
 from giotto.controllers.irc import listen
-listen(programs, config, model_mock=args.mock, cache=cache)"""
+initialize_giotto(config)
+listen(programs, config, model_mock=args.mock)"""
 
 class IRCController(GiottoController):
     name = 'irc'

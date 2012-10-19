@@ -1,3 +1,5 @@
+import os
+
 from giotto.core import parse_kwargs
 from giotto.controllers import GiottoController
 
@@ -7,9 +9,16 @@ mock = '--model-mock' in args
 if mock:
     # remove the mock argument so the controller doesn't get confused
     args.pop(args.index('--model-mock'))
-from giotto.controllers.cmd import CMDController
-controller = CMDController(request=sys.argv, programs=programs, model_mock=mock, cache=cache)
+from giotto.controllers.cmd import CMDController, CMDRequest
+initialize_giotto(config)
+request = CMDRequest(sys.argv)
+controller = CMDController(request=request, programs=programs, model_mock=mock)
 controller.get_concrete_response()"""
+
+class CMDRequest(object):
+    def __init__(self, argv):
+        self.enviornment = os.environ
+        self.argv = argv
 
 class CMDController(GiottoController):
     """
@@ -22,7 +31,7 @@ class CMDController(GiottoController):
     default_mimetype = 'text/cmd'
 
     def get_program_name(self):
-        prog = self.request[1]
+        prog = self.request.argv[1]
         if prog.startswith('--'):
             # if the first argument is a commandline-style keyword argument,
             # then the program name is blank. (root program)
@@ -37,7 +46,7 @@ class CMDController(GiottoController):
         Parse the raw commandline arguments (from sys.argv) to a dictionary
         that is understandable to the rest of the framework.
         """
-        arguments = self.request[1:]
+        arguments = self.request.argv[1:]
         if not arguments[0].startswith('--'):
             # first argument is the program name
             arguments = arguments[1:]
