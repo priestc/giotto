@@ -56,7 +56,7 @@ Another middleware class, ``SetAuthenticationCookie`` is put in the output middl
 It's job is to set the cookies so each subsequent request can be authenticated.
 By default, the authentication cookie expires after 30 days.
 This value can be changed by setting the ``auth_cookie_expire`` value to the number of hours the cookie shoudl live for,
-in your projects ``config.py``.
+in your project's ``config.py``.
 
 Extending the views on the login/register programs
 --------------------------------------------------

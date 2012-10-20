@@ -53,6 +53,61 @@
             
   <div class="section" id="cache">
 <span id="ref-cache"></span><h1>Cache<a class="headerlink" href="#cache" title="Permalink to this headline">¶</a></h1>
+<p>Cache is a way to improve performance in your application.
+It works by storing the return value of the model and view, so subsequent requests can skip the calculation.</p>
+<div class="section" id="configuring-cache">
+<h2>Configuring cache<a class="headerlink" href="#configuring-cache" title="Permalink to this headline">¶</a></h2>
+<p>In your project&#8217;s <tt class="docutils literal"><span class="pre">config.py</span></tt>, add the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">giotto.cache</span> <span class="kn">import</span> <span class="n">CacheWithRedis</span>
+<span class="n">cache</span> <span class="o">=</span> <span class="n">CacheWithRedis</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>or if you want to use memcache:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">giotto.cache</span> <span class="kn">import</span> <span class="n">CacheWithMemcache</span>
+<span class="n">cache</span> <span class="o">=</span> <span class="n">CacheWithMemcache</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>You can also add parameters to the <tt class="docutils literal"><span class="pre">CacheWith*</span></tt> class such as port and host.</p>
+</div>
+<div class="section" id="enabling-caching-for-programs">
+<h2>Enabling Caching for programs<a class="headerlink" href="#enabling-caching-for-programs" title="Permalink to this headline">¶</a></h2>
+<p>To enable cache for a program, add a value (in seconds) to the <tt class="docutils literal"><span class="pre">cache</span></tt> attribute of your program class:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">my_model</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span><span class="p">}</span>
+
+<span class="k">class</span> <span class="nc">MyProgram</span><span class="p">(</span><span class="n">GiottoProgram</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;my_program&#39;</span>
+    <span class="n">controllers</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;http-get&#39;</span><span class="p">,</span> <span class="s">&#39;cmd&#39;</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="p">[</span><span class="n">my_model</span><span class="p">]</span>
+    <span class="n">cache</span> <span class="o">=</span> <span class="mi">3600</span> <span class="c"># one hour</span>
+    <span class="n">view</span> <span class="o">=</span> <span class="n">MyViewClass</span>
+</pre></div>
+</div>
+<p>The first request that comes into this program will be calculated.
+The result of this calculation (the model&#8217;s return value) will be stored in the cache.
+Depending on what you&#8217;ve configured, this will be either Redis or Memcache.</p>
+<p>The next request that comes in, with the same value for <tt class="docutils literal"><span class="pre">x</span></tt>,
+the calculation will be skipped and the value stored in cache will be returned instead.
+After one hour has passed, the next request will calculate a new value.
+To configure the program to never expire cache values, set the <tt class="docutils literal"><span class="pre">cache</span></tt> value to 0.
+To turn off cache, either omit the cache attribute, or set it to <tt class="docutils literal"><span class="pre">None</span></tt>.</p>
+</div>
+<div class="section" id="under-the-hood">
+<h2>Under the hood<a class="headerlink" href="#under-the-hood" title="Permalink to this headline">¶</a></h2>
+<p>A cache key is constructed from each incoming request.
+The cache key is in the following format:</p>
+<blockquote>
+<div>(model arguments)(model name)(mimetype)</div></blockquote>
+<p>The output of the view is what gets stored under this key.
+In the example above, the cache key (if invoked from within a web browser), would be the following:</p>
+<div class="highlight-python"><pre>invocation -&gt; curl http://localhost:5000/my_program?x=12
+cache key -&gt; {'x': 12}(my_model)(text/html)</pre>
+</div>
+<p>If invoked from within the commandline controller, the cache key would be the following:</p>
+<div class="highlight-python"><pre>invocation -&gt; ./giotto-cmd my_program x=12
+cache key -&gt; {'x': 12}(my_model)(text/cmd)</pre>
+</div>
+</div>
 </div>
 
 
@@ -61,6 +116,16 @@
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Cache</a><ul>
+<li><a class="reference internal" href="#configuring-cache">Configuring cache</a></li>
+<li><a class="reference internal" href="#enabling-caching-for-programs">Enabling Caching for programs</a></li>
+<li><a class="reference internal" href="#under-the-hood">Under the hood</a></li>
+</ul>
+</li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="middleware.html"
                         title="previous chapter">Middleware</a></p>

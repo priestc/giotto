@@ -24,6 +24,9 @@ class AuthenticationMiddleware(object):
         p = request.args('password', None)
         user = User.get_user_by_password(u, p) if u and p else None
 
+        setattr(request, 'user', user)
+        return request
+
 
 class SetAuthenticationCookie(object):
     """
@@ -51,3 +54,8 @@ class MustBeLoggedIn(object):
     def http(self, request):
         if not request.user:
             raise NotAuthorized('Must be Logged in for this program')
+
+class LogoutMiddleware(object):
+    def http(self, request, response):
+        response.delete_cookie('username')
+        response.delete_cookie('password')

@@ -37,6 +37,11 @@ class LoginSubmit(GiottoProgram):
     view = BasicView
     output_middleware = [SetAuthenticationCookie]
 
+class Logout(GiottoProgram):
+    name = "logout"
+    controllers = ('http-post', 'cmd')
+    output_middleware = [LogoutMiddleware]
+
 class ListAllUsers(GiottoProgram):
     name = 'all_users'
     controllers = ('http-get', 'cmd')
