@@ -72,7 +72,9 @@ $ giotto_project --http --cmd --demo</pre>
 <p>This will create a <tt class="docutils literal"><span class="pre">programs.py</span></tt> file, which contains your program objects.
 It will also create a series of &#8220;concrete controller files&#8221;,
 which will act as a gateway between your application and the outside world.
-The concrete controller files will be called <tt class="docutils literal"><span class="pre">giotto-http</span></tt> and <tt class="docutils literal"><span class="pre">giotto-cmd</span></tt></p>
+The concrete controller files will be called <tt class="docutils literal"><span class="pre">giotto-http</span></tt> and <tt class="docutils literal"><span class="pre">giotto-cmd</span></tt>
+This utility will also add a <tt class="docutils literal"><span class="pre">config.py</span></tt> file,
+which will be where you add your database information (and other things).</p>
 <p>If you only want to interact with you application through the command line,
 then you could leave off the <tt class="docutils literal"><span class="pre">--http</span></tt> flag when calling <tt class="docutils literal"><span class="pre">giotto_project</span></tt> (and vice versa).
 The option <tt class="docutils literal"><span class="pre">--demo</span></tt> tells giotto to include a simple &#8220;multiply&#8221; program to demonstrate how giotto works.</p>
@@ -225,7 +227,8 @@ Also, add a pause to the model method:</p>
 </div>
 <p>This will simulate a heavy calculating model.
 You also need to have either Redis or Memcache installed and running.
-Configure the cache by adding the following to the <tt class="docutils literal"><span class="pre">cache</span></tt> variable in the concrete controller file:</p>
+Configure the cache by setting the following to the <tt class="docutils literal"><span class="pre">cache</span></tt>
+variable in the config file:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">giotto.cache</span> <span class="kn">import</span> <span class="n">CacheWithMemcache</span>
 
 <span class="n">cache</span> <span class="o">=</span> <span class="n">CacheWithMemcache</span><span class="p">(</span>

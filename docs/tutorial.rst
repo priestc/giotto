@@ -26,6 +26,8 @@ This will create a ``programs.py`` file, which contains your program objects.
 It will also create a series of "concrete controller files",
 which will act as a gateway between your application and the outside world.
 The concrete controller files will be called ``giotto-http`` and ``giotto-cmd``
+This utility will also add a ``config.py`` file,
+which will be where you add your database information (and other things).
 
 If you only want to interact with you application through the command line,
 then you could leave off the ``--http`` flag when calling ``giotto_project`` (and vice versa).
@@ -189,7 +191,8 @@ Also, add a pause to the model method::
 
 This will simulate a heavy calculating model.
 You also need to have either Redis or Memcache installed and running.
-Configure the cache by adding the following to the ``cache`` variable in the concrete controller file::
+Configure the cache by setting the following to the ``cache``
+variable in the config file::
 
     from giotto.cache import CacheWithMemcache
 
