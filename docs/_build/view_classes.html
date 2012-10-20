@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>View Classes &mdash; Giotto 0.0.2 documentation</title>
+    <title>View Classes &mdash; Giotto 0.0.3pre documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.0.2',
+        VERSION:     '0.0.3pre',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,9 +25,9 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Giotto 0.0.2 documentation" href="index.html" />
-    <link rel="next" title="Cache" href="cache.html" />
-    <link rel="prev" title="Getting Started with Giotto" href="tutorial.html" /> 
+    <link rel="top" title="Giotto 0.0.3pre documentation" href="index.html" />
+    <link rel="next" title="Middleware" href="middleware.html" />
+    <link rel="prev" title="Built-in Controller Classes" href="built_in_controller_classes.html" /> 
   </head>
   <body>
     <div class="related">
@@ -37,12 +37,12 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="cache.html" title="Cache"
+          <a href="middleware.html" title="Middleware"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="tutorial.html" title="Getting Started with Giotto"
+          <a href="built_in_controller_classes.html" title="Built-in Controller Classes"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Giotto 0.0.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Giotto 0.0.3pre documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -53,6 +53,45 @@
             
   <div class="section" id="view-classes">
 <span id="ref-view-classes"></span><h1>View Classes<a class="headerlink" href="#view-classes" title="Permalink to this headline">¶</a></h1>
+<p>View classes take in data that the model returns, and returns data that is viewable.
+For instance, if the model returns a simple dictionary:</p>
+<blockquote>
+<div>{&#8216;x&#8217;: 3, &#8216;y&#8217;: 10, &#8216;result&#8217;: 30}</div></blockquote>
+<p>The the view&#8217;s job is to take this data and return a visual representation, such as:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="mi">3</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">==</span> <span class="mi">30</span>
+</pre></div>
+</div>
+<p>or:</p>
+<div class="highlight-python"><pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+    &lt;body&gt;
+        &lt;p&gt;3 * 10 == 30&lt;/p&gt;
+    &lt;/body&gt;
+&lt;/html&gt;</pre>
+</div>
+<div class="section" id="creating-view-classes">
+<h2>Creating View Classes<a class="headerlink" href="#creating-view-classes" title="Permalink to this headline">¶</a></h2>
+<p>All view classes must descent from <tt class="docutils literal"><span class="pre">giotto.views.BaseView</span></tt>.
+Each class needs to implement at least one mimetype method:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">giotto.views</span> <span class="kn">import</span> <span class="n">BaseView</span>
+
+<span class="k">class</span> <span class="nc">MyView</span><span class="p">(</span><span class="n">BaseView</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">text_plain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;</span><span class="si">%(x)s</span><span class="s"> * </span><span class="si">%(y)s</span><span class="s"> == </span><span class="si">%(result)s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">result</span>
+</pre></div>
+</div>
+<p>Each method is named after the mimetype it returns (with the <tt class="docutils literal"><span class="pre">/</span></tt> replaced with an underscore),
+and take one argument that will be the value that the model returns.
+When creating views, make sure there is no &#8216;impedance mismatch&#8217; between the data that the model returns,
+and the data the view is written to take in.
+For instance, the above mimetype method is designed to display a dictionary with three keys (<tt class="docutils literal"><span class="pre">x</span></tt>, <tt class="docutils literal"><span class="pre">y</span></tt>, and <tt class="docutils literal"><span class="pre">result</span></tt>).
+If the model was changed to return a list, this view method will crash.</p>
+</div>
+<div class="section" id="basicview">
+<h2>BasicView<a class="headerlink" href="#basicview" title="Permalink to this headline">¶</a></h2>
+<p>There is a view class called <tt class="docutils literal"><span class="pre">BasicView</span></tt> that was created to be a quick and dirty way to view most any data.
+While developing your application, it is a good idea to use <tt class="docutils literal"><span class="pre">BaseView</span></tt> until you have settled on a consistent data type that your model returns.</p>
+</div>
 </div>
 
 
@@ -61,12 +100,21 @@
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">View Classes</a><ul>
+<li><a class="reference internal" href="#creating-view-classes">Creating View Classes</a></li>
+<li><a class="reference internal" href="#basicview">BasicView</a></li>
+</ul>
+</li>
+</ul>
+
   <h4>Previous topic</h4>
-  <p class="topless"><a href="tutorial.html"
-                        title="previous chapter">Getting Started with Giotto</a></p>
+  <p class="topless"><a href="built_in_controller_classes.html"
+                        title="previous chapter">Built-in Controller Classes</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="cache.html"
-                        title="next chapter">Cache</a></p>
+  <p class="topless"><a href="middleware.html"
+                        title="next chapter">Middleware</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/view_classes.txt"
@@ -96,12 +144,12 @@
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="cache.html" title="Cache"
+          <a href="middleware.html" title="Middleware"
              >next</a> |</li>
         <li class="right" >
-          <a href="tutorial.html" title="Getting Started with Giotto"
+          <a href="built_in_controller_classes.html" title="Built-in Controller Classes"
              >previous</a> |</li>
-        <li><a href="index.html">Giotto 0.0.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Giotto 0.0.3pre documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
