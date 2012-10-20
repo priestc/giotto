@@ -1,9 +1,10 @@
-from giotto import GiottoProgram
+from giotto.programs import GiottoProgram
 from giotto.views import BasicView
-from giotto.pimitives import LOGGED_IN_USER
+from giotto.primitives import LOGGED_IN_USER
+from giotto.models import is_authenticated
 
 from models import User
-from views import LoginFormView, BasicRegisterForm
+from views import BasicRegisterForm
 from middleware import AuthenticationMiddleware, SetAuthenticationCookie
 
 class NewUserRegistration(GiottoProgram):
@@ -14,7 +15,7 @@ class NewUserRegistration(GiottoProgram):
 
 class NewUserRegistrationForm(GiottoProgram):
     name = 'register'
-    controllers = ('http-get')
+    controllers = ('http-get', )
     model = []
     view = BasicRegisterForm
 
@@ -32,6 +33,6 @@ class LoginSubmit(GiottoProgram):
     name = 'login'
     controllers = ('http-post', )
     input_middleware = [AuthenticationMiddleware]
-    model = [lambda x=LOGGED_IN_USER: x]
+    model = [is_authenticated, {'user', User('test', password='pass')}]
     view = BasicView
     output_middleware = [SetAuthenticationCookie]

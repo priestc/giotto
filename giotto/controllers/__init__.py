@@ -1,7 +1,7 @@
 import inspect
 import json
 
-from giotto import GiottoProgram
+from giotto.programs import GiottoProgram
 from giotto.exceptions import InvalidInput, ProgramNotFound, MockNotFound
 from giotto.primitives import GiottoPrimitive
 

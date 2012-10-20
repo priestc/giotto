@@ -53,13 +53,21 @@ class BasicView(GiottoView):
 
         return j
 
-    def text_html(self, result):
-        out = []
-        for key, value in result.iteritems():
-            row = "<tr><td>{0}</td><td>{1}</td></tr>".format(key, value)
-            out.append(row)
+    def text_cmd(self, result):
+        return self.text_plain(result)
 
-        out = "\n".join(out)
+    def text_html(self, result):
+        if result is None:
+            return "<html><body><table>None</table></body></html>"
+        out = []
+        try:
+            for key, value in result.iteritems():
+                row = "<tr><td>{0}</td><td>{1}</td></tr>".format(key, value)
+                out.append(row)
+        except AttributeError:
+            out = [result]
+
+        out = "\n".join()
         return """<html><body><table>{0}</table></body></html>""".format(out)
 
     def text_plain(self, result):

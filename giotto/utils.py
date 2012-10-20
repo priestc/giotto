@@ -1,6 +1,8 @@
 import argparse
 from collections import defaultdict
 
+import giotto
+
 def itersubclasses(cls, _seen=None):
     """
     itersubclasses(cls)
@@ -76,10 +78,14 @@ def super_accept_to_mimetype(ext):
         return 'application/json'
 
 def initialize_giotto(config):
-    import giotto
     setattr(giotto, 'config', config)
 
 
-
+def get_config():
+    """
+    Function for getting the config. Use this instead of importing gitto.config
+    directly because the later will produce an import error.
+    """
+    return giotto.config
 
 

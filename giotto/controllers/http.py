@@ -10,7 +10,6 @@ mock = '--mock' in sys.argv
 from werkzeug.serving import run_simple
 from giotto.controllers.http import make_app
 application = make_app(programs, model_mock=mock)
-initialize_giotto(config)
 if '--run' in sys.argv:
     run_simple('127.0.0.1', 5000, application, use_debugger=True, use_reloader=True)"""
 
@@ -97,7 +96,7 @@ def make_app(programs, model_mock=False, cache=None):
         WSGI app for serving giotto applications
         """
         request = Request(environ)
-        controller = HTTPController(request, programs, model_mock=model_mock, cache=cache)
+        controller = HTTPController(request, programs, model_mock=model_mock)
         wsgi_response = controller.get_concrete_response()
         return wsgi_response(environ, start_response)
 

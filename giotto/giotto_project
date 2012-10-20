@@ -35,16 +35,16 @@ template_controller = '''\
 
 import argparse
 import sys
-from giotto.utils import itersubclasses
-from giotto.utils import initialize_giotto
-from programs import *
+from giotto.utils import itersubclasses, initialize_giotto
 
-programs = list(itersubclasses(GiottoProgram))
 import config
 initialize_giotto(config)
+
+from programs import *
+programs = list(itersubclasses(GiottoProgram))
 '''
 
-blank_application = '''from giotto import GiottoProgram
+blank_application = '''from giotto.programs import GiottoProgram
 
 # define programs here'''
 

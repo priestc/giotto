@@ -1,6 +1,6 @@
 from .models import User
 
-class AuthenticateMiddleware(object):
+class AuthenticationMiddleware(object):
     def http(self, request):
         user = None
         if request.method == 'POST':

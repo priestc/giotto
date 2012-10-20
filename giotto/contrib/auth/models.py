@@ -2,7 +2,10 @@ import re
 import bcrypt
 
 from giotto.exceptions import InvalidInput
-from giotto.config import Base, session
+from giotto.utils import get_config
+
+Base = get_config().Base
+session = get_config().session
 
 from sqlalchemy import Column, String
 
