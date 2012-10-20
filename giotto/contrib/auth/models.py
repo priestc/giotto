@@ -4,8 +4,8 @@ import bcrypt
 from giotto.exceptions import InvalidInput
 from giotto.utils import get_config
 
-Base = get_config().Base
-session = get_config().session
+Base = get_config('Base')
+session = get_config('session')
 
 from sqlalchemy import Column, String
 
@@ -26,7 +26,8 @@ class User(Base):
         Make sure this newly created user instance meets the username/password
         requirements
         """
-        if not re.match(r'^[\d\w]{4,30}$', self.username):
+        r = get_config('auth_regex', r'^[\d\w]{4,30}$')
+        if not re.match(r, self.username):
             raise InvalidInput('Username not valid')
         if len(self.raw_password) < 4:
             raise InvalidInput('Password much be at least 4 characters')
@@ -64,6 +65,10 @@ class User(Base):
         session.add(user)
         session.commit()
         return user
+
+    @classmethod
+    def all(cls):
+        return session.query(cls).all()
 
     def __repr__(self):
         return "<User('%s', '%s')>" % (self.username, self.password)

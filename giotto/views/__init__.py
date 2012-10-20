@@ -66,27 +66,27 @@ class BasicView(GiottoView):
             tr:nth-child(odd) {background: #00EEDD}
         </style>
         """
+        h1 = htmlize(type(result))
         if result is None:
             return "<html><body><table>None</table></body></html>"
-        out = []
-        try:
+        if not hasattr(result, 'iteritems'):
+            header = "<tr><th>Value</th></tr>"
+            out = ["<tr><td>" + htmlize(result) + "</td></tr>"]
+        else:
+            # object is a dict
+            header = "<tr><th>Key</th><th>Value</th></tr>"
             for key, value in result.iteritems():
-                v = str(value).replace('<', '&lt;').replace('>', '&gt;')
+                v = htmlize(value)
                 row = "<tr><td>{0}</td><td>{1}</td></tr>".format(key, v)
                 out.append(row)
-        except AttributeError:
-            out = [result]
 
         out = "\n".join(out)
-        return """<html><head>{1}</head><body>
+        return """<html><head>{1}</head><body><h1>{3}</h1>
         <table>
-            <tr>
-                <th>Key</th>
-                <th>Value</th>
-            </tr>
+            {2}
             {0}
         </table>
-        </body></html>""".format(out, css)
+        </body></html>""".format(out, css, header, h1)
 
     def text_plain(self, result):
         out = []
@@ -95,6 +95,9 @@ class BasicView(GiottoView):
             out.append(row)
 
         return "\n".join(out)
+
+def htmlize(value):
+    return str(value).replace('<', '&lt;').replace('>', '&gt;')
 
 class GiottoTemplateView(BasicView):
     """

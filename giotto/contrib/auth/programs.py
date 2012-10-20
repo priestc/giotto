@@ -36,3 +36,9 @@ class LoginSubmit(GiottoProgram):
     model = [is_authenticated('Login credentials incorrect'), {'user': User('test', password='pass')}]
     view = BasicView
     output_middleware = [SetAuthenticationCookie]
+
+class ListAllUsers(GiottoProgram):
+    name = 'all_users'
+    controllers = ('http-get', 'cmd')
+    model = [User.all]
+    view = BasicView

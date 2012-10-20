@@ -81,11 +81,13 @@ def initialize_giotto(config):
     setattr(giotto, 'config', config)
 
 
-def get_config():
+def get_config(obj, alternative=None):
     """
-    Function for getting the config. Use this instead of importing gitto.config
-    directly because the later will produce an import error.
+    Function for getting stuff from the config. Use this instead of importing
+    gitto.config directly because the later will produce an import error.
     """
-    return giotto.config
-
+    if alternative:
+        return getattr(giotto.config, obj, alternative)
+    else:
+        return getattr(giotto.config, obj)
 

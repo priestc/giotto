@@ -14,6 +14,8 @@ def do_argspec(source):
     argspec = inspect.getargspec(source)
     kwargs = dict(zip(*[reversed(l) for l in (argspec.args, argspec.defaults or [])]))
     args = [x for x in argspec.args if x not in kwargs.keys()]
+    if args and args[0] == 'cls':
+        args = args[1:]
     return args, kwargs
 
 class GiottoController(object):
@@ -115,7 +117,6 @@ class GiottoController(object):
         and don't use the accept headers correctly.
         """
         return None
-
 
     def get_mimetype(self):
         return self.get_super_accept() or self.default_mimetype
