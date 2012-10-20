@@ -6,7 +6,7 @@ from giotto.utils import super_accept_to_mimetype
 from giotto.exceptions import NoViewMethod
 
 http_execution_snippet = """
-mock = '--mock' in sys.argv
+mock = '--model-mock' in sys.argv
 from werkzeug.serving import run_simple
 from giotto.controllers.http import make_app
 application = make_app(programs, model_mock=mock)

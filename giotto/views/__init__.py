@@ -57,18 +57,36 @@ class BasicView(GiottoView):
         return self.text_plain(result)
 
     def text_html(self, result):
+        css = """
+        <style>
+            table {border-collapse: collapse}
+            td, th {border: 1px solid black; padding: 10px}
+            th {background: white;}
+            tr:nth-child(even) {background: #DDEE00}
+            tr:nth-child(odd) {background: #00EEDD}
+        </style>
+        """
         if result is None:
             return "<html><body><table>None</table></body></html>"
         out = []
         try:
             for key, value in result.iteritems():
-                row = "<tr><td>{0}</td><td>{1}</td></tr>".format(key, value)
+                v = str(value).replace('<', '&lt;').replace('>', '&gt;')
+                row = "<tr><td>{0}</td><td>{1}</td></tr>".format(key, v)
                 out.append(row)
         except AttributeError:
             out = [result]
 
-        out = "\n".join()
-        return """<html><body><table>{0}</table></body></html>""".format(out)
+        out = "\n".join(out)
+        return """<html><head>{1}</head><body>
+        <table>
+            <tr>
+                <th>Key</th>
+                <th>Value</th>
+            </tr>
+            {0}
+        </table>
+        </body></html>""".format(out, css)
 
     def text_plain(self, result):
         out = []

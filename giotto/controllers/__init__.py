@@ -70,7 +70,8 @@ class GiottoController(object):
         try:
             return self.program.model[1]
         except IndexError:
-            raise MockNotFound
+            # if no mock is defined, then use an empty dict as the data
+            return {}
 
     def _get_generic_response_data(self):
         """

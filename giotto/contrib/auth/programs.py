@@ -33,6 +33,6 @@ class LoginSubmit(GiottoProgram):
     name = 'login'
     controllers = ('http-post', )
     input_middleware = [AuthenticationMiddleware]
-    model = [is_authenticated, {'user', User('test', password='pass')}]
+    model = [is_authenticated('Login credentials incorrect'), {'user': User('test', password='pass')}]
     view = BasicView
     output_middleware = [SetAuthenticationCookie]
