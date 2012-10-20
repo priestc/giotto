@@ -25,6 +25,7 @@ Contents:
    middleware
    cache
    model_mocking
+   authentication
    deployment
 
 

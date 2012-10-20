@@ -9,7 +9,8 @@ First, install giotto::
     $ pip install giotto
 
 .. note::
-    Instead of the above command, you can get the latest version from github::
+    Giotto is very actively under development, The version on pypi is most definitely stale.
+    Instead of the above command, you can optionally install the latest version from github::
         
         $ pip install git+git://github.com/priestc/giotto.git
 

@@ -1,0 +1,187 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Authentication &mdash; Giotto 0.0.3pre documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.0.3pre',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Giotto 0.0.3pre documentation" href="index.html" />
+    <link rel="next" title="Deploying Giotto" href="deployment.html" />
+    <link rel="prev" title="Model Mocking" href="model_mocking.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="deployment.html" title="Deploying Giotto"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="model_mocking.html" title="Model Mocking"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Giotto 0.0.3pre documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="authentication">
+<span id="ref-authentication"></span><h1>Authentication<a class="headerlink" href="#authentication" title="Permalink to this headline">¶</a></h1>
+<p>There is an application within the contrib submodule called <tt class="docutils literal"><span class="pre">auth</span></tt> that handles authentication.
+This application uses <a class="reference external" href="http://www.sqlalchemy.org/">SQLAlchemy</a> to store user data.</p>
+<p>This <tt class="docutils literal"><span class="pre">User</span></tt> model stores two pieces of information: username and password.
+The password is stored as an encrypted string.
+Encrypting is done automatically by the <a class="reference external" href="http://www.mindrot.org/projects/py-bcrypt/">bcrypt</a> library.</p>
+<p>This user class is not intended to store all information that an application developer would want to store for a user.
+The developer is meant to create their own user profile table that connects to the User table via foreign key.</p>
+<div class="section" id="enabling-authentication-for-your-application">
+<h2>Enabling Authentication for your application<a class="headerlink" href="#enabling-authentication-for-your-application" title="Permalink to this headline">¶</a></h2>
+<p>All you need to do is import the login and registration programs into your application&#8217;s <tt class="docutils literal"><span class="pre">programs.py</span></tt> file:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">giotto.contrib.auth.programs</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">UserRegistrationSubmit</span><span class="p">,</span> <span class="n">UserRegistrationForm</span><span class="p">,</span> <span class="n">LoginForm</span><span class="p">,</span> <span class="n">LoginSubmit</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Then, to register a new account, point your browser to the <tt class="docutils literal"><span class="pre">register</span></tt> program.
+Enter your username and password and click submit. This will create a new user in the system.
+Usernames, by default have to conform to the following regex: <tt class="docutils literal"><span class="pre">^[\d\w]{4,30}$</span></tt>.
+This can be changed by adding a regex string to <tt class="docutils literal"><span class="pre">auth_regex</span></tt> in your project&#8217;s config file.</p>
+<p>To login, point your browser to the <tt class="docutils literal"><span class="pre">login</span></tt> program. Enter your credentials.
+If the username/password you entered match a row int he user table, you will be logged in.</p>
+</div>
+<div class="section" id="how-authentication-works-under-the-hood">
+<h2>How Authentication works under the hood<a class="headerlink" href="#how-authentication-works-under-the-hood" title="Permalink to this headline">¶</a></h2>
+<p>When using the HTTP controller, loggin in sets two cookies, <tt class="docutils literal"><span class="pre">username</span></tt> and <tt class="docutils literal"><span class="pre">password</span></tt>.
+The password cookie is not a raw password. It is the hashed cookie, hashed by bcrypt.</p>
+<p>To authenticate this username/password cookie,
+add the <tt class="docutils literal"><span class="pre">AuthenticationMiddleware</span></tt> to the input_middleware stream of your program.
+This middleware class will inspect the cookies, and add a <tt class="docutils literal"><span class="pre">user</span></tt> attribute to the request.
+Requests coming through this middleware that aren&#8217;t authenticated will result in a <tt class="docutils literal"><span class="pre">request.user</span></tt> value that is <tt class="docutils literal"><span class="pre">None</span></tt>.</p>
+<p>To access the authenticated user from within ght model, use the LOGGED_IN_USER primitive:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">giotto.primitives</span> <span class="kn">import</span> <span class="n">LOGGED_IN_USER</span>
+
+<span class="k">def</span> <span class="nf">some_model_function</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">LOGGED_IN_USER</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s">&#39;user&#39;</span><span class="p">:</span> <span class="n">user</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>If the program is accessed by a logged in uer,
+the value of <tt class="docutils literal"><span class="pre">LOGGED_IN_USER</span></tt> will be the User object that corresponds to the currently logged in user.
+If the program is accessed by a non-logged in user, <tt class="docutils literal"><span class="pre">LOGGED_IN_USER</span></tt> will be <tt class="docutils literal"><span class="pre">None</span></tt>.</p>
+<p>Another middleware class, <tt class="docutils literal"><span class="pre">SetAuthenticationCookie</span></tt> is put in the output middleware stream.
+It&#8217;s job is to set the cookies so each subsequent request can be authenticated.
+By default, the authentication cookie expires after 30 days.
+This value can be changed by setting the <tt class="docutils literal"><span class="pre">auth_cookie_expire</span></tt> value to the number of hours the cookie shoudl live for,
+in your projects <tt class="docutils literal"><span class="pre">config.py</span></tt>.</p>
+</div>
+<div class="section" id="extending-the-views-on-the-login-register-programs">
+<h2>Extending the views on the login/register programs<a class="headerlink" href="#extending-the-views-on-the-login-register-programs" title="Permalink to this headline">¶</a></h2>
+<p>To extend the way the default login looks, subclass the program with your own view defined:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">MyLogin</span><span class="p">(</span><span class="n">LoginForm</span><span class="p">):</span>
+    <span class="n">view</span> <span class="o">=</span> <span class="n">MyLoginView</span>
+
+<span class="k">class</span> <span class="nc">MyRegisterForm</span><span class="p">(</span><span class="n">UserRegistrationForm</span><span class="p">):</span>
+    <span class="n">view</span> <span class="o">=</span> <span class="n">MyRegisterView</span>
+</pre></div>
+</div>
+<p>or by defining the whole program yourself:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">LoginForm</span><span class="p">(</span><span class="n">GiottoProgram</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;login&#39;</span>
+    <span class="n">controllers</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;http-get&#39;</span><span class="p">,</span> <span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">view</span> <span class="o">=</span> <span class="n">MyRegisterView</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Authentication</a><ul>
+<li><a class="reference internal" href="#enabling-authentication-for-your-application">Enabling Authentication for your application</a></li>
+<li><a class="reference internal" href="#how-authentication-works-under-the-hood">How Authentication works under the hood</a></li>
+<li><a class="reference internal" href="#extending-the-views-on-the-login-register-programs">Extending the views on the login/register programs</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="model_mocking.html"
+                        title="previous chapter">Model Mocking</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="deployment.html"
+                        title="next chapter">Deploying Giotto</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/authentication.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="deployment.html" title="Deploying Giotto"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="model_mocking.html" title="Model Mocking"
+             >previous</a> |</li>
+        <li><a href="index.html">Giotto 0.0.3pre documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Chris Priest.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

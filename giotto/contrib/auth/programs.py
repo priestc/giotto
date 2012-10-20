@@ -7,13 +7,13 @@ from models import User
 from views import BasicRegisterForm
 from middleware import AuthenticationMiddleware, SetAuthenticationCookie
 
-class NewUserRegistration(GiottoProgram):
+class UserRegistrationSubmit(GiottoProgram):
     name = 'register'
     controllers = ('http-post', 'cmd')
     model = [User.new_user, User(username='test', password='pass')]
     view = BasicRegisterForm
 
-class NewUserRegistrationForm(GiottoProgram):
+class UserRegistrationForm(GiottoProgram):
     name = 'register'
     controllers = ('http-get', )
     model = []
