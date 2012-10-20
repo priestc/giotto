@@ -12,3 +12,6 @@ class NoViewMethod(Exception):
 
 class MockNotFound(Exception):
     pass
+
+class NotAuthorized(Exception):
+    pass

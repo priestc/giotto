@@ -1,4 +1,5 @@
 from .models import User
+from giotto.exceptions import NotAuthorized
 
 class AuthenticationMiddleware(object):
     def http(self, request):
@@ -25,6 +26,10 @@ class AuthenticationMiddleware(object):
 
 
 class SetAuthenticationCookie(object):
+    """
+    Place this middleware class in the output stream to set the cookies that
+    are used to authenticate each subsequent request.
+    """
     def http(self, request, response):
         if request.user:
             response.set_cookie('username', request.user.username)
@@ -36,3 +41,13 @@ class SetAuthenticationCookie(object):
             request.environment['giotto_username'] = request.username
             request.environment['giotto_password'] = request.password
         return response
+
+
+class MustBeLoggedIn(object):
+    """
+    Put this in the input middleware stream to fail any requests that aren't
+    made by authenticated users
+    """
+    def http(self, request):
+        if not request.user:
+            raise NotAuthorized('Must be Logged in for this program')
