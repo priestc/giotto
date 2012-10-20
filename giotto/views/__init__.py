@@ -57,6 +57,9 @@ class BasicView(GiottoView):
         return self.text_plain(result)
 
     def text_html(self, result):
+        """
+        Try to display any object in sensible HTML.
+        """
         css = """
         <style>
             table {border-collapse: collapse}
@@ -71,7 +74,11 @@ class BasicView(GiottoView):
             return "<html><body><table>None</table></body></html>"
         if not hasattr(result, 'iteritems'):
             header = "<tr><th>Value</th></tr>"
-            out = ["<tr><td>" + htmlize(result) + "</td></tr>"]
+            if type(result) is list:
+                result = htmlize_list(result)
+            else:
+                result = htmlize(result)
+            out = ["<tr><td>" + result + "</td></tr>"]
         else:
             # object is a dict
             header = "<tr><th>Key</th><th>Value</th></tr>"
@@ -98,6 +105,13 @@ class BasicView(GiottoView):
 
 def htmlize(value):
     return str(value).replace('<', '&lt;').replace('>', '&gt;')
+
+def htmlize_list(items):
+    out = ["<ul>"]
+    for item in items:
+        out.append("<li>" + htmlize(item) + "</li>")
+    out.append("</ul>")
+    return "\n".join(out)
 
 class GiottoTemplateView(BasicView):
     """
