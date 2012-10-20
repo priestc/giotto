@@ -71,7 +71,7 @@ class BasicView(GiottoView):
         """
         h1 = htmlize(type(result))
         if result is None:
-            return "<html><body><table>None</table></body></html>"
+            return "<!DOCTYPE html><html><body><table>None</table></body></html>"
         if not hasattr(result, 'iteritems'):
             header = "<tr><th>Value</th></tr>"
             if type(result) is list:
@@ -88,7 +88,7 @@ class BasicView(GiottoView):
                 out.append(row)
 
         out = "\n".join(out)
-        return """<html><head>{1}</head><body><h1>{3}</h1>
+        return """<!DOCTYPE html><html><head>{1}</head><body><h1>{3}</h1>
         <table>
             {2}
             {0}
