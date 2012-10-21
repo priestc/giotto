@@ -64,7 +64,7 @@ try:
     open('config.py', 'r')
 except IOError:
     # create a blank config file (if one doesn't already exist)
-    f = open('congif.py', 'w')
+    f = open('config.py', 'w')
     f.write(config_template)
 
 if args.http:
