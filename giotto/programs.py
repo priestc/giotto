@@ -1,5 +1,6 @@
 from giotto.views import BasicView
 from giotto.models import make_tables
+from giotto.primitives import ALL_PROGRAMS
 
 class GiottoProgram(object):
     name = None
@@ -25,4 +26,17 @@ class MakeTables(GiottoProgram):
     name = "make_tables"
     controllers = ('cmd', )
     model = [make_tables]
+    view = BasicView
+
+def show_programs(programs=ALL_PROGRAMS):
+    return programs
+
+class ShowAllPrograms(GiottoProgram):
+    """
+    Display a list of all instaled programs for all controllers for the
+    currently invoked application.
+    """
+    name = "show_programs"
+    controllers = ('http-get', 'cmd', 'irc')
+    model = [show_programs]
     view = BasicView

@@ -88,6 +88,8 @@ class HTTPController(GiottoController):
             return self.get_data()
         if primitive == 'LOGGED_IN_USER':
             return self.request.user
+        if primitive == 'ALL_PROGRAMS':
+            return self.programs
 
 def make_app(programs, model_mock=False, cache=None):
     

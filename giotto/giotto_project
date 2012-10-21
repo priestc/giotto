@@ -25,9 +25,11 @@ Base = declarative_base()
 from sqlite3 import dbapi2 as sqlite
 engine = create_engine('sqlite+pysqlite:///file.db', module=sqlite)
 
-Session = sessionmaker(bind=engine)
-session = Session()
-cache = None'''
+session = sessionmaker(bind=engine)()
+cache = None
+
+from jinja2 import Environment, FileSystemLoader
+jinja2_env = Environment(loader=FileSystemLoader(project_path))'''
 
 template_controller = '''\
 #!/usr/bin/env python

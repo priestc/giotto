@@ -1,23 +1,17 @@
-demo_application = '''from giotto import GiottoProgram
-from giotto.views import GiottoTemplateView
+demo_application = '''from giotto.programs import GiottoProgram
+from giotto.views import BasicView
 
-class ColoredMultiplyView(GiottoTemplateView):
-    def text_plain(self, result):
-        return "{{ obj.x }} * {{ obj.y }} == {{ obj.product }}"
-
-    def application_json(self, result):
-        import json
-        return json.dumps(result)
+class ColoredMultiplyView(BasicView):
 
     def text_html(self, result):
         return """<!DOCTYPE html>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
         <html>
             <body>
-                <span style="color: blue">{{ obj.x }} * {{ obj.y }}</span> == 
-                <span style="color: red">{{ obj.product }}</span>
+                <span style="color: blue">%(x)s * %(y)s</span> == 
+                <span style="color: red">%(product)s</span>
             </body>
-        </html>"""
+        </html>""" % result
 
     def text_cmd(self, result):
         from colorama import init, Fore
