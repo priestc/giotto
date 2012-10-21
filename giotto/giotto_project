@@ -74,7 +74,7 @@ if args.http:
     os.chmod(filename, st.st_mode | stat.S_IEXEC)
 
 if args.irc:
-    from giotto.controllers.irc import irc_execution_snippet
+    from giotto.controllers.irc_ import irc_execution_snippet
     filename = 'giotto-irc'
     f = open(filename, 'w')
     f.write(template_controller + irc_execution_snippet)

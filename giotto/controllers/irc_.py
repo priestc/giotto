@@ -3,9 +3,15 @@ import socket
 import string 
 import os
 
+try:
+  import irc.bot
+except:
+  print "Requires irc; pip install irc"
+
 from giotto.controllers import GiottoController
 from giotto.exceptions import ProgramNotFound
 from giotto.utils import parse_kwargs
+
 
 irc_execution_snippet = """
 parser = argparse.ArgumentParser(description='Giotto Project Creator')
@@ -19,7 +25,7 @@ config = {
     'ident': 'giotto',
     'realname': 'Giotto',
     'owner': '',
-    'channel_list': '#botwar',
+    'channel': '#botwar',
     'magic_token': '!giotto ',
 }
 from giotto.controllers.irc import listen
@@ -90,13 +96,13 @@ class IRCRequest(object):
     # the ident of the user who made the request
     ident = ''
 
-    def __init__(self, line, magic_token, nick):
-        self.ident = line[0][1:]
+    def __init__(self, event, magic_token, nick):
+        self.ident = event.source()
         self.username = self.ident.split("!")[0]
-        self.msg_type = line[1]
-        self.sent_to = line[2]
-        self.private_message = not self.sent_to.startswith('#')
-        self.raw_message = " ".join(line[3:])[1:]
+        self.msg_type = event.eventtype()
+        self.sent_to = event.target()
+        self.private_message = self.msg_type == "privmsg"
+        self.raw_message = event.arguments()[0]
         self.program, self.args = self.get_program_and_args(self.raw_message, magic_token)
         #print self.__repr__()
 
@@ -125,65 +131,52 @@ class IRCRequest(object):
     def __repr__(self):
         return "program: %s, args: %s" % (self.program, self.args)
 
+class IrcBot(irc.bot.SingleServerIRCBot):
+  def __init__(self, config):
+    irc.bot.SingleServerIRCBot.__init__(
+        self, 
+        [(config['host'],config['port'])], 
+        config['nick'], 
+        config['nick'])
+    self.channel = config['channel']
+    self.config = config
+  
+  def on_nicknameinuse(self, c, e):
+    c.nick(c.get_nickname() + "_")
+
+  def on_welcome(self, c, e):
+    c.join(self.channel)
+
+  def on_privmsg(self, c, e):
+    self.process_message(c, e)
+
+  def on_pubmsg(self, c, e):
+    self.process_message(c, e)
+ 
+  def process_message(self, c, e):
+    request = IRCRequest(e,self.config['magic_token'],c.get_nickname())
+
+    try:
+      controller = IRCController(request, self.config['programs'], self.config['model_mock'])
+      result = controller.get_concrete_response()
+    except ProgramNotFound:
+      print "No program found: %s -- %s" % (request.program, request.args)
+    #except Exception as exc:
+    #  cls = exc.__class__.__name__
+    #  c.privmsg(request.sent_to, "\x04%s - %s: %s" % (request.program, cls, exc))
+    else:
+      msg = "%s: %s" % (request.username, result['response'])
+      if request.private_message:
+        c.privmsg(request.username, msg)
+      else:
+        c.privmsg(request.sent_to, msg)
+
+
 def listen(programs, config, model_mock=False, cache=None):
     """
     IRC listening process.
     """
-    #open a socket to handle the connection
-    IRC = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    #simple function to send data through the socket
-    def send_data(command):
-        print "->", command
-        IRC.send(command + '\n')
-
-    def say(target, message):
-        send_data("PRIVMSG %s :%s\r" % (target, message))
-
-    # connect to server
-    IRC.connect((config['host'], config['port']))
-
-    # login to server
-    send_data("USER %s %s %s :%s" % (config['ident'], 'hostname', '*', config['realname']))
-    send_data("NICK %s" % config['nick'])
-
-    # join channels
-    send_data("JOIN %s" % config['channel_list'])
-
-    while True:
-        buff = IRC.recv(1024)
-        msg = string.split(buff)
-        if msg[0] == "PING":
-            #answer with pong as per RFC 1459
-            send_data("PONG %s" % msg[1])
-            continue
-
-        request = IRCRequest(msg, config['magic_token'], config['nick'])
-        if not request.looks_legit:
-            continue
-
-        print "@@@ LEGIT @@@", request
-
-        try:
-            controller = IRCController(request, programs, model_mock, cache)
-            result = controller.get_concrete_response()
-        except ProgramNotFound:
-            print "No program found: %s -- %s" % (request.program, request.args)
-        except Exception as exc:
-            cls = exc.__class__.__name__
-            say(request.sent_to, "04%s - %s: %s" % (request.program, cls, exc))
-        else:
-            msg = "%s: %s" % (request.username, result['response'])
-            if request.private_message:
-                say(request.username, msg)
-            else:
-                say(request.sent_to, msg)
-
-
-
-
-
-
-
-
-
+    config['programs'] = programs
+    config['model_mock'] = model_mock
+    IRC = IrcBot(config)
+    IRC.start()
