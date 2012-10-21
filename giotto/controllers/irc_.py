@@ -19,16 +19,16 @@ parser.add_argument('--mock', action='store_true', help='Mock out the model')
 args = parser.parse_args()
 
 config = {
-    'host': 'chat.freenode.org',
+    'host': 'irc.synirc.net',
     'port': 6667,
-    'nick': 'giotto-bot',
+    'nick': 'test-bot',
     'ident': 'giotto',
     'realname': 'Giotto',
     'owner': '',
-    'channel': '#botwar',
+    'channel': '#atestthing',
     'magic_token': '!giotto ',
 }
-from giotto.controllers.irc import listen
+from giotto.controllers.irc_ import listen
 listen(programs, config, model_mock=args.mock)"""
 
 class IRCController(GiottoController):
