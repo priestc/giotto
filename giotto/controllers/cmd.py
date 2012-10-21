@@ -1,6 +1,6 @@
 import os
 
-from giotto.core import parse_kwargs
+from giotto.utils import parse_kwargs
 from giotto.controllers import GiottoController
 
 cmd_execution_snippet = """

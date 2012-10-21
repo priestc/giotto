@@ -1,4 +1,4 @@
-demo_application = '''from giotto import GiottoProgram
+demo_application = '''from giotto.programs import GiottoProgram
 from giotto.views import GiottoTemplateView
 
 class ColoredMultiplyView(GiottoTemplateView):
