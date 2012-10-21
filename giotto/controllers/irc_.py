@@ -108,12 +108,17 @@ class IRCRequest(object):
         #print self.__repr__()
 
     def get_program_and_args(self, message, magic_token):
-        # channel invocation
+      if self.private_message == True:
+        program = message.split()[0]
+        args = message.split()[1:]
+      else:
+        # channel invocationa
         l = len(magic_token)
         parsed_message = message[l:]
         args = parsed_message.split()[1:]
         program = parsed_message.split()[0]
-        return program, args
+      
+      return program, args
 
     @property
     def looks_legit(self):
@@ -142,10 +147,10 @@ class IrcBot(irc.bot.SingleServerIRCBot):
     self.process_message(c, e)
 
   def on_pubmsg(self, c, e):
+    if e.arguments()[0].startswith(self.config['magic_token']) == False: return
     self.process_message(c, e)
  
   def process_message(self, c, e):
-    if e.arguments()[0].startswith(self.config['magic_token']) == False: return
 
     request = IRCRequest(e,self.config['magic_token'],c.get_nickname())
     if request.looks_legit == False: return
