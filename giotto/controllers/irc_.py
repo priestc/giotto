@@ -2,6 +2,7 @@ import sys
 import socket 
 import string 
 import os
+import traceback
 
 try:
   import irc.bot
@@ -103,30 +104,20 @@ class IRCRequest(object):
         self.sent_to = event.target()
         self.private_message = self.msg_type == "privmsg"
         self.raw_message = event.arguments()[0]
-        self.program, self.args = self.get_program_and_args(self.raw_message, magic_token)
+        self.program, self.args = self.get_program_and_args(self.raw_message,magic_token)
         #print self.__repr__()
 
     def get_program_and_args(self, message, magic_token):
-        if message.startswith(magic_token):
-            # channel invocation
-            l = len(magic_token)
-            parsed_message = message[l:]
-            args = parsed_message.split()[1:]
-            program = parsed_message.split()[0]
-            return program, args
-        if self.private_message:
-            # private message invocation
-            items = message.split()
-            if len(items) < 2:
-                return items[0], ""
-            return items[0], items[1:]
-        else:
-            # some other invocation that is not valid
-            return None, None
+        # channel invocation
+        l = len(magic_token)
+        parsed_message = message[l:]
+        args = parsed_message.split()[1:]
+        program = parsed_message.split()[0]
+        return program, args
 
     @property
     def looks_legit(self):
-        return '@' in self.ident and self.msg_type.lower() == 'privmsg'
+        return '@' in self.ident
 
     def __repr__(self):
         return "program: %s, args: %s" % (self.program, self.args)
@@ -137,7 +128,7 @@ class IrcBot(irc.bot.SingleServerIRCBot):
         self, 
         [(config['host'],config['port'])], 
         config['nick'], 
-        config['nick'])
+        config['realname'])
     self.channel = config['channel']
     self.config = config
   
@@ -154,16 +145,20 @@ class IrcBot(irc.bot.SingleServerIRCBot):
     self.process_message(c, e)
  
   def process_message(self, c, e):
-    request = IRCRequest(e,self.config['magic_token'],c.get_nickname())
+    if e.arguments()[0].startswith(self.config['magic_token']) == False: return
 
+    request = IRCRequest(e,self.config['magic_token'],c.get_nickname())
+    if request.looks_legit == False: return
+    
     try:
       controller = IRCController(request, self.config['programs'], self.config['model_mock'])
       result = controller.get_concrete_response()
     except ProgramNotFound:
       print "No program found: %s -- %s" % (request.program, request.args)
-    #except Exception as exc:
-    #  cls = exc.__class__.__name__
-    #  c.privmsg(request.sent_to, "\x04%s - %s: %s" % (request.program, cls, exc))
+    except Exception as exc:
+      cls = exc.__class__.__name__
+      c.privmsg(request.sent_to, "\x0304%s - %s: %s" % (request.program, cls, exc))
+      traceback.print_exc(file=sys.stdout)
     else:
       msg = "%s: %s" % (request.username, result['response'])
       if request.private_message:
