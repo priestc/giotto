@@ -5,7 +5,7 @@ import os
 
 from giotto.controllers import GiottoController
 from giotto.exceptions import ProgramNotFound
-from giotto.core import parse_kwargs
+from giotto.utils import parse_kwargs
 
 irc_execution_snippet = """
 parser = argparse.ArgumentParser(description='Giotto Project Creator')
