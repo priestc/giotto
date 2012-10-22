@@ -3,7 +3,9 @@ import mimetypes
 
 import magic
 from jinja2 import Template
+from jinja2.exceptions import TemplateNotFound
 from giotto.exceptions import NoViewMethod
+from giotto.utils import get_config
 
 class GiottoView(object):
     """
@@ -40,6 +42,22 @@ class GiottoView(object):
             data.seek(0)
 
         return {'body': data, 'mimetype': mimetype, 'status': status}
+
+def htmlize(value):
+    """
+    Turn any object into a html viewable entity.
+    """
+    return str(value).replace('<', '&lt;').replace('>', '&gt;')
+
+def htmlize_list(items):
+    """
+    Turn a python list into an html list.
+    """
+    out = ["<ul>"]
+    for item in items:
+        out.append("<li>" + htmlize(item) + "</li>")
+    out.append("</ul>")
+    return "\n".join(out)
 
 class BasicView(GiottoView):
     """
@@ -103,28 +121,25 @@ class BasicView(GiottoView):
 
         return "\n".join(out)
 
-def htmlize(value):
-    return str(value).replace('<', '&lt;').replace('>', '&gt;')
-
-def htmlize_list(items):
-    out = ["<ul>"]
-    for item in items:
-        out.append("<li>" + htmlize(item) + "</li>")
-    out.append("</ul>")
-    return "\n".join(out)
-
-class GiottoTemplateView(BasicView):
+class JinjaTemplateView(BasicView):
     """
     A view renderer where each mimetype renderer returns a jinja template that
     will get rendered automatically. The context_name attribute denotes the
-    name of the model object in the template.
+    name of the model object in the template. Each mimetype method should return
+    a string that locates a jinja2 template. Required is to define a jinja2 environment
+    (``jinja2_env``) in your project's ``config.py`` file.
     """
     context_name = 'obj'
     def render(self, mimetype):
-        result = super(GiottoTemplateView, self).render(mimetype)
+        jinja2_env = get_config('jinja2_env')
+        result = super(JinjaTemplateView, self).render(mimetype)
         template = result['body']
         if hasattr(template, 'lower'):
-            jinja_template = Template(template)
+            try:
+                jinja_template = jinja2_env.get_template(template)
+            except TemplateNotFound:
+                jinja_template = Template(template)
+
             rendered = jinja_template.render(obj=self.result)
             result['body'] = rendered
             return result

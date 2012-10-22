@@ -5,7 +5,7 @@ from giotto.models import is_authenticated
 
 from models import User
 from views import BasicRegisterForm
-from middleware import AuthenticationMiddleware, SetAuthenticationCookie
+from middleware import AuthenticationMiddleware, SetAuthenticationCookie, LogoutMiddleware
 
 class UserRegistrationSubmit(GiottoProgram):
     name = 'register'
