@@ -88,14 +88,19 @@ class BasicView(GiottoView):
         </style>
         """
         h1 = htmlize(type(result))
+
         if result is None:
-            return "<!DOCTYPE html><html><body><table>None</table></body></html>"
+            return "<!DOCTYPE html><html><body>None</body></html>"
+
+        out = []
         if not hasattr(result, 'iteritems'):
             header = "<tr><th>Value</th></tr>"
             if type(result) is list:
                 result = htmlize_list(result)
             else:
                 result = htmlize(result)
+            out = ["<tr><td>" + result + "</td></tr>"]
+        elif hasattr(result, 'lower'):
             out = ["<tr><td>" + result + "</td></tr>"]
         else:
             # object is a dict
@@ -106,12 +111,17 @@ class BasicView(GiottoView):
                 out.append(row)
 
         out = "\n".join(out)
-        return """<!DOCTYPE html><html><head>{1}</head><body><h1>{3}</h1>
-        <table>
-            {2}
-            {0}
-        </table>
-        </body></html>""".format(out, css, header, h1)
+        return """<!DOCTYPE html>
+        <html>
+            <head>{0}</head>
+            <body>
+                <h1>{1}</h1>
+                <table>
+                    {2}
+                    {3}
+                </table>
+            </body>
+        </html>""".format(css, h1, header, out)
 
     def text_plain(self, result):
         out = []
