@@ -130,6 +130,7 @@ class GiottoController(object):
         output = {}
         for i, arg in enumerate(args):
             if i < len(self.path_args):
+                # use path args instead (if they have been supplied)
                 pa = self.path_args[i]
             else:
                 pa = None
@@ -160,23 +161,11 @@ class GiottoController(object):
                 response = to_execute(self.request, response)
         return response
 
-    def show_program_names(self):
-        """
-        Print out a list of all program names for debugging purposes
-        """
-        out = []
-        for p in self.programs:
-            disp = "%s - %s" % (p.name, p.controllers)
-            out.append(disp)
-        return "\n".join(out)
-
     def render_view(self, view_data):
         """
         Render the view with data from the model and/or controller.
         """
         ViewClass = self.program.view
         view = ViewClass(view_data, self)
-
         response = view.render(self.get_mimetype())
-
         return response
