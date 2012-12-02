@@ -6,9 +6,11 @@ class FileView(GiottoView):
     def text_html(self, result):
         return result
 
+    def text_cmd(self, result):
+        return result.read()
+
 def StaticServe(base_path):
     def get_file(path):
-        base_path = get_config('base_path', '')
         f = open(base_path + path, 'r')
         return f
 
