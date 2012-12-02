@@ -34,7 +34,7 @@ class GiottoController(object):
         self.manifest = manifest
 
         # the program that corresponds to this invocation
-        self.program, args = self.manifest.get_program(self.get_program_name())
+        self.program, self.path_args = self.manifest.get_program(self.get_program_name())
 
     def __repr__(self):
         controller = self.get_controller_name()
@@ -128,8 +128,12 @@ class GiottoController(object):
             return {}
         args, kwargs = do_argspec(source)
         output = {}
-        for arg in args:
-            target = raw_data.get(arg, None)
+        for i, arg in enumerate(args):
+            if i < len(self.path_args):
+                pa = self.path_args[i]
+            else:
+                pa = None
+            target = pa or raw_data.get(arg, None)
             output[arg] = target
 
         for key, value in kwargs.iteritems():

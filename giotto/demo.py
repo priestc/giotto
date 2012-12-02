@@ -48,5 +48,5 @@ class Multiply(GiottoProgram):
 
 
 manifest = ProgramManifest({
-    'multiply': Multiply
+    'multiply': Multiply()
 })'''
