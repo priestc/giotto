@@ -117,7 +117,7 @@ class IRCRequest(object):
             args = parsed_message.split()[1:]
             program = parsed_message.split()[0]
       
-      return program, args
+        return program, args
 
     def __repr__(self):
         return "program: %s, args: %s" % (self.program, self.args)
