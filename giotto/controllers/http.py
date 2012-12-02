@@ -9,7 +9,7 @@ http_execution_snippet = """
 mock = '--model-mock' in sys.argv
 from werkzeug.serving import run_simple
 from giotto.controllers.http import make_app
-application = make_app(programs, model_mock=mock)
+application = make_app(manifest, model_mock=mock)
 if '--run' in sys.argv:
     run_simple('127.0.0.1', 5000, application, use_debugger=True, use_reloader=True)"""
 
@@ -73,12 +73,20 @@ class HTTPController(GiottoController):
                 'body': 'Unsupported Media Type: %s' % self.get_mimetype()
             }
         
-        # convert to a format appropriate to the wsgi Response api.
-        response = Response(
-            status=code,
-            response=result['body'],
-            mimetype=result['mimetype'],
-        )
+        if hasattr(result, 'close'):
+            mime = magic
+            response = Response(
+                status=code
+                response=result,
+                mimetype=mime
+            )
+        else:
+            # convert to a format appropriate to the wsgi Response api.
+            response = Response(
+                status=code,
+                response=result['body'],
+                mimetype=result['mimetype'],
+            )
 
         # now do middleware
         return self.execute_output_middleware_stream(response) 

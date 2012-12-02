@@ -6,6 +6,11 @@ from giotto.exceptions import InvalidInput, ProgramNotFound, MockNotFound
 from giotto.primitives import GiottoPrimitive
 
 def do_argspec(source):
+    """
+    Inspect the model (or view in the case of no model) and return the args
+    and kwargs. This functin is necessary because argspec returns in a silly format
+    by default.
+    """
     if hasattr(source, 'render'):
         # if 'source' is a view object, try to get the render method,
         # otherwise, just use the __call__ method.
@@ -19,19 +24,17 @@ def do_argspec(source):
     return args, kwargs
 
 class GiottoController(object):
-    def __init__(self, request, programs, model_mock=False):
+    def __init__(self, request, manifest, model_mock=False):
         from giotto import config
         self.request = request
         self.model_mock = model_mock
         self.cache = config.cache
 
         # all programs available to this controller
-        self.programs = programs
+        self.manifest = manifest
 
         # the program that corresponds to this invocation
-        self.program = self._get_program()
-
-        self.execute_input_middleware_stream()
+        self.program, args = self.manifest.get_program(self.get_program_name())
 
     def __repr__(self):
         controller = self.get_controller_name()
@@ -39,21 +42,6 @@ class GiottoController(object):
         data = self.get_data()
         return "<%s %s - %s - %s>" % (
             self.__class__.__name__, controller, model, data
-        )
-
-    def _get_program(self):
-        """
-        Search through all installed programs and return the one that matches
-        this request.
-        """
-        for p in self.programs:
-            controller = self.get_controller_name()
-            name = self.get_program_name()
-            if p.is_match(controller, name):
-                return p
-
-        raise ProgramNotFound("Can't find program for: %s in: %s" % (
-            self.__repr__(), self.show_program_names())
         )
 
     def get_cache_key(self):
@@ -64,7 +52,7 @@ class GiottoController(object):
             # controller contains info that can't be json serialized:
             controller_args = str(data)
 
-        program = self._get_program().name
+        program = self.program.name
         mimetype = self.get_mimetype()
         return "%s(%s)(%s)" % (controller_args, program, mimetype)
 
@@ -80,6 +68,8 @@ class GiottoController(object):
         Return the data to create a response object appropriate for the
         controller. This function is called by get_concrete_response_data.
         """
+        self.execute_input_middleware_stream()
+
         cache_key = self.get_cache_key()
         raw_data = self.get_data()
         model = self.get_model()

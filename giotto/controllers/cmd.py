@@ -11,7 +11,7 @@ if mock:
     args.pop(args.index('--model-mock'))
 from giotto.controllers.cmd import CMDController, CMDRequest
 request = CMDRequest(sys.argv)
-controller = CMDController(request=request, programs=programs, model_mock=mock)
+controller = CMDController(request=request, manifest=manifest, model_mock=mock)
 controller.get_concrete_response()"""
 
 class CMDRequest(object):

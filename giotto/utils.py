@@ -86,7 +86,7 @@ def get_config(obj, alternative=None):
     Function for getting stuff from the config. Use this instead of importing
     gitto.config directly because the later will produce an import error.
     """
-    if alternative:
+    if alternative is not None:
         return getattr(giotto.config, obj, alternative)
     else:
         return getattr(giotto.config, obj)

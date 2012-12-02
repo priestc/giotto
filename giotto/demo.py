@@ -41,8 +41,12 @@ def multiply(x, y):
 
 
 class Multiply(GiottoProgram):
-    name = "multiply"
     controllers = ('http-get', 'cmd', 'irc')
     model = [multiply, {'x': 3, 'y': 3, 'product': 9}]
     cache = None
-    view = ColoredMultiplyView'''
+    view = ColoredMultiplyView
+
+
+manifest = ProgramManifest({
+    'multiply': Multiply
+})'''
