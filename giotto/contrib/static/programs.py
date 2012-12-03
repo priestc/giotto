@@ -18,7 +18,7 @@ def StaticServe(base_path):
     class StaticServeInternal(GiottoProgram):
         name = 'static'
         controllers = ('http-get', )
-        model = [get_file, StringIO("Test file content")]
+        model = [get_file, StringIO("Mock file content")]
         view = FileView
 
     return StaticServeInternal

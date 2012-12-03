@@ -37,24 +37,23 @@ template_controller = '''\
 
 import argparse
 import sys
-from giotto.utils import itersubclasses, initialize_giotto
+from giotto.utils import initialize_giotto
 
 import config
 initialize_giotto(config)
 
-from programs import *
-programs = list(itersubclasses(GiottoProgram))
+from manifest import manifest
 '''
 
-blank_application = '''from giotto.programs import GiottoProgram
+blank_application = '''from giotto.programs import GiottoProgram, ProgramManifest
 
 # define programs here'''
 
 try:
-    open('programs.py', 'r')
+    open('manifest.py', 'r')
 except IOError:
     # create a blank programs file (if one doesn't already exist)
-    f = open('programs.py', 'w')
+    f = open('manifest.py', 'w')
     if args.demo:
         f.write(demo_application)
     else:

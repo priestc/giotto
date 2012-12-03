@@ -76,7 +76,7 @@ class HTTPController(GiottoController):
         if hasattr(result, 'close'):
             mime = magic
             response = Response(
-                status=code
+                status=code,
                 response=result,
                 mimetype=mime
             )
