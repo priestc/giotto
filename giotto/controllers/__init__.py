@@ -34,7 +34,12 @@ class GiottoController(object):
         self.manifest = manifest
 
         # the program that corresponds to this invocation
-        self.program, self.path_args = self.manifest.get_program(self.get_program_name())
+        invocation = self.get_invocation()
+        parsed = self.manifest.parse_invocation(invocation)
+
+        self.program = parsed['program']
+        self.path_args = parsed['args']
+        self.mimetype = parsed['superformat_mime'] or self.mimetype_override() or self.default_mimetype
 
     def __repr__(self):
         controller = self.get_controller_name()
@@ -43,6 +48,13 @@ class GiottoController(object):
         return "<%s %s - %s - %s>" % (
             self.__class__.__name__, controller, model, data
         )
+
+    def mimetype_override(self):
+        """
+        In some circumstances, the returned mimetype can be changed. Return that here.
+        Otherwise the default or superformat will be used.
+        """
+        return None
 
     def get_cache_key(self):
         data = self.get_model_args(self.get_model(), self.get_data())
@@ -53,8 +65,7 @@ class GiottoController(object):
             controller_args = str(data)
 
         program = self.program.name
-        mimetype = self.get_mimetype()
-        return "%s(%s)(%s)" % (controller_args, program, mimetype)
+        return "%s(%s)(%s)" % (controller_args, program, self.mimetype)
 
     def get_model_mock(self):
         try:
@@ -99,17 +110,6 @@ class GiottoController(object):
             self.cache.set(cache_key, rendered, self.program.cache)
 
         return rendered
-
-    def get_super_accept(self):
-        """
-        'Super accept' is an accept header that supercedes the default and/or
-        controller specefic mimetype This is needed because web browsers suck
-        and don't use the accept headers correctly.
-        """
-        return None
-
-    def get_mimetype(self):
-        return self.get_super_accept() or self.default_mimetype
 
     def get_model(self):
         if self.program.model:
@@ -167,5 +167,5 @@ class GiottoController(object):
         """
         ViewClass = self.program.view
         view = ViewClass(view_data, self)
-        response = view.render(self.get_mimetype())
+        response = view.render(self.mimetype)
         return response

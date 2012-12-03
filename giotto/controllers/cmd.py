@@ -29,13 +29,8 @@ class CMDController(GiottoController):
     name = 'cmd'
     default_mimetype = 'text/cmd'
 
-    def get_program_name(self):
-        prog = self.request.argv[1]
-        if prog.startswith('--'):
-            # if the first argument is a commandline-style keyword argument,
-            # then the program name is blank. (root program)
-            prog = ''
-        return prog
+    def get_invocation(self):
+        return self.request.argv[1]
 
     def get_controller_name(self):
         return 'cmd'

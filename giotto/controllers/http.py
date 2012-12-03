@@ -2,7 +2,6 @@ import urllib
 
 from giotto.controllers import GiottoController
 from werkzeug.wrappers import Request, Response
-from giotto.utils import super_accept_to_mimetype
 from giotto.exceptions import NoViewMethod
 
 http_execution_snippet = """
@@ -27,29 +26,20 @@ class HTTPController(GiottoController):
             params = '?' + urllib.urlencode(data)
         return "%s%s%s" % (program, ext, params)
 
-    def get_mimetype(self):
-        sa = self.get_super_accept()
-        if sa:
-            return sa
+    def mimetype_override(self):
         accept = self.request.headers['Accept']
         has_json_in_view = hasattr(self.program.view, 'application_json')
         if accept == '*/*' and self.request.is_xhr and has_json_in_view:
             # return json on ajax calls if no accept headers are present.
-            # only if the view has implemented a application/json method
+            # and only if the view has implemented a application/json method
             return "application/json"
 
         if accept != '*/*' and not accept.startswith('text/html'):
             return accept
-        return self.default_mimetype
+        return None
 
-    def get_program_name(self):
-        splitted = self.request.path[1:].split('.')
-        return splitted[0]
-
-    def get_super_accept(self):
-        splitted = self.request.path[1:].split('.')
-        if len(splitted) > 1:
-            return super_accept_to_mimetype(splitted[1])
+    def get_invocation(self):
+        return self.request.path
 
     def get_controller_name(self):
         return 'http-%s' % self.request.method.lower()
@@ -70,7 +60,7 @@ class HTTPController(GiottoController):
             code = 415
             result = {
                 'mimetype': 'text/plain',
-                'body': 'Unsupported Media Type: %s' % self.get_mimetype()
+                'body': 'Unsupported Media Type: %s' % self.mimetype
             }
         
         if hasattr(result, 'close'):

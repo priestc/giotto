@@ -15,6 +15,9 @@ class ExampleProgram3(GiottoProgram):
 class ExampleProgram4(GiottoProgram):
     pass
 
+class RootProgram(GiottoProgram):
+    pass
+
 class ManifestTest(unittest.TestCase):
 
     manifest = ProgramManifest({
@@ -24,6 +27,7 @@ class ManifestTest(unittest.TestCase):
             'path2': {
                 'prog3': ExampleProgram3(),
                 'path3': {
+                    '': RootProgram(),
                     'prog4': ExampleProgram4()
                 },
             },
@@ -31,43 +35,50 @@ class ManifestTest(unittest.TestCase):
     })
 
     def test_simple_program(self):
-        program, args = self.manifest.get_program('prog1')
-        self.assertIsInstance(program, ExampleProgram1)
-        self.assertEquals(args, [])
-        self.assertEquals(program.name, 'prog1')
-        self.assertEquals(program.path, 'prog1')
+        parsed = self.manifest.parse_invocation('prog1.xml')
+        self.assertIsInstance(parsed['program'], ExampleProgram1)
+        self.assertEquals(parsed['args'], [])
+        self.assertEquals(parsed['name'], 'prog1')
+        self.assertEquals(parsed['superformat'], 'xml')
 
     def test_args(self):
-        program, args = self.manifest.get_program('prog1/arg1/arg2')
-        self.assertIsInstance(program, ExampleProgram1)
-        self.assertEquals(args, ['arg1', 'arg2'])
-        self.assertEquals(program.name, 'prog1')
-        self.assertEquals(program.path, 'prog1')
+        parsed = self.manifest.parse_invocation('prog1.json/arg1/arg2')
+        self.assertIsInstance(parsed['program'], ExampleProgram1)
+        self.assertEquals(parsed['args'], ['arg1', 'arg2'])
+        self.assertEquals(parsed['name'], 'prog1')
+        self.assertEquals(parsed['superformat'], 'json')
 
     def test_path_and_arg(self):
-        program, args = self.manifest.get_program('path1/prog2/arg1')
-        self.assertIsInstance(program, ExampleProgram2)
-        self.assertEquals(args, ['arg1'])
-        self.assertEquals(program.name, 'prog2')
-        self.assertEquals(program.path, 'path1/prog2')
+        parsed = self.manifest.parse_invocation('path1/prog2.html/arg1')
+        self.assertIsInstance(parsed['program'], ExampleProgram2)
+        self.assertEquals(parsed['args'], ['arg1'])
+        self.assertEquals(parsed['name'], 'prog2')
+        self.assertEquals(parsed['superformat'], 'html')
 
     def test_long_path(self):
-        program, args = self.manifest.get_program('path1/path2/path3/prog4/arg1/arg2')
-        self.assertIsInstance(program, ExampleProgram4)
-        self.assertEquals(args, ['arg1', 'arg2'])
-        self.assertEquals(program.name, 'prog4')
-        self.assertEquals(program.path, 'path1/path2/path3/prog4')
+        parsed = self.manifest.parse_invocation('path1/path2/path3/prog4/arg1/arg2')
+        self.assertIsInstance(parsed['program'], ExampleProgram4)
+        self.assertEquals(parsed['args'], ['arg1', 'arg2'])
+        self.assertEquals(parsed['name'], 'prog4')
+        self.assertEquals(parsed['superformat'], None)
+
+    def test_root(self):
+        parsed = self.manifest.parse_invocation('path1/path2/path3/arg1/arg2')
+        self.assertIsInstance(parsed['program'], RootProgram)
+        self.assertEquals(parsed['args'], ['arg1', 'arg2'])
+        self.assertEquals(parsed['name'], '')
+        self.assertEquals(parsed['superformat'], None)
 
     def test_trailing_slash(self):
-        program, args = self.manifest.get_program('prog1/')
-        self.assertIsInstance(program, ExampleProgram1)
-        self.assertEquals(args, [])
+        parsed = self.manifest.parse_invocation('prog1/')
+        self.assertIsInstance(parsed['program'], ExampleProgram1)
+        self.assertEquals(parsed['args'], [])
 
     def test_not_found(self):
-        self.assertRaises(ProgramNotFound, lambda: self.manifest.get_program('path1/path2/fakearg'))
+        self.assertRaises(ProgramNotFound, lambda: self.manifest.parse_invocation('path1/path2/fakearg'))
 
     def test_no_program(self):
-        self.assertRaises(ProgramNotFound, lambda: self.manifest.get_program('path1/path2'))
+        self.assertRaises(ProgramNotFound, lambda: self.manifest.parse_invocation('path1/path2'))
 
 if __name__ == '__main__':
     unittest.main()

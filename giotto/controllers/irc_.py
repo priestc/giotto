@@ -35,10 +35,7 @@ class IRCController(GiottoController):
     name = 'irc'
     default_mimetype = 'text/irc'
 
-    def get_mimetype(self):
-        return self.default_mimetype
-
-    def get_program_name(self):
+    def get_invocation(self):
         return self.request.program
 
     def get_controller_name(self):

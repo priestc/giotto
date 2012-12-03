@@ -2,6 +2,7 @@ from giotto.views import BasicView
 from giotto.models import make_tables
 from giotto.primitives import ALL_PROGRAMS
 from giotto.exceptions import ProgramNotFound
+from giotto.utils import super_accept_to_mimetype
 
 class GiottoProgram(object):
     name = None
@@ -56,49 +57,61 @@ class ProgramManifest(object):
     def __getitem__(self, key):
         return self.manifest[key]
 
-    def get_program(self, path):
-        if path.endswith('/'):
-            path = path[:-1]
-        splitted_path = path.split('/')
-        program_name = splitted_path[0]
-        args = splitted_path[1:]
-
-        program, args = self._get_program(program_name, args)
-        
-        if args:
-            p = splitted_path[:len(args)*-1]
+    def extract_superformat(self, name):
+        """
+        In comes the program name, out comes the superformat (html, json, xml, etc)
+        and the new program name with superstring removed.
+        """
+        if '.' in name:
+            splitted = name.split('.')
+            if len(splitted) > 2:
+                raise ProgramNotFound('Invalid Program name: %' % name)
+            return (splitted[0], splitted[1])
         else:
-            p = splitted_path
+            return (name, None)
 
-        program.path = "/".join(p)
-        program.name = p[-1]
-        return program, args
+    def parse_invocation(self, invocation):
+        if invocation.endswith('/'):
+            invocation = invocation[:-1]
+        if invocation.startswith('/'):
+            invocation = invocation[1:]
 
-    def _get_program(self, program, args):
+        splitted_path = invocation.split('/')
+        start_name = splitted_path[0]
+        start_args = splitted_path[1:]
+
+        parsed = self._parse(start_name, start_args)
+        parsed['invocation'] = invocation
+        return parsed
+
+    def _parse(self, program_name, args):
         """
         Recursive function to transversing nested manifests
         """
+        program_name, superformat = self.extract_superformat(program_name)
         try:
-            program = self[program]
+            program = self[program_name]
+        except KeyError:
+            # maybe program_name is supposed to be an arg to a root program?
+            if '' in self.manifest:
+                return {
+                    'program': self[''],
+                    'name': '',
+                    'superformat': None,
+                    'superformat_mime': None,
+                    'args': [program_name] + args,
+                }
+            raise ProgramNotFound('Program %s Does Not Exist' % program_name)
+        else:
             if type(program) == ProgramManifest:
                 if not args:
                     raise ProgramNotFound('Namespace found, but no program')
-                return program._get_program(args[0], args[1:])
+                return program._parse(args[0], args[1:])
             else:
-                return program, args
-        except KeyError:
-            raise ProgramNotFound('Program %s Does Not Exist' % program)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                return {
+                    'program': program,
+                    'name': program_name,
+                    'superformat': superformat,
+                    'superformat_mime': super_accept_to_mimetype(superformat),
+                    'args': args,
+                }

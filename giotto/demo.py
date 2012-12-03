@@ -5,7 +5,7 @@ class ColoredMultiplyView(BasicView):
 
     def text_html(self, result):
         return """<!DOCTYPE html>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
         <html>
             <body>
                 <span style="color: blue">%(x)s * %(y)s</span> == 
