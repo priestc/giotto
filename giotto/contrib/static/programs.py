@@ -11,9 +11,26 @@ class FileView(GiottoView):
         return result.read()
 
 def StaticServe(base_path):
+    """
+    Meta program for serving any file based on the path
+    """
     def get_file(path):
-        f = open(base_path + path, 'r')
-        return f
+        return open(base_path + path, 'r')
+
+    class StaticServeInternal(GiottoProgram):
+        name = 'static'
+        controllers = ('http-get', )
+        model = [get_file, StringIO("Mock file content")]
+        view = FileView
+
+    return StaticServeInternal
+
+def SingleStaticServe(file_path):
+    """
+    Meta program for serving a single file. Useful for favicon.ico
+    """
+    def get_file():
+        return open(file_path, 'r')
 
     class StaticServeInternal(GiottoProgram):
         name = 'static'

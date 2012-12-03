@@ -70,7 +70,7 @@ class ManifestTest(unittest.TestCase):
         self.assertEquals(parsed['superformat'], None)
 
     def test_trailing_slash(self):
-        parsed = self.manifest.parse_invocation('prog1/')
+        parsed = self.manifest.parse_invocation('/prog1/')
         self.assertIsInstance(parsed['program'], ExampleProgram1)
         self.assertEquals(parsed['args'], [])
 

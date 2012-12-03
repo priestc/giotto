@@ -122,10 +122,10 @@ class IRCRequest(object):
 class IrcBot(irc.bot.SingleServerIRCBot):
     def __init__(self, config):
         if not config['host']:
-            raise SystemExit('IRC controller needs to be configured with a hostname')
+            raise SystemExit('Error: IRC controller needs to be configured with a hostname')
 
         if not config['nick']:
-            raise SystemExit('IRC controller needs to be configured with a nick')
+            raise SystemExit('Error: IRC controller needs to be configured with a nick')
 
         print "Connecting to %s:%s as %s" % (config['host'],config['port'], config['nick'])
 
