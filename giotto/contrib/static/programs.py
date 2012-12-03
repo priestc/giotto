@@ -1,3 +1,4 @@
+from cStringIO import StringIO
 from giotto.programs import GiottoProgram
 from giotto.utils import get_config
 from giotto.views import GiottoView
@@ -17,7 +18,7 @@ def StaticServe(base_path):
     class StaticServeInternal(GiottoProgram):
         name = 'static'
         controllers = ('http-get', )
-        model = [get_file]
+        model = [get_file, StringIO("Test file content")]
         view = FileView
 
     return StaticServeInternal
