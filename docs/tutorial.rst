@@ -23,7 +23,7 @@ and inside that directory, run this command::
     $ cd demo
     $ giotto_project --http --cmd --demo
 
-This will create a ``programs.py`` file, which contains your program objects.
+This will create a ``manifest.py`` file, which contains your program manifest.
 It will also create a series of "concrete controller files",
 which will act as a gateway between your application and the outside world.
 The concrete controller files will be called ``giotto-http`` and ``giotto-cmd``
@@ -34,7 +34,7 @@ If you only want to interact with you application through the command line,
 then you could leave off the ``--http`` flag when calling ``giotto_project`` (and vice versa).
 The option ``--demo`` tells giotto to include a simple "multiply" program to demonstrate how giotto works.
 
-Inside the ``programs.py`` file, you will see the following::
+Inside the ``manifest.py`` file, you will see the following::
 
     class ColoredMultiplyView(GiottoTemplateView):
         def text_plain(self, result):
@@ -82,11 +82,14 @@ Inside the ``programs.py`` file, you will see the following::
 
 
     class Multiply(GiottoProgram):
-        name = "multiply"
         controllers = ('http-get', 'cmd', 'irc')
         model = [multiply, {'x': 3, 'y': 3, 'product': 9}]
         cache = None
         view = ColoredMultiplyView
+
+    manifest = ProgramManifest({
+        'multiply': Multiply()
+    })
 
 All Giotto applications are made up a collection of Giotto Programs. Each program class
 defines a model, a view, and a set of controllers.
@@ -156,7 +159,6 @@ Using Mocks
 On the GiottoProgram class, add a ``model_mock`` attribute::
 
     class Multiply(GiottoProgram):
-        name = "multiply"
         controllers = ('http-get', 'cmd', 'irc')
         model = [multiply, {'x': 10, 'y': 10, 'product': 100}]
         view = [ColoredMultiplyView]
@@ -177,7 +179,6 @@ Cache
 Add a ``cache`` attribute to the program::
 
     class Multiply(GiottoProgram):
-        name = "multiply"
         controllers = ('http-get', 'cmd', 'irc')
         model = [multiply, {'x': 10, 'y': 10, 'product': 100}]
         cache = 3600
