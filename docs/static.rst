@@ -29,15 +29,3 @@ This program is useful to place a single file onto the manifest::
     })
 
 The name you give the ``SingleStaticServe`` program in your manifest has to have the extension omitted.
-
-Caching static content
-----------------------
-Include the ``cache`` keyword to the program when adding it to your manifest
-to indicate how long you want static content to be cached.::
-
-    manifest = ProgramManifest({
-        'static': StaticServe('/var/www/static_files', cache=3600),
-        'favicon': StaticServe('/var/www/static_files/favicon.ico', cache=3600),
-    })
-
-If this keyword argument is left off, the file will be served from dish for each request.
