@@ -4,6 +4,7 @@ import json
 from giotto.programs import GiottoProgram
 from giotto.exceptions import InvalidInput, ProgramNotFound, MockNotFound
 from giotto.primitives import GiottoPrimitive
+from giotto.cache import DummyCache
 
 def do_argspec(source):
     """
@@ -28,7 +29,7 @@ class GiottoController(object):
         from giotto import config
         self.request = request
         self.model_mock = model_mock
-        self.cache = config.cache
+        self.cache = config.cache or DummyCache()
 
         # all programs available to this controller
         self.manifest = manifest

@@ -27,6 +27,7 @@ Contents:
    cache
    model_mocking
    authentication
+   serving_static_files
    deployment
 
 

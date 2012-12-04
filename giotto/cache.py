@@ -47,3 +47,13 @@ class CacheWithRedis(GiottoCache):
         if pickled_value is None:
             return None
         return pickle.loads(pickled_value)
+
+class DummyCache(GiottoCache):
+    """
+    Cache that does not save nor return a hit ever. Used as a placeholder.
+    """
+    def set(self, key, obj, expire):
+        return None
+
+    def get(self, key):
+        return None
