@@ -50,7 +50,11 @@ class ListAllUsers(GiottoProgram):
 
 manifest = ProgramManifest({
     'login': LoginSubmit(),
-    'login_form': LoginFOrm(),
+    'login_form': LoginForm(),
     'register': UserRegistrationSubmit(),
     'register_form': UserRegistrationForm(),
+})
+
+management_manifest = ProgramManifest({
+    'list_all': ListAllUsers(),
 })

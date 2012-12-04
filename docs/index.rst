@@ -19,6 +19,7 @@ Contents:
 
    introduction
    tutorial
+   manifests
    terminology
    built_in_controller_classes
    view_classes
