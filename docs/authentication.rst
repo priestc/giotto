@@ -72,7 +72,6 @@ To extend the way the default login looks, subclass the program with your own vi
 or by defining the whole program yourself::
 
     class LoginForm(GiottoProgram):
-        name = 'login'
         controllers = ('http-get', )
         model = []
         view = MyRegisterView

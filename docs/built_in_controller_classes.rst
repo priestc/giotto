@@ -80,7 +80,7 @@ In this example, the bot is named "giotto-bot", but this can be configured throu
 
 All models are rendered by the views with the ``text/irc`` mimetype.
 
-Overriding default Mimetypes
+Overriding default mimetypes
 ----------------------------
 Whenever you invoke a program, the mimetype used to render the model data is determined by that controller's default mimetype.
 The default mimetypes for the HTTP, IRC and CMD controllers are ``text/html``, ``text/irc``, and ``text/cmd`` respectively.

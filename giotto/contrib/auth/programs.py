@@ -47,3 +47,10 @@ class ListAllUsers(GiottoProgram):
     controllers = ('http-get', 'cmd')
     model = [User.all]
     view = BasicView
+
+manifest = ProgramManifest({
+    'login': LoginSubmit(),
+    'login_form': LoginFOrm(),
+    'register': UserRegistrationSubmit(),
+    'register_form': UserRegistrationForm(),
+})

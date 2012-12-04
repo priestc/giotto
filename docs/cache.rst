@@ -22,7 +22,7 @@ or if you want to use memcache::
 You can also add parameters to the ``CacheWith*`` class such as port and host.
 
 
-Enabling Caching for programs
+Enabling caching for programs
 -----------------------------
 
 To enable cache for a program, add a value (in seconds) to the ``cache`` attribute of your program class::
