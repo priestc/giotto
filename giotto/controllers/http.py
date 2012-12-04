@@ -83,7 +83,7 @@ class HTTPController(GiottoController):
             )
 
         # now do middleware
-        return self.execute_output_middleware_stream(response) 
+        return self.execute_output_middleware_stream(response)
 
     def get_primitive(self, primitive):
         if primitive == 'RAW_PAYLOAD':
