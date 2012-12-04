@@ -63,7 +63,7 @@ To invoke your application, run this generated script (called a concrete control
 
     $ ./giotto-irc
 
-Once the bot has been connected to the server, to invoke programs, enter a channel and type the following:
+Once the bot has been connected to the server, to invoke programs, enter a channel and type the following::
 
     !giotto path/to/myprogram
 

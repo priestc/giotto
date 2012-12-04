@@ -8,6 +8,8 @@ Manifests are objects that keep track of all the programs that make up your appl
 Think of them as urlconfs in django.
 An example Manifests looks like this::
 
+    from giotto.programs import ProgramManifest
+    
     manifest = ProgramManifest({
         '': RootProgram(),
         'auth': {
@@ -37,7 +39,7 @@ You can also nest manifests::
         'signup': SignupProgram(),
     }
 
-Manifests must contain only strings in the keys, and only ``GiottoProgram``s as the values.
+Manifests must contain only strings in the keys, and only ``GiottoPrograms`` as the values.
 The strings may contain any characters except for periods (``.``).
 
 All concrete controllers look for a project manifest object named ``manifest`` in the file named ``manifest.py``.
