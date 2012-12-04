@@ -57,6 +57,21 @@ class ProgramManifest(object):
     def __getitem__(self, key):
         return self.manifest[key]
 
+    def get_all_programs(self):
+        """
+        Tranverse this manifest and return all programs exist in this manifest.
+        """
+        out = set()
+        programs = self.manifest.values()
+        for program in programs:
+            if type(program) == ProgramManifest:
+                program_set = program.get_all_programs()
+            else:
+                program_set = set([program])
+            out.update(program_set)
+
+        return out
+
     def extract_superformat(self, name):
         """
         In comes the program name, out comes the superformat (html, json, xml, etc)
