@@ -6,7 +6,7 @@ Manifests
 
 Manifests are objects that keep track of all the programs that make up your application.
 Think of them as urlconfs in django.
-An example Manifests looks like this:
+An example Manifests looks like this::
 
     manifest = ProgramManifest({
         '': RootProgram(),
@@ -22,7 +22,7 @@ An example Manifests looks like this:
 When this application is served to the outside world through a controller,
 this manifest tells the controller which programs are to be available.
 
-You can also nest manifests:
+You can also nest manifests::
 
     login_manifest = ProgramManifest({
         'login': LoginProgram(),
