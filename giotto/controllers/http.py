@@ -1,4 +1,5 @@
 import urllib
+import magic
 
 from giotto.controllers import GiottoController
 from werkzeug.wrappers import Request, Response
@@ -63,18 +64,21 @@ class HTTPController(GiottoController):
                 'body': 'Unsupported Media Type: %s' % self.mimetype
             }
         
-        if hasattr(result, 'close'):
-            mime = magic
+        body = result['body']
+        if hasattr(body, 'close'):
+            # response is a file, determine the mime of that file and return
+            mime = magic.from_buffer(body.read(1024), mime=True)
+            body.seek(0)
             response = Response(
                 status=code,
-                response=result,
+                response=body,
                 mimetype=mime
             )
         else:
             # convert to a format appropriate to the wsgi Response api.
             response = Response(
                 status=code,
-                response=result['body'],
+                response=body,
                 mimetype=result['mimetype'],
             )
 
