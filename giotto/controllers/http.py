@@ -17,16 +17,6 @@ class HTTPController(GiottoController):
     name = 'http'
     default_mimetype = 'text/html'
 
-    def get_invocation(self, program, data, ext=""):
-        if ext and not ext.startswith('.'):
-            ext = '.%s' % ext
-
-        if type(data) is list:
-            params = "/".join(data)
-        else:
-            params = '?' + urllib.urlencode(data)
-        return "%s%s%s" % (program, ext, params)
-
     def mimetype_override(self):
         accept = self.request.headers['Accept']
         has_json_in_view = hasattr(self.program.view, 'application_json')
@@ -53,7 +43,7 @@ class HTTPController(GiottoController):
             data = self.request.form
         return data
 
-    def get_response(self):
+    def get_concrete_response(self):
         code = 200
         try:
             result = self.get_data_response()
@@ -105,20 +95,3 @@ def make_app(programs, model_mock=False, cache=None):
         return wsgi_response(environ, start_response)
 
     return application
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -22,6 +22,7 @@ Contents:
    manifests
    terminology
    built_in_controller_classes
+   creating_your_own_controllers
    view_classes
    middleware
    cache
