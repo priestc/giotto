@@ -77,11 +77,11 @@ class HTTPController(GiottoController):
 
     def get_primitive(self, primitive):
         if primitive == 'RAW_PAYLOAD':
-            return self.get_data()
+            return self.get_raw_data()
         if primitive == 'LOGGED_IN_USER':
             return self.request.user
         if primitive == 'ALL_PROGRAMS':
-            return self.programs
+            return self.manifest.get_all_programs()
 
 def make_app(programs, model_mock=False, cache=None):
     
