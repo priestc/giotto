@@ -45,7 +45,7 @@ class HTTPController(GiottoController):
     def get_controller_name(self):
         return 'http-%s' % self.request.method.lower()
 
-    def get_data(self):
+    def get_raw_data(self):
         data = {}
         if self.request.method == 'GET':
             data = self.request.args
@@ -53,10 +53,10 @@ class HTTPController(GiottoController):
             data = self.request.form
         return data
 
-    def get_concrete_response(self):
+    def get_response(self):
         code = 200
         try:
-            result = self._get_generic_response_data()
+            result = self.get_data_response()
         except NoViewMethod:
             code = 415
             result = {
@@ -83,7 +83,7 @@ class HTTPController(GiottoController):
             )
 
         # now do middleware
-        return self.execute_output_middleware_stream(response)
+        return response
 
     def get_primitive(self, primitive):
         if primitive == 'RAW_PAYLOAD':
@@ -101,7 +101,7 @@ def make_app(programs, model_mock=False, cache=None):
         """
         request = Request(environ)
         controller = HTTPController(request, programs, model_mock=model_mock)
-        wsgi_response = controller.get_concrete_response()
+        wsgi_response = controller.get_response()
         return wsgi_response(environ, start_response)
 
     return application

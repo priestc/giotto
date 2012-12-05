@@ -41,20 +41,21 @@ class IRCController(GiottoController):
     def get_controller_name(self):
         return 'irc'
 
-    def get_data(self):
+    def get_raw_data(self):
         kwargs = self.request.args
         return parse_kwargs(kwargs)
 
     def get_concrete_response(self):
-        result = self._get_generic_response_data()
-        # convert to a format appropriate to the wsgi Response api.
-        response = dict(
+        try:
+            result = self.get_data_response()
+        except ProgramNotFound:
+            result = {'body': "Program not found"}
+
+        # convert to a format appropriate to the IRC Response api.
+        return dict(
             response=result['body'],
             say_to=self.request.sent_to,
         )
-
-        # now do middleware
-        return self.execute_output_middleware_stream(response) 
 
     def get_primitive(self, primitive):
         if primitive == 'RAW_PAYLOAD':
@@ -159,10 +160,8 @@ class IrcBot(irc.bot.SingleServerIRCBot):
         request = IRCRequest(e,self.config['magic_token'],c.get_nickname())
         
         try:
-            controller = IRCController(request, self.config['programs'], self.config['model_mock'])
-            result = controller.get_concrete_response()
-        except ProgramNotFound:
-            print "No program found: %s -- %s" % (request.program, request.args)
+            controller = IRCController(request, self.config['manifest'], self.config['model_mock'])
+            result = controller.get_response()
         except Exception as exc:
             cls = exc.__class__.__name__
             c.privmsg(request.sent_to, "\x0304%s - %s: %s" % (request.program, cls, exc))
@@ -175,11 +174,11 @@ class IrcBot(irc.bot.SingleServerIRCBot):
                 c.privmsg(request.sent_to, msg)
 
 
-def listen(programs, config, model_mock=False):
+def listen(manifest, config, model_mock=False):
     """
     IRC listening process.
     """
-    config['programs'] = programs
+    config['manifest'] = manifest
     config['model_mock'] = model_mock
     IRC = IrcBot(config)
     IRC.start()

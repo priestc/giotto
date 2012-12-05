@@ -42,6 +42,60 @@ class GiottoController(object):
         self.path_args = parsed['args']
         self.mimetype = parsed['superformat_mime'] or self.mimetype_override() or self.default_mimetype
 
+
+    def get_response(self):
+        name = self.get_controller_name()
+        self.request = self.program.execute_input_middleware_stream(self.request, name)
+
+        response = self.get_concrete_response()
+
+        return self.program.execute_output_middleware_stream(self.request, response, name)
+
+    def get_data_response(self):
+        
+        args, kwargs = self.program.get_model_args_kwargs()
+        data = self.get_data_for_model(args, kwargs)
+
+        if self.program.cache:
+            key = self.get_cache_key(data)
+
+            hit = self.cache.get(key)
+            if hit:
+                return hit
+        
+        model_data = self.program.execute_model(data)
+        response = self.program.execute_view(model_data, self.mimetype)
+
+        if self.program.cache:
+            self.cache.set(key, response, self.program.cache or 0)
+
+        return response
+
+    def get_data_for_model(self, args, kwargs):
+        """
+        In comes args and kwargs expected for the model. Out comes the data from
+        this invocation that will go to the model.
+        """
+        raw_data = self.get_raw_data()
+        output = {}
+        for i, arg in enumerate(args):
+            if i < len(self.path_args):
+                # use path args instead (if they have been supplied)
+                target = self.path_args[i]
+            else:
+                target = raw_data.get(arg, None)
+
+            output[arg] = target
+
+        for key, value in kwargs.iteritems():
+            if isinstance(value, GiottoPrimitive):
+                output[key] = self.get_primitive(value.name)
+            else:
+                output[key] = value
+
+        return output
+
+
     def __repr__(self):
         controller = self.get_controller_name()
         model = self.get_program_name()
@@ -57,8 +111,7 @@ class GiottoController(object):
         """
         return None
 
-    def get_cache_key(self):
-        data = self.get_model_args(self.get_model(), self.get_data())
+    def get_cache_key(self, data):
         try:
             controller_args = json.dumps(data, separators=(',', ':'), sort_keys=True)
         except TypeError:
@@ -67,106 +120,3 @@ class GiottoController(object):
 
         program = self.program.name
         return "%s(%s)(%s)" % (controller_args, program, self.mimetype)
-
-    def get_model_mock(self):
-        try:
-            return self.program.model[1]
-        except IndexError:
-            # if no mock is defined, then use an empty dict as the data
-            return {}
-
-    def _get_generic_response_data(self):
-        """
-        Return the data to create a response object appropriate for the
-        controller. This function is called by get_concrete_response_data.
-        """
-        self.execute_input_middleware_stream()
-
-        cache_key = self.get_cache_key()
-        raw_data = self.get_data()
-        model = self.get_model()
-        view = self.program.view
-        
-        if self.model_mock:
-            # if the model mock option is True, then bypass the model
-            # and just return the mock
-            return self.render_view(self.get_model_mock())
-
-        if self.program.cache:
-            rendered = self.cache.get(cache_key)
-            if rendered:
-                # return hit from cache
-                return rendered
-
-        if model:
-            data = self.get_model_args(model, raw_data)
-            view_data = model(**data)
-        else:
-            # there is no model, so we will use the view as the model.
-            view_data = self.get_model_args(view, raw_data)
-
-        rendered = self.render_view(view_data)
-
-        if self.program.cache:
-            self.cache.set(cache_key, rendered, self.program.cache)
-
-        return rendered
-
-    def get_model(self):
-        if self.program.model:
-            # remove ugly wrapping list (to avoid becoming an instance mothod
-            return self.program.model[0]
-        else:
-            return lambda: {}
-
-    def get_model_args(self, source, raw_data):
-        """
-        Given raw data from the controller, inspect the model function (or in
-        the case of a program that has no model, the view object) and replace
-        all primitives with appropriate data.
-        """
-        if self.model_mock:
-            return {}
-        args, kwargs = do_argspec(source)
-        output = {}
-        for i, arg in enumerate(args):
-            if i < len(self.path_args):
-                # use path args instead (if they have been supplied)
-                pa = self.path_args[i]
-            else:
-                pa = None
-            target = pa or raw_data.get(arg, None)
-            output[arg] = target
-
-        for key, value in kwargs.iteritems():
-            if isinstance(value, GiottoPrimitive):
-                output[key] = self.get_primitive(value.name)
-            else:
-                output[key] = value
-
-        return output
-
-    def execute_input_middleware_stream(self):
-        middlewares = getattr(self.program, 'input_middleware', [])
-        for m in middlewares:
-            to_execute = getattr(m(), self.name)
-            self.request = to_execute(self.request)
-        return self.request
-
-    def execute_output_middleware_stream(self, response):
-        middlewares = getattr(self.program, 'output_middleware', [])
-        for middleware_class in middlewares:
-            middleware_instance = middleware_class()
-            to_execute = getattr(middleware_instance, self.name, None)
-            if to_execute:
-                response = to_execute(self.request, response)
-        return response
-
-    def render_view(self, view_data):
-        """
-        Render the view with data from the model and/or controller.
-        """
-        ViewClass = self.program.view
-        view = ViewClass(view_data, self)
-        response = view.render(self.mimetype)
-        return response

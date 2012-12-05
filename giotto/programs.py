@@ -1,8 +1,28 @@
+import inspect
+
 from giotto.views import BasicView
 from giotto.models import make_tables
 from giotto.primitives import ALL_PROGRAMS
 from giotto.exceptions import ProgramNotFound
 from giotto.utils import super_accept_to_mimetype
+
+def do_argspec(source):
+    """
+    Inspect the model (or view in the case of no model) and return the args
+    and kwargs. This functin is necessary because argspec returns in a silly format
+    by default.
+    """
+    if hasattr(source, 'render'):
+        # if 'source' is a view object, try to get the render method,
+        # otherwise, just use the __call__ method.
+        source = source.render
+
+    argspec = inspect.getargspec(source)
+    kwargs = dict(zip(*[reversed(l) for l in (argspec.args, argspec.defaults or [])]))
+    args = [x for x in argspec.args if x not in kwargs.keys()]
+    if args and args[0] == 'cls':
+        args = args[1:]
+    return args, kwargs
 
 class GiottoProgram(object):
     name = None
@@ -14,34 +34,43 @@ class GiottoProgram(object):
     output_middleware = ()
 
     @classmethod
-    def is_match(cls, controller, name):
+    def get_model_args_kwargs(cls):
         """
-        Does this program match the current invocation prameters? 
+        Return the argspec of the model for this program.
         """
-        return cls.name == name and controller in cls.controllers
+        return do_argspec(cls.model[0])
 
-class MakeTables(GiottoProgram):
-    """
-    Program for creating the database tables for all imported models. Use this
-    program internaly only. Do not hook it up through HTTP.
-    """
-    name = "make_tables"
-    controllers = ('cmd', )
-    model = [make_tables]
-    view = BasicView
+    @classmethod
+    def execute_input_middleware_stream(cls, request, controller):
+        """
+        Request comes from the controller. Returned is a request.
+        controller arg is the name of the controller.
+        """
+        for m in cls.input_middleware:
+            to_execute = getattr(m(), controller)
+            if to_execute:
+                request = to_execute(request)
+        return request
 
-def show_programs(programs=ALL_PROGRAMS):
-    return programs
+    @classmethod
+    def execute_output_middleware_stream(cls, request, response, controller):
+        for m in cls.output_middleware:
+            to_execute = getattr(m(), controller, None)
+            if to_execute:
+                response = to_execute(request, response)
+        return response
 
-class ShowAllPrograms(GiottoProgram):
-    """
-    Display a list of all instaled programs for all controllers for the
-    currently invoked application.
-    """
-    name = "show_programs"
-    controllers = ('http-get', 'cmd', 'irc')
-    model = [show_programs]
-    view = BasicView
+    @classmethod
+    def execute_model(cls, data):
+        """
+        Returns data from the model, if mock is defined, it returns that instead.
+        """
+        #if len(cls.model) == 1:
+        return cls.model[0](**data)
+
+    @classmethod
+    def execute_view(cls, data, mimetype):
+        return cls.view(data).render(mimetype)
 
 class ProgramManifest(object):
     def __init__(self, manifest):
@@ -130,3 +159,26 @@ class ProgramManifest(object):
                     'superformat_mime': super_accept_to_mimetype(superformat),
                     'args': args,
                 }
+
+class MakeTables(GiottoProgram):
+    """
+    Program for creating the database tables for all imported models. Use this
+    program internaly only. Do not hook it up through HTTP.
+    """
+    name = "make_tables"
+    controllers = ('cmd', )
+    model = [make_tables]
+    view = BasicView
+
+def show_programs(programs=ALL_PROGRAMS):
+    return programs
+
+class ShowAllPrograms(GiottoProgram):
+    """
+    Display a list of all instaled programs for all controllers for the
+    currently invoked application.
+    """
+    name = "show_programs"
+    controllers = ('http-get', 'cmd', 'irc')
+    model = [show_programs]
+    view = BasicView

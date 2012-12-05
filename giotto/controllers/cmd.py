@@ -12,7 +12,7 @@ if mock:
 from giotto.controllers.cmd import CMDController, CMDRequest
 request = CMDRequest(sys.argv)
 controller = CMDController(request=request, manifest=manifest, model_mock=mock)
-controller.get_concrete_response()"""
+controller.get_response()"""
 
 class CMDRequest(object):
     def __init__(self, argv):
@@ -35,7 +35,7 @@ class CMDController(GiottoController):
     def get_controller_name(self):
         return 'cmd'
 
-    def get_data(self):
+    def get_raw_data(self):
         """
         Parse the raw commandline arguments (from sys.argv) to a dictionary
         that is understandable to the rest of the framework.
@@ -47,7 +47,7 @@ class CMDController(GiottoController):
         return parse_kwargs(arguments)
 
     def get_concrete_response(self):
-        result = self._get_generic_response_data()
+        result = self.get_data_response()
         
         response = {
             'stdout': [result['body']],
@@ -55,7 +55,6 @@ class CMDController(GiottoController):
         }
 
         # now do middleware
-        response = self.execute_output_middleware_stream(response)
         stdout = response['stdout']
 
         if hasattr(stdout, 'write'):
@@ -70,4 +69,4 @@ class CMDController(GiottoController):
 
 
     def get_primitive(self, name):
-        return "ff"
+        return "ff" # implement later

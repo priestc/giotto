@@ -12,12 +12,11 @@ class GiottoView(object):
     Base class for all Giotto view objects. All Giotto Views must at least descend
     from this class, as ths class contains piping that the controller calls.
     """
-    def __init__(self, result, controller):
+    def __init__(self, result):
         """
         result == the output from the model
         """
         self.result = result
-        self.controller = controller
 
     def render(self, mimetype):
         status = 200
