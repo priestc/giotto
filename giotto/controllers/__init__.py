@@ -52,13 +52,19 @@ class GiottoController(object):
         return self.program.execute_output_middleware_stream(self.request, response, name)
 
     def get_data_response(self):
-        
-        args, kwargs = self.program.get_model_args_kwargs()
-        data = self.get_data_for_model(args, kwargs)
+        """
+        Execute the model and view, and handle the cache.
+        Returns controller-agnostic response data.
+        """
+
+        if self.model_mock:
+            data = program.get_model_mock()
+        else:
+            args, kwargs = self.program.get_model_args_kwargs()
+            data = self.get_data_for_model(args, kwargs)
 
         if self.program.cache:
             key = self.get_cache_key(data)
-
             hit = self.cache.get(key)
             if hit:
                 return hit
