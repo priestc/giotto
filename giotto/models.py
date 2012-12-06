@@ -1,11 +1,10 @@
 from giotto.primitives import LOGGED_IN_USER
 from giotto.exceptions import InvalidInput
-from giotto.utils import get_config
 
 def make_tables():
-    config = get_config()
-    Base = get_config().Base
-    engine = get_config().engine
+    from giotto import config
+    Base = config.Base
+    engine = config.engine
     Base.metadata.create_all(engine)
     return {'message': 'All tables created'}
 

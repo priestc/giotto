@@ -152,7 +152,7 @@ class TestNestedBlankManifest(unittest.TestCase):
 class TestInvalidManifest(unittest.TestCase):
 
     def test_invalid_key(self):
-        x = lambda: ProgramManifest({'x.x': RootProgram})
+        x = lambda: ProgramManifest({'invalid.key': RootProgram})
         self.assertRaises(ValueError, x)
 
     def test_invalid_program_type(self):

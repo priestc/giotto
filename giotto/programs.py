@@ -38,6 +38,8 @@ class GiottoProgram(object):
 
     @classmethod
     def get_model(cls):
+        if len(cls.model) == 0:
+            return None
         return cls.model[0]
 
     @classmethod
@@ -69,11 +71,15 @@ class GiottoProgram(object):
         """
         Returns data from the model, if mock is defined, it returns that instead.
         """
-        #if len(cls.model) == 1:
-        return cls.model[0](**data)
+        model = cls.get_model()
+        if model is None:
+            return None
+        return model(**data)
 
     @classmethod
     def execute_view(cls, data, mimetype):
+        if not cls.view:
+            return {'body': ''}
         return cls.view(data).render(mimetype)
 
 class ProgramManifest(object):
@@ -177,7 +183,7 @@ class ProgramManifest(object):
                 if program_name == '':
                     return program._parse('', args)
                 if not args:
-                    raise ProgramNotFound('Namespace found, but no program')
+                    raise ProgramNotFound('No root program for namespace, and no program match')
                 return program._parse(args[0], args[1:])
             else:
                 return {
@@ -198,15 +204,20 @@ class MakeTables(GiottoProgram):
     model = [make_tables]
     view = BasicView
 
-def show_programs(programs=ALL_PROGRAMS):
-    return programs
+def shell():
+    from IPython import embed
+    embed()
+    return None
 
-class ShowAllPrograms(GiottoProgram):
+class Shell(GiottoProgram):
     """
     Display a list of all instaled programs for all controllers for the
     currently invoked application.
     """
-    name = "show_programs"
-    controllers = ('http-get', 'cmd', 'irc')
-    model = [show_programs]
-    view = BasicView
+    controllers = ('cmd')
+    model = [shell]
+
+management_manifest = ProgramManifest({
+    'make_tables': MakeTables,
+    'shell': Shell,
+})
