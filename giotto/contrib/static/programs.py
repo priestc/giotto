@@ -17,12 +17,12 @@ def StaticServe(base_path):
     def get_file(path):
         return open(base_path + path, 'r')
 
-    class StaticServeInternal(GiottoProgram):
+    class StaticServe(GiottoProgram):
         controllers = ('http-get', )
         model = [get_file, StringIO("Mock file content")]
         view = FileView
 
-    return StaticServeInternal
+    return StaticServe
 
 def SingleStaticServe(file_path):
     """
@@ -31,9 +31,9 @@ def SingleStaticServe(file_path):
     def get_file():
         return open(file_path, 'r')
 
-    class StaticServeInternal(GiottoProgram):
+    class SingleStaticServe(GiottoProgram):
         controllers = ('http-get', )
         model = [get_file, StringIO("Mock file content")]
         view = FileView
 
-    return StaticServeInternal
+    return SingleStaticServe
