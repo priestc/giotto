@@ -33,6 +33,7 @@ class RootProgram(GiottoProgram):
 class ManifestTest(unittest.TestCase):
 
     manifest = ProgramManifest({
+        '': RootProgram,
         'prog1': ExampleProgram1,
         'path1': {
             'prog2': ExampleProgram2,
@@ -44,6 +45,14 @@ class ManifestTest(unittest.TestCase):
                 },
             },
         },
+    })
+
+    double_blank_manifest = ProgramManifest({
+        '': ProgramManifest({
+            '': RootProgram,
+            'prog2': ExampleProgram2
+        }),
+        'prog1': ExampleProgram1,
     })
 
     def test_simple_program(self):
@@ -86,6 +95,13 @@ class ManifestTest(unittest.TestCase):
         self.assertEquals(parsed['program'], ExampleProgram1)
         self.assertEquals(parsed['args'], [])
 
+    def test_single_root(self):
+        parsed = self.manifest.parse_invocation('/')
+        self.assertEquals(parsed['program'], RootProgram)
+        self.assertEquals(parsed['args'], [])
+        self.assertEquals(parsed['name'], '')
+        self.assertEquals(parsed['superformat'], None)
+
     def test_not_found(self):
         self.assertRaises(ProgramNotFound, lambda: self.manifest.parse_invocation('path1/path2/fakearg'))
 
@@ -95,6 +111,20 @@ class ManifestTest(unittest.TestCase):
     def test_program_finder(self):
         progs = {ExampleProgram1, ExampleProgram2, ExampleProgram3, ExampleProgram4, RootProgram}
         self.assertEquals(self.manifest.get_all_programs(), progs)
+
+    def test_double_blank(self):
+        parsed = self.double_blank_manifest.parse_invocation('/')
+        self.assertEquals(parsed['program'], RootProgram)
+        self.assertEquals(parsed['args'], [])
+        self.assertEquals(parsed['name'], '')
+        self.assertEquals(parsed['superformat'], None)
+
+    def test_double_blank(self):
+        parsed = self.double_blank_manifest.parse_invocation('prog2')
+        self.assertEquals(parsed['program'], ExampleProgram2)
+        self.assertEquals(parsed['args'], [])
+        self.assertEquals(parsed['name'], 'prog2')
+        self.assertEquals(parsed['superformat'], None)
 
 if __name__ == '__main__':
     unittest.main()
