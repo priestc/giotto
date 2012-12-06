@@ -6,24 +6,6 @@ from giotto.primitives import ALL_PROGRAMS
 from giotto.exceptions import ProgramNotFound
 from giotto.utils import super_accept_to_mimetype
 
-def do_argspec(source):
-    """
-    Inspect the model (or view in the case of no model) and return the args
-    and kwargs. This functin is necessary because argspec returns in a silly format
-    by default.
-    """
-    if hasattr(source, 'render'):
-        # if 'source' is a view object, try to get the render method,
-        # otherwise, just use the __call__ method.
-        source = source.render
-
-    argspec = inspect.getargspec(source)
-    kwargs = dict(zip(*[reversed(l) for l in (argspec.args, argspec.defaults or [])]))
-    args = [x for x in argspec.args if x not in kwargs.keys()]
-    if args and args[0] == 'cls':
-        args = args[1:]
-    return args, kwargs
-
 class GiottoProgram(object):
     name = None
     input_middleware = ()
@@ -36,9 +18,30 @@ class GiottoProgram(object):
     @classmethod
     def get_model_args_kwargs(cls):
         """
-        Return the argspec of the model for this program.
+        Inspect the model (or view in the case of no model) and return the args
+        and kwargs. This functin is necessary because argspec returns in a silly format
+        by default.
         """
-        return do_argspec(cls.model[0])
+        source = cls.get_model()
+        if hasattr(source, 'render'):
+            # if 'source' is a view object, try to get the render method,
+            # otherwise, just use the __call__ method.
+            source = source.render
+
+        argspec = inspect.getargspec(source)
+        kwargs = dict(zip(*[reversed(l) for l in (argspec.args, argspec.defaults or [])]))
+        args = [x for x in argspec.args if x not in kwargs.keys()]
+        if args and args[0] == 'cls':
+            args = args[1:]
+        return args, kwargs
+
+    @classmethod
+    def get_model(cls):
+        return cls.model[0]
+
+    @classmethod
+    def get_model_mock(cls):
+        return cls.model[1]
 
     @classmethod
     def execute_input_middleware_stream(cls, request, controller):
