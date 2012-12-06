@@ -139,15 +139,20 @@ class ProgramManifest(object):
         try:
             program = self[program_name]
         except KeyError:
-            # program is not in name, drop down to root...
+            # program name is not in keys, drop down to root...
             if '' in self.manifest:
-                return {
-                    'program': self[''],
-                    'name': '',
-                    'superformat': None,
-                    'superformat_mime': None,
-                    'args': [program_name] + args,
-                }
+
+                result = self['']
+                if type(result) == ProgramManifest:
+                    return result._parse(program_name, args)
+                else:
+                    return {
+                        'program': result,
+                        'name': '',
+                        'superformat': None,
+                        'superformat_mime': None,
+                        'args': [program_name] + args,
+                    }
             else:
                 raise ProgramNotFound('Program %s Does Not Exist' % program_name)
         else:
