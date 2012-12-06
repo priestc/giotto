@@ -32,20 +32,22 @@ class RootProgram(GiottoProgram):
 
 class ManifestTest(unittest.TestCase):
 
-    manifest = ProgramManifest({
-        '': RootProgram,
-        'prog1': ExampleProgram1,
-        'path1': {
-            'prog2': ExampleProgram2,
-            'path2': {
-                'prog3': ExampleProgram3,
-                'path3': {
-                    '': RootProgram,
-                    'prog4': ExampleProgram4
+    def __init__(self, *a, **k):
+        super(ManifestTest, self).__init__(*a, **k)
+        self.manifest = ProgramManifest({
+            '': RootProgram,
+            'prog1': ExampleProgram1,
+            'path1': {
+                'prog2': ExampleProgram2,
+                'path2': {
+                    'prog3': ExampleProgram3,
+                    'path3': {
+                        '': RootProgram,
+                        'prog4': ExampleProgram4
+                    },
                 },
             },
-        },
-    })
+        })
 
     def test_simple_program(self):
         parsed = self.manifest.parse_invocation('prog1.xml')
@@ -106,16 +108,18 @@ class ManifestTest(unittest.TestCase):
 
 
 class TestNestedBlankManifest(unittest.TestCase):
-    nested_blank_manifest = ProgramManifest({
-        '': ProgramManifest({
+    def __init__(self, *a, **k):
+        super(TestNestedBlankManifest, self).__init__(*a, **k)
+        self.nested_blank_manifest = ProgramManifest({
             '': ProgramManifest({
-                '': RootProgram,
-                'prog3': ExampleProgram3,
+                '': ProgramManifest({
+                    '': RootProgram,
+                    'prog3': ExampleProgram3,
+                }),
+                'prog2': ExampleProgram2,
             }),
-            'prog2': ExampleProgram2,
-        }),
-        'prog1': ExampleProgram1,
-    })
+            'prog1': ExampleProgram1,
+        })
 
     def test_blank(self):
         parsed = self.nested_blank_manifest.parse_invocation('/')
@@ -144,6 +148,16 @@ class TestNestedBlankManifest(unittest.TestCase):
         self.assertEquals(parsed['args'], ['args1', 'args2'])
         self.assertEquals(parsed['name'], '')
         self.assertEquals(parsed['superformat'], None)
+
+class TestInvalidManifest(unittest.TestCase):
+
+    # def test_invalid_key(self):
+    #     x = lambda: ProgramManifest({'x.x': RootProgram})
+    #     self.assertRaises(ValueError, x)
+
+    def test_invalid_program_type(self):
+        x = lambda: ProgramManifest({'xx': "not a program"})
+        self.assertRaises(TypeError, x)
 
 if __name__ == '__main__':
     unittest.main()

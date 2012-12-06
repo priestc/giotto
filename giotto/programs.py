@@ -1,4 +1,5 @@
 import inspect
+import re
 
 from giotto.views import BasicView
 from giotto.models import make_tables
@@ -76,12 +77,29 @@ class GiottoProgram(object):
         return cls.view(data).render(mimetype)
 
 class ProgramManifest(object):
+    """
+    Represents a node in a larger manifest tree. Manifests are like URLS for
+    giotto applications. All keys must be strings, and all values must be
+    either GiottoPrograms or another ProgramManifest instance.
+    """
+    key_regex = r'^\w*$'
+
     def __init__(self, manifest):
         self.manifest = manifest
         # any sub manifests, convert to manifests objects
         for key, item in self.manifest.items():
-            if type(item) is dict:
+            type_ = type(item)
+            
+            is_program = (hasattr(item, 'mro') and GiottoProgram in item.mro())
+            is_manifest = type_ == ProgramManifest
+
+            if not re.match(self.key_regex, key):
+                raise ValueError("Invalid manifest key: %s" % key)
+
+            if type_ is dict:
                 self.manifest[key] = ProgramManifest(item)
+            elif not is_manifest and not is_program:
+                raise TypeError("Manifest value must be either a program or another manifest")
 
     def __repr__(self):
         return "<Manifest (%s nodes)>" % len(self.manifest)
@@ -141,7 +159,6 @@ class ProgramManifest(object):
         except KeyError:
             # program name is not in keys, drop down to root...
             if '' in self.manifest:
-
                 result = self['']
                 if type(result) == ProgramManifest:
                     return result._parse(program_name, args)
