@@ -157,6 +157,8 @@ class ProgramManifest(object):
                 raise ProgramNotFound('Program %s Does Not Exist' % program_name)
         else:
             if type(program) == ProgramManifest:
+                if program_name == '':
+                    return program._parse('', args)
                 if not args:
                     raise ProgramNotFound('Namespace found, but no program')
                 return program._parse(args[0], args[1:])
