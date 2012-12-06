@@ -139,7 +139,7 @@ class ProgramManifest(object):
         try:
             program = self[program_name]
         except KeyError:
-            # maybe program_name is supposed to be an arg to a root program?
+            # program is not in name, drop down to root...
             if '' in self.manifest:
                 return {
                     'program': self[''],
@@ -148,7 +148,8 @@ class ProgramManifest(object):
                     'superformat_mime': None,
                     'args': [program_name] + args,
                 }
-            raise ProgramNotFound('Program %s Does Not Exist' % program_name)
+            else:
+                raise ProgramNotFound('Program %s Does Not Exist' % program_name)
         else:
             if type(program) == ProgramManifest:
                 if not args:

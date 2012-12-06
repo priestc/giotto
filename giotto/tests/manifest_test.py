@@ -47,14 +47,6 @@ class ManifestTest(unittest.TestCase):
         },
     })
 
-    double_blank_manifest = ProgramManifest({
-        '': ProgramManifest({
-            '': RootProgram,
-            'prog2': ExampleProgram2
-        }),
-        'prog1': ExampleProgram1,
-    })
-
     def test_simple_program(self):
         parsed = self.manifest.parse_invocation('prog1.xml')
         self.assertEquals(parsed['program'], ExampleProgram1)
@@ -112,18 +104,45 @@ class ManifestTest(unittest.TestCase):
         progs = {ExampleProgram1, ExampleProgram2, ExampleProgram3, ExampleProgram4, RootProgram}
         self.assertEquals(self.manifest.get_all_programs(), progs)
 
-    def test_double_blank(self):
-        parsed = self.double_blank_manifest.parse_invocation('/')
+
+class TestNestedBlankManifest(unittest.TestCase):
+    nested_blank_manifest = ProgramManifest({
+        '': ProgramManifest({
+            '': ProgramManifest({
+                '': RootProgram,
+                'prog3': ExampleProgram3,
+            }),
+            'prog2': ExampleProgram2,
+        }),
+        'prog1': ExampleProgram1,
+    })
+
+    def test_blank(self):
+        parsed = self.nested_blank_manifest.parse_invocation('/')
         self.assertEquals(parsed['program'], RootProgram)
         self.assertEquals(parsed['args'], [])
         self.assertEquals(parsed['name'], '')
         self.assertEquals(parsed['superformat'], None)
 
-    def test_double_blank(self):
-        parsed = self.double_blank_manifest.parse_invocation('prog2')
+    def test_follow(self):
+        parsed = self.nested_blank_manifest.parse_invocation('prog2')
         self.assertEquals(parsed['program'], ExampleProgram2)
         self.assertEquals(parsed['args'], [])
         self.assertEquals(parsed['name'], 'prog2')
+        self.assertEquals(parsed['superformat'], None)
+
+    def test_follow_with_args(self):
+        parsed = self.nested_blank_manifest.parse_invocation('prog2/arg1/arg2')
+        self.assertEquals(parsed['program'], ExampleProgram2)
+        self.assertEquals(parsed['args'], ['arg1', 'arg2'])
+        self.assertEquals(parsed['name'], 'prog2')
+        self.assertEquals(parsed['superformat'], None)
+
+    def test_root_with_args(self):
+        parsed = self.nested_blank_manifest.parse_invocation('/args1/args2')
+        self.assertEquals(parsed['program'], RootProgram)
+        self.assertEquals(parsed['args'], ['args1', 'args2'])
+        self.assertEquals(parsed['name'], '')
         self.assertEquals(parsed['superformat'], None)
 
 if __name__ == '__main__':
