@@ -43,26 +43,26 @@ class MiddlewareTest(unittest.TestCase):
 
     def test_input_middleware(self):
         request = {'start':True}
-        request = ExampleProgram.execute_input_middleware_stream(request, 'test')
+        request = ExampleProgram().execute_input_middleware_stream(request, 'test')
         self.assertEquals(request, {'start': True, 'three': True, 'two': True, 'one': True})
 
     def test_output_middleware(self):
         request = {'start': False}
         response = {'start': False}
-        response = ExampleProgram.execute_output_middleware_stream(request, response, 'test')
+        response = ExampleProgram().execute_output_middleware_stream(request, response, 'test')
         self.assertEquals(response, {'start': False, 'three': False, 'two': False, 'one': False})
 
     def test_empty_input_middleware(self):
         "Input middleware execution when program has no middleware specified"
         request = {'start': True}
-        request = NoMiddlewareProgram.execute_input_middleware_stream(request, 'test')
+        request = NoMiddlewareProgram().execute_input_middleware_stream(request, 'test')
         self.assertEquals(request, {'start': True})
 
     def test_empty_output_middleware(self):
         "Output middleware execution when program has no middleware specified"
         request = {'start': False}
         response = {'start': False}
-        response = NoMiddlewareProgram.execute_output_middleware_stream(request, response, 'test')
+        response = NoMiddlewareProgram().execute_output_middleware_stream(request, response, 'test')
         self.assertEquals(response, {'start': False})
 
 if __name__ == '__main__':

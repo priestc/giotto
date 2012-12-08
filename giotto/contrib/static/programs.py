@@ -5,10 +5,10 @@ from giotto.views import GiottoView
 
 class FileView(GiottoView):
     def text_html(self, result):
-        return result
+        return {'body': result, 'mimetype': ''}
 
     def text_cmd(self, result):
-        return result.read()
+        return {'body': result.read(), 'mimetype': ''}
 
 def StaticServe(base_path):
     """

@@ -17,14 +17,13 @@ class GiottoProgram(object):
     def __init__(self, **kwargs):
         self.__dict__ = kwargs
 
-    @classmethod
-    def get_model_args_kwargs(cls):
+    def get_model_args_kwargs(self):
         """
         Inspect the model (or view in the case of no model) and return the args
         and kwargs. This functin is necessary because argspec returns in a silly format
         by default.
         """
-        source = cls.get_model()
+        source = self.get_model()
         if not source:
             return [], {}
 
@@ -40,51 +39,45 @@ class GiottoProgram(object):
             args = args[1:]
         return args, kwargs
 
-    @classmethod
-    def get_model(cls):
-        if len(cls.model) == 0:
+    def get_model(self):
+        if len(self.model) == 0:
             return None
-        return cls.model[0]
+        return self.model[0]
 
-    @classmethod
-    def get_model_mock(cls):
-        return cls.model[1]
+    def get_model_mock(self):
+        return self.model[1]
 
-    @classmethod
-    def execute_input_middleware_stream(cls, request, controller):
+    def execute_input_middleware_stream(self, request, controller):
         """
         Request comes from the controller. Returned is a request.
         controller arg is the name of the controller.
         """
-        for m in cls.input_middleware:
+        for m in self.input_middleware:
             to_execute = getattr(m(), controller)
             if to_execute:
                 request = to_execute(request)
         return request
 
-    @classmethod
-    def execute_output_middleware_stream(cls, request, response, controller):
-        for m in cls.output_middleware:
+    def execute_output_middleware_stream(self, request, response, controller):
+        for m in self.output_middleware:
             to_execute = getattr(m(), controller, None)
             if to_execute:
                 response = to_execute(request, response)
         return response
 
-    @classmethod
-    def execute_model(cls, data):
+    def execute_model(self, data):
         """
         Returns data from the model, if mock is defined, it returns that instead.
         """
-        model = cls.get_model()
+        model = self.get_model()
         if model is None:
             return None
         return model(**data)
 
-    @classmethod
-    def execute_view(cls, data, mimetype):
-        if not cls.view:
-            return {'body': ''}
-        return cls.view(data).render(mimetype)
+    def execute_view(self, data, mimetype):
+        if not self.view:
+            return {'body': '', 'mimetype': ''}
+        return self.view(data).render(mimetype)
 
 class ProgramManifest(object):
     """
