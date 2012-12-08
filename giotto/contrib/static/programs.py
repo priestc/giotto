@@ -22,7 +22,7 @@ def StaticServe(base_path):
         model = [get_file, StringIO("Mock file content")]
         view = FileView
 
-    return StaticServe
+    return StaticServe()
 
 def SingleStaticServe(file_path):
     """
@@ -36,4 +36,4 @@ def SingleStaticServe(file_path):
         model = [get_file, StringIO("Mock file content")]
         view = FileView
 
-    return SingleStaticServe
+    return SingleStaticServe()

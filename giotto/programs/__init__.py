@@ -14,6 +14,9 @@ class GiottoProgram(object):
     view = ()
     output_middleware = ()
 
+    def __init__(self, **kwargs):
+        self.__dict__ = kwargs
+
     @classmethod
     def get_model_args_kwargs(cls):
         """
@@ -22,6 +25,9 @@ class GiottoProgram(object):
         by default.
         """
         source = cls.get_model()
+        if not source:
+            return [], {}
+
         if hasattr(source, 'render'):
             # if 'source' is a view object, try to get the render method,
             # otherwise, just use the __call__ method.
@@ -94,7 +100,7 @@ class ProgramManifest(object):
         for key, item in self.manifest.items():
             type_ = type(item)
             
-            is_program = (hasattr(item, 'mro') and GiottoProgram in item.mro())
+            is_program = isinstance(item, GiottoProgram)
             is_manifest = type_ == ProgramManifest
 
             if not re.match(self.key_regex, key):
@@ -133,8 +139,6 @@ class ProgramManifest(object):
         """
         if '.' in name:
             splitted = name.split('.')
-            if len(splitted) > 2:
-                raise ProgramNotFound('Invalid Program name: %' % name)
             return (splitted[0], splitted[1])
         else:
             return (name, None)
@@ -195,6 +199,6 @@ class ProgramManifest(object):
 from giotto.programs.shell import Shell
 from giotto.programs.make_tables import MakeTables
 management_manifest = ProgramManifest({
-    'make_tables': MakeTables,
-    'shell': Shell,
+    'make_tables': MakeTables(),
+    'shell': Shell(),
 })

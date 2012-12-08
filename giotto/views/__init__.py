@@ -39,8 +39,10 @@ class GiottoView(object):
         if variable_mimetype:
             mimetype = magic.from_buffer(data.read(1024), mime=True)
             data.seek(0)
+            data.update({'mimetype': mimetype})
 
-        return {'body': data, 'mimetype': mimetype, 'status': status}
+        data.update({'status': status})
+        return data
 
 def htmlize(value):
     """
@@ -68,9 +70,12 @@ class BasicView(GiottoView):
         except TypeError:
             j = json.dumps(result.__dict__)
 
-        return j
+        return {'body': j, 'mimetype': 'application/json'}
 
     def text_cmd(self, result):
+        return self.text_plain(result)
+
+    def text_irc(self, result):
         return self.text_plain(result)
 
     def text_html(self, result):
@@ -110,7 +115,7 @@ class BasicView(GiottoView):
                 out.append(row)
 
         out = "\n".join(out)
-        return """<!DOCTYPE html>
+        return {'body': """<!DOCTYPE html>
         <html>
             <head>{0}</head>
             <body>
@@ -120,7 +125,8 @@ class BasicView(GiottoView):
                     {3}
                 </table>
             </body>
-        </html>""".format(css, h1, header, out)
+        </html>""".format(css, h1, header, out),
+        'mimetype': 'text/html'}
 
     def text_plain(self, result):
         out = []
@@ -128,31 +134,18 @@ class BasicView(GiottoView):
             row = "{0} - {1}".format(key, value)
             out.append(row)
 
-        return "\n".join(out)
+        return {'body': "\n".join(out), 'mimetype': "text/plain"}
 
-class JinjaTemplateView(BasicView):
-    """
-    A view renderer where each mimetype renderer returns a jinja template that
-    will get rendered automatically. The context_name attribute denotes the
-    name of the model object in the template. Each mimetype method should return
-    a string that locates a jinja2 template. Required is to define a jinja2 environment
-    (``jinja2_env``) in your project's ``config.py`` file.
-    """
-    context_name = 'obj'
-    def render(self, mimetype):
-        jinja2_env = get_config('jinja2_env')
-        result = super(JinjaTemplateView, self).render(mimetype)
-        template = result['body']
-        if hasattr(template, 'lower'):
-            try:
-                jinja_template = jinja2_env.get_template(template)
-            except TemplateNotFound:
-                jinja_template = Template(template)
+def JinjaTemplateView(template_name, name='model', mimetype="text/html"):
+    class JinjaTemplateView(BasicView):
+        def text_html(self, result):
+            from giotto import config
+            template = config.jinja2_env.get_template(template_name)
+            context = {name: result}
+            rendered = template.render(**context)
+            return {'body': rendered, 'mimetype': mimetype}
 
-            rendered = jinja_template.render(obj=self.result)
-            result['body'] = rendered
-            return result
-        raise TypeError('Template must be a string')
+    return JinjaTemplateView
 
 class ImageViewer(GiottoView):
     """

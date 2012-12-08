@@ -35,15 +35,15 @@ class ManifestTest(unittest.TestCase):
     def __init__(self, *a, **k):
         super(ManifestTest, self).__init__(*a, **k)
         self.manifest = ProgramManifest({
-            '': RootProgram,
-            'prog1': ExampleProgram1,
+            '': GiottoProgram(model="root"),
+            'prog1': GiottoProgram(model="one"),
             'path1': {
-                'prog2': ExampleProgram2,
+                'prog2': GiottoProgram(model="two"),
                 'path2': {
-                    'prog3': ExampleProgram3,
+                    'prog3': GiottoProgram(model="three"),
                     'path3': {
-                        '': RootProgram,
-                        'prog4': ExampleProgram4
+                        '': GiottoProgram(model="root"),
+                        'prog4': GiottoProgram(model="four"),
                     },
                 },
             },
@@ -51,47 +51,47 @@ class ManifestTest(unittest.TestCase):
 
     def test_simple_program(self):
         parsed = self.manifest.parse_invocation('prog1.xml')
-        self.assertEquals(parsed['program'], ExampleProgram1)
+        self.assertEquals(parsed['program'].model, 'one')
         self.assertEquals(parsed['args'], [])
         self.assertEquals(parsed['name'], 'prog1')
         self.assertEquals(parsed['superformat'], 'xml')
 
     def test_args(self):
         parsed = self.manifest.parse_invocation('prog1.json/arg1/arg2')
-        self.assertEquals(parsed['program'], ExampleProgram1)
+        self.assertEquals(parsed['program'].model, "one")
         self.assertEquals(parsed['args'], ['arg1', 'arg2'])
         self.assertEquals(parsed['name'], 'prog1')
         self.assertEquals(parsed['superformat'], 'json')
 
     def test_path_and_arg(self):
         parsed = self.manifest.parse_invocation('path1/prog2.html/arg1')
-        self.assertEquals(parsed['program'], ExampleProgram2)
+        self.assertEquals(parsed['program'].model, "two")
         self.assertEquals(parsed['args'], ['arg1'])
         self.assertEquals(parsed['name'], 'prog2')
         self.assertEquals(parsed['superformat'], 'html')
 
     def test_long_path(self):
         parsed = self.manifest.parse_invocation('path1/path2/path3/prog4/arg1/arg2')
-        self.assertEquals(parsed['program'], ExampleProgram4)
+        self.assertEquals(parsed['program'].model, "four")
         self.assertEquals(parsed['args'], ['arg1', 'arg2'])
         self.assertEquals(parsed['name'], 'prog4')
         self.assertEquals(parsed['superformat'], None)
 
     def test_root(self):
         parsed = self.manifest.parse_invocation('path1/path2/path3/arg1/arg2')
-        self.assertEquals(parsed['program'], RootProgram)
+        self.assertEquals(parsed['program'].model, 'root')
         self.assertEquals(parsed['args'], ['arg1', 'arg2'])
         self.assertEquals(parsed['name'], '')
         self.assertEquals(parsed['superformat'], None)
 
     def test_trailing_slash(self):
         parsed = self.manifest.parse_invocation('/prog1/')
-        self.assertEquals(parsed['program'], ExampleProgram1)
+        self.assertEquals(parsed['program'].model, 'one')
         self.assertEquals(parsed['args'], [])
 
     def test_single_root(self):
         parsed = self.manifest.parse_invocation('/')
-        self.assertEquals(parsed['program'], RootProgram)
+        self.assertEquals(parsed['program'].model, 'root')
         self.assertEquals(parsed['args'], [])
         self.assertEquals(parsed['name'], '')
         self.assertEquals(parsed['superformat'], None)
@@ -103,8 +103,9 @@ class ManifestTest(unittest.TestCase):
         self.assertRaises(ProgramNotFound, lambda: self.manifest.parse_invocation('path1/path2'))
 
     def test_program_finder(self):
-        progs = {ExampleProgram1, ExampleProgram2, ExampleProgram3, ExampleProgram4, RootProgram}
-        self.assertEquals(self.manifest.get_all_programs(), progs)
+        models = {'one', 'two', 'three', 'four', 'root'}
+        result = {p.model for p in self.manifest.get_all_programs()}
+        self.assertEquals(result, models)
 
 
 class TestNestedBlankManifest(unittest.TestCase):
@@ -113,38 +114,38 @@ class TestNestedBlankManifest(unittest.TestCase):
         self.nested_blank_manifest = ProgramManifest({
             '': ProgramManifest({
                 '': ProgramManifest({
-                    '': RootProgram,
-                    'prog3': ExampleProgram3,
+                    '': GiottoProgram(model='root'),
+                    'prog3': GiottoProgram(model='three'),
                 }),
-                'prog2': ExampleProgram2,
+                'prog2': GiottoProgram(model='two'),
             }),
-            'prog1': ExampleProgram1,
+            'prog1': GiottoProgram(model='one'),
         })
 
     def test_blank(self):
         parsed = self.nested_blank_manifest.parse_invocation('/')
-        self.assertEquals(parsed['program'], RootProgram)
+        self.assertEquals(parsed['program'].model, 'root')
         self.assertEquals(parsed['args'], [])
         self.assertEquals(parsed['name'], '')
         self.assertEquals(parsed['superformat'], None)
 
     def test_follow(self):
         parsed = self.nested_blank_manifest.parse_invocation('prog2')
-        self.assertEquals(parsed['program'], ExampleProgram2)
+        self.assertEquals(parsed['program'].model, "two")
         self.assertEquals(parsed['args'], [])
         self.assertEquals(parsed['name'], 'prog2')
         self.assertEquals(parsed['superformat'], None)
 
     def test_follow_with_args(self):
         parsed = self.nested_blank_manifest.parse_invocation('prog2/arg1/arg2')
-        self.assertEquals(parsed['program'], ExampleProgram2)
+        self.assertEquals(parsed['program'].model, 'two')
         self.assertEquals(parsed['args'], ['arg1', 'arg2'])
         self.assertEquals(parsed['name'], 'prog2')
         self.assertEquals(parsed['superformat'], None)
 
     def test_root_with_args(self):
         parsed = self.nested_blank_manifest.parse_invocation('/args1/args2')
-        self.assertEquals(parsed['program'], RootProgram)
+        self.assertEquals(parsed['program'].model, 'root')
         self.assertEquals(parsed['args'], ['args1', 'args2'])
         self.assertEquals(parsed['name'], '')
         self.assertEquals(parsed['superformat'], None)
@@ -152,7 +153,7 @@ class TestNestedBlankManifest(unittest.TestCase):
 class TestInvalidManifest(unittest.TestCase):
 
     def test_invalid_key(self):
-        x = lambda: ProgramManifest({'invalid.key': RootProgram})
+        x = lambda: ProgramManifest({'invalid.key': GiottoProgram()})
         self.assertRaises(ValueError, x)
 
     def test_invalid_program_type(self):
