@@ -30,77 +30,100 @@ class ExampleProgram4(GiottoProgram):
 class RootProgram(GiottoProgram):
     pass
 
+class ControllerTagTest(unittest.TestCase):
+    def __init__(self, *a, **k):
+        super(ControllerTagTest, self).__init__(*a, **k)
+        self.manifest = ProgramManifest({
+            '': GiottoProgram(model="root"),
+            ('prog1', 'get'): GiottoProgram(model="one"),
+            ('prog1', 'post'): GiottoProgram(model="two"),
+        })
+
+    def test_one(self):
+        parsed = self.manifest.parse_invocation('prog1', 'get')
+        self.assertEquals(parsed['program'].model, 'one')
+        self.assertEquals(parsed['args'], [])
+        self.assertEquals(parsed['name'], 'prog1')
+        self.assertEquals(parsed['superformat'], None)
+
+    def test_two(self):
+        parsed = self.manifest.parse_invocation('prog1', 'post')
+        self.assertEquals(parsed['program'].model, 'two')
+        self.assertEquals(parsed['args'], [])
+        self.assertEquals(parsed['name'], 'prog1')
+        self.assertEquals(parsed['superformat'], None)
+
 class ManifestTest(unittest.TestCase):
 
     def __init__(self, *a, **k):
         super(ManifestTest, self).__init__(*a, **k)
         self.manifest = ProgramManifest({
             '': GiottoProgram(model="root"),
-            'prog1': GiottoProgram(model="one"),
-            'path1': {
-                'prog2': GiottoProgram(model="two"),
-                'path2': {
-                    'prog3': GiottoProgram(model="three"),
-                    'path3': {
+            ('prog1', 'get'): GiottoProgram(model="one"),
+            ('path1', 'get'): {
+                ('prog2', 'get'): GiottoProgram(model="two"),
+                ('path2', 'get'): {
+                    ('prog3', 'get'): GiottoProgram(model="three"),
+                    ('path3', 'get'): {
                         '': GiottoProgram(model="root"),
-                        'prog4': GiottoProgram(model="four"),
+                        ('prog4', 'get'): GiottoProgram(model="four"),
                     },
                 },
             },
         })
 
     def test_simple_program(self):
-        parsed = self.manifest.parse_invocation('prog1.xml')
+        parsed = self.manifest.parse_invocation('prog1.xml', 'get')
         self.assertEquals(parsed['program'].model, 'one')
         self.assertEquals(parsed['args'], [])
         self.assertEquals(parsed['name'], 'prog1')
         self.assertEquals(parsed['superformat'], 'xml')
 
     def test_args(self):
-        parsed = self.manifest.parse_invocation('prog1.json/arg1/arg2')
+        parsed = self.manifest.parse_invocation('prog1.json/arg1/arg2', 'get')
         self.assertEquals(parsed['program'].model, "one")
         self.assertEquals(parsed['args'], ['arg1', 'arg2'])
         self.assertEquals(parsed['name'], 'prog1')
         self.assertEquals(parsed['superformat'], 'json')
 
     def test_path_and_arg(self):
-        parsed = self.manifest.parse_invocation('path1/prog2.html/arg1')
+        parsed = self.manifest.parse_invocation('path1/prog2.html/arg1', 'get')
         self.assertEquals(parsed['program'].model, "two")
         self.assertEquals(parsed['args'], ['arg1'])
         self.assertEquals(parsed['name'], 'prog2')
         self.assertEquals(parsed['superformat'], 'html')
 
     def test_long_path(self):
-        parsed = self.manifest.parse_invocation('path1/path2/path3/prog4/arg1/arg2')
+        parsed = self.manifest.parse_invocation('path1/path2/path3/prog4/arg1/arg2', 'get')
         self.assertEquals(parsed['program'].model, "four")
         self.assertEquals(parsed['args'], ['arg1', 'arg2'])
         self.assertEquals(parsed['name'], 'prog4')
         self.assertEquals(parsed['superformat'], None)
 
     def test_root(self):
-        parsed = self.manifest.parse_invocation('path1/path2/path3/arg1/arg2')
+        parsed = self.manifest.parse_invocation('path1/path2/path3/arg1/arg2', 'get')
         self.assertEquals(parsed['program'].model, 'root')
         self.assertEquals(parsed['args'], ['arg1', 'arg2'])
         self.assertEquals(parsed['name'], '')
         self.assertEquals(parsed['superformat'], None)
 
     def test_trailing_slash(self):
-        parsed = self.manifest.parse_invocation('/prog1/')
+        parsed = self.manifest.parse_invocation('/prog1/', 'get')
         self.assertEquals(parsed['program'].model, 'one')
         self.assertEquals(parsed['args'], [])
 
     def test_single_root(self):
-        parsed = self.manifest.parse_invocation('/')
+        parsed = self.manifest.parse_invocation('/', 'get')
         self.assertEquals(parsed['program'].model, 'root')
         self.assertEquals(parsed['args'], [])
         self.assertEquals(parsed['name'], '')
         self.assertEquals(parsed['superformat'], None)
 
     def test_not_found(self):
-        self.assertRaises(ProgramNotFound, lambda: self.manifest.parse_invocation('path1/path2/fakearg'))
+        self.assertRaises(ProgramNotFound, lambda: self.manifest.parse_invocation('path1/path2/fakearg', 'get'))
 
     def test_no_program(self):
-        self.assertRaises(ProgramNotFound, lambda: self.manifest.parse_invocation('path1/path2'))
+        self.assertRaises(ProgramNotFound, lambda: self.manifest.parse_invocation('path1/path2', 'get'))
 
     def test_program_finder(self):
         models = {'one', 'two', 'three', 'four', 'root'}

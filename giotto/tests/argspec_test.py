@@ -21,7 +21,7 @@ class ArgspecTest(unittest.TestCase):
         def model(var0, var1=3, var2=9): return None
         args, kwargs = GiottoProgram(model=[model]).get_model_args_kwargs()
         self.assertEquals(args, ['var0'])
-        self.assertEquals(kwargs, {'var1': 3, 'var2': 9})   
+        self.assertEquals(kwargs, {'var1': 3, 'var2': 9})
 
 if __name__ == '__main__':
     unittest.main()

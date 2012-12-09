@@ -74,10 +74,10 @@ class GiottoProgram(object):
             return None
         return model(**data)
 
-    def execute_view(self, data, mimetype):
+    def execute_view(self, data, mimetype, errors):
         if not self.view:
             return {'body': '', 'mimetype': ''}
-        return self.view(data).render(mimetype)
+        return self.view(data, errors).render(mimetype)
 
 class ProgramManifest(object):
     """
@@ -92,11 +92,17 @@ class ProgramManifest(object):
         # any sub manifests, convert to manifests objects
         for key, item in self.manifest.items():
             type_ = type(item)
-            
+            if type(key) == tuple:
+                # if the key is a tuple with the controller tag attached.
+                name_part_of_key = key[0]
+            else:
+                #if key is just the key (save as (key, '*'))
+                name_part_of_key = key
+
             is_program = isinstance(item, GiottoProgram)
             is_manifest = type_ == ProgramManifest
 
-            if not re.match(self.key_regex, key):
+            if not re.match(self.key_regex, name_part_of_key):
                 raise ValueError("Invalid manifest key: %s" % key)
 
             if type_ is dict:
@@ -109,6 +115,16 @@ class ProgramManifest(object):
 
     def __getitem__(self, key):
         return self.manifest[key]
+
+    def get_program(self, program, controller_tag):
+        for to_try in ((program, controller_tag), (program, '*'), program):
+            try:
+                return self.manifest[to_try]
+            except KeyError:
+                pass
+
+        raise KeyError
+
 
     def get_all_programs(self):
         """
@@ -136,7 +152,7 @@ class ProgramManifest(object):
         else:
             return (name, None)
 
-    def parse_invocation(self, invocation):
+    def parse_invocation(self, invocation, controller_tag=''):
         if invocation.endswith('/'):
             invocation = invocation[:-1]
         if invocation.startswith('/'):
@@ -146,23 +162,23 @@ class ProgramManifest(object):
         start_name = splitted_path[0]
         start_args = splitted_path[1:]
 
-        parsed = self._parse(start_name, start_args)
+        parsed = self._parse(start_name, start_args, controller_tag)
         parsed['invocation'] = invocation
         return parsed
 
-    def _parse(self, program_name, args):
+    def _parse(self, program_name, args, controller_tag):
         """
         Recursive function to transversing nested manifests
         """
         program_name, superformat = self.extract_superformat(program_name)
         try:
-            program = self[program_name]
+            program = self.get_program(program_name, controller_tag)
         except KeyError:
             # program name is not in keys, drop down to root...
             if '' in self.manifest:
-                result = self['']
+                result = self.get_program('', controller_tag)
                 if type(result) == ProgramManifest:
-                    return result._parse(program_name, args)
+                    return result._parse(program_name, args, controller_tag)
                 else:
                     return {
                         'program': result,
@@ -176,10 +192,10 @@ class ProgramManifest(object):
         else:
             if type(program) == ProgramManifest:
                 if program_name == '':
-                    return program._parse('', args)
+                    return program._parse('', args, controller_tag)
                 if not args:
                     raise ProgramNotFound('No root program for namespace, and no program match')
-                return program._parse(args[0], args[1:])
+                return program._parse(args[0], args[1:], controller_tag)
             else:
                 return {
                     'program': program,

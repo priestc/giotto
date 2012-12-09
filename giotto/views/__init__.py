@@ -12,11 +12,12 @@ class GiottoView(object):
     Base class for all Giotto view objects. All Giotto Views must at least descend
     from this class, as ths class contains piping that the controller calls.
     """
-    def __init__(self, result):
+    def __init__(self, result, errors=None):
         """
         result == the output from the model
         """
         self.result = result
+        self.errors = errors
 
     def render(self, mimetype):
         status = 200
@@ -141,7 +142,7 @@ def JinjaTemplateView(template_name, name='model', mimetype="text/html"):
         def text_html(self, result):
             from giotto import config
             template = config.jinja2_env.get_template(template_name)
-            context = {name: result}
+            context = {name: result, 'errors': self.errors}
             rendered = template.render(**context)
             return {'body': rendered, 'mimetype': mimetype}
 

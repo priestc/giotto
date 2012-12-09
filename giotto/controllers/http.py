@@ -1,9 +1,10 @@
+import copy
 import urllib
 import magic
 
 from giotto.controllers import GiottoController
 from werkzeug.wrappers import Request, Response
-from giotto.exceptions import NoViewMethod
+from giotto.exceptions import NoViewMethod, InvalidInput
 
 http_execution_snippet = """
 mock = '--model-mock' in sys.argv
@@ -53,14 +54,18 @@ class HTTPController(GiottoController):
                 'mimetype': 'text/plain',
                 'body': 'Unsupported Media Type: %s' % self.mimetype
             }
-        
-        response = Response(
-                status=code,
-                response=result['body'],
-                mimetype=result['mimetype'],
-            )
+        except InvalidInput as exc:
+            request = make_duplicate_request(self.request)
+            request.method = 'GET'
+            c = HTTPController(request, self.manifest, self.model_mock, errors=exc)
+            return c.get_response()
 
-        # now do middleware
+        response = Response(
+            status=code,
+            response=result['body'],
+            mimetype=result['mimetype'],
+        )
+
         return response
 
     def get_primitive(self, primitive):
@@ -71,15 +76,32 @@ class HTTPController(GiottoController):
         if primitive == 'ALL_PROGRAMS':
             return self.manifest.get_all_programs()
 
-def make_app(programs, model_mock=False, cache=None):
+def make_app(manifest, model_mock=False, cache=None):
     
     def application(environ, start_response):
         """
         WSGI app for serving giotto applications
         """
         request = Request(environ)
-        controller = HTTPController(request, programs, model_mock=model_mock)
+        controller = HTTPController(request, manifest, model_mock=model_mock)
         wsgi_response = controller.get_response()
         return wsgi_response(environ, start_response)
 
     return application
+
+def make_duplicate_request(request):
+    """
+    Since werkzeug request objects are immutable, this is needed to create an
+    identical reuet object with immutable values so it can be retried after a
+    POST failure.
+    """
+    class Req(object):
+        method = 'GET'
+        path = ''
+        headers = []
+        args = []
+    r = Req()
+    r.path = request.path
+    r.headers = request.headers
+    r.args = request.args
+    return r

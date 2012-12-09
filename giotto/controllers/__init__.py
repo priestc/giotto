@@ -25,23 +25,22 @@ def do_argspec(source):
     return args, kwargs
 
 class GiottoController(object):
-    def __init__(self, request, manifest, model_mock=False):
+    def __init__(self, request, manifest, model_mock=False, errors=None):
         from giotto import config
         self.request = request
         self.model_mock = model_mock
         self.cache = config.cache or DummyCache()
-
-        # all programs available to this controller
+        self.errors = errors
         self.manifest = manifest
 
         # the program that corresponds to this invocation
         invocation = self.get_invocation()
-        parsed = self.manifest.parse_invocation(invocation)
+        name = self.get_controller_name()
+        parsed = self.manifest.parse_invocation(invocation, name)
 
         self.program = parsed['program']
         self.path_args = parsed['args']
         self.mimetype = parsed['superformat_mime'] or self.mimetype_override() or self.default_mimetype
-
 
     def get_response(self):
         name = self.get_controller_name()
@@ -63,17 +62,17 @@ class GiottoController(object):
             args, kwargs = self.program.get_model_args_kwargs()
             data = self.get_data_for_model(args, kwargs)
 
-        if self.program.cache:
+        if self.program.cache and not self.errors:
             key = self.get_cache_key(data)
             hit = self.cache.get(key)
             if hit:
                 return hit
         
         model_data = self.program.execute_model(data)
-        response = self.program.execute_view(model_data, self.mimetype)
+        response = self.program.execute_view(model_data, self.mimetype, self.errors)
 
-        if self.program.cache:
-            self.cache.set(key, response, self.program.cache or 0)
+        if self.program.cache and not self.errors:
+            self.cache.set(key, response, self.program.cache)
 
         return response
 

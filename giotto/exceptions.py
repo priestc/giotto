@@ -1,5 +1,6 @@
 class InvalidInput(Exception):
-    pass
+    def __init__(self, data):
+        self.__dict__ = data
 
 class InvalidProgram(Exception):
     pass
