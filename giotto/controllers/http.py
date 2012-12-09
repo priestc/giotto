@@ -58,7 +58,9 @@ class HTTPController(GiottoController):
             request = make_duplicate_request(self.request)
             request.method = 'GET'
             c = HTTPController(request, self.manifest, self.model_mock, errors=exc)
-            return c.get_response()
+            response = c.get_response()
+            response.status_code = 400
+            return response
 
         response = Response(
             status=code,
@@ -103,5 +105,6 @@ def make_duplicate_request(request):
     r = Req()
     r.path = request.path
     r.headers = request.headers
+    r.is_xhr = request.is_xhr
     r.args = request.args
     return r
