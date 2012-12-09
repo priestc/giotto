@@ -35,8 +35,10 @@ class ControllerTagTest(unittest.TestCase):
         super(ControllerTagTest, self).__init__(*a, **k)
         self.manifest = ProgramManifest({
             '': GiottoProgram(model="root"),
-            ('prog1', 'get'): GiottoProgram(model="one"),
-            ('prog1', 'post'): GiottoProgram(model="two"),
+            'prog1': [
+                GiottoProgram(model="one", controllers=('get', )),
+                GiottoProgram(model="two", controllers=('post', )),
+            ]
         })
 
     def test_one(self):
@@ -59,14 +61,14 @@ class ManifestTest(unittest.TestCase):
         super(ManifestTest, self).__init__(*a, **k)
         self.manifest = ProgramManifest({
             '': GiottoProgram(model="root"),
-            ('prog1', 'get'): GiottoProgram(model="one"),
-            ('path1', 'get'): {
-                ('prog2', 'get'): GiottoProgram(model="two"),
-                ('path2', 'get'): {
-                    ('prog3', 'get'): GiottoProgram(model="three"),
-                    ('path3', 'get'): {
+            'prog1': GiottoProgram(model="one"),
+            'path1': {
+                'prog2': GiottoProgram(model="two"),
+                'path2': {
+                    'prog3': GiottoProgram(model="three"),
+                    'path3': {
                         '': GiottoProgram(model="root"),
-                        ('prog4', 'get'): GiottoProgram(model="four"),
+                        'prog4': GiottoProgram(model="four"),
                     },
                 },
             },

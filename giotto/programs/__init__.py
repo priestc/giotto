@@ -92,23 +92,19 @@ class ProgramManifest(object):
         # any sub manifests, convert to manifests objects
         for key, item in self.manifest.items():
             type_ = type(item)
-            if type(key) == tuple:
-                # if the key is a tuple with the controller tag attached.
-                name_part_of_key = key[0]
-            else:
-                #if key is just the key (save as (key, '*'))
-                name_part_of_key = key
 
             is_program = isinstance(item, GiottoProgram)
             is_manifest = type_ == ProgramManifest
+            is_list = type_ == list
 
-            if not re.match(self.key_regex, name_part_of_key):
+            if not re.match(self.key_regex, key):
                 raise ValueError("Invalid manifest key: %s" % key)
 
             if type_ is dict:
                 self.manifest[key] = ProgramManifest(item)
-            elif not is_manifest and not is_program:
-                raise TypeError("Manifest value must be either a program or another manifest")
+            elif not is_manifest and not is_program and not is_list:
+                msg = "Manifest value must be either: a program, a list of programs, or another manifest"
+                raise TypeError(msg)
 
     def __repr__(self):
         return "<Manifest (%s nodes)>" % len(self.manifest)
@@ -116,16 +112,14 @@ class ProgramManifest(object):
     def __getitem__(self, key):
         return self.manifest[key]
 
-    def get_program(self, program, controller_tag):
-        for to_try in ((program, controller_tag), (program, '*'), program):
-            try:
-                return self.manifest[to_try]
-            except KeyError:
-                pass
-
-        raise KeyError
-
-
+    def get_program(self, program_name, controller_tag):
+        result = self.manifest[program_name]
+        if type(result) is list:
+            for program in result:
+                if controller_tag in program.controllers:
+                    return program
+            raise KeyError
+        return result
     def get_all_programs(self):
         """
         Tranverse this manifest and return all programs exist in this manifest.
