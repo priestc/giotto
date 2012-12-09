@@ -23,5 +23,17 @@ class ArgspecTest(unittest.TestCase):
         self.assertEquals(args, ['var0'])
         self.assertEquals(kwargs, {'var1': 3, 'var2': 9})
 
+    def test_cls_arg(self):
+        """
+        cls var gets ignored when getting args for a model callable
+        """
+        class Model(object):
+            @classmethod
+            def model(cls, var0, var1=3, var2=9):
+                return None
+        args, kwargs = GiottoProgram(model=[Model.model]).get_model_args_kwargs()
+        self.assertEquals(args, ['var0'])
+        self.assertEquals(kwargs, {'var1': 3, 'var2': 9})
+
 if __name__ == '__main__':
     unittest.main()

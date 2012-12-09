@@ -120,6 +120,7 @@ class ProgramManifest(object):
                     return program
             raise KeyError
         return result
+
     def get_all_programs(self):
         """
         Tranverse this manifest and return all programs exist in this manifest.
