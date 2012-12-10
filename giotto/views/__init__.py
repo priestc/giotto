@@ -40,9 +40,12 @@ class GiottoView(object):
         if variable_mimetype:
             mimetype = magic.from_buffer(data.read(1024), mime=True)
             data.seek(0)
-            data.update({'mimetype': mimetype})
+            data['mimetype'] = mimetype
 
-        data.update({'status': status})
+        if not 'mimetype' in data:
+            data['mimetype'] = mimetype
+
+        data['status'] = status
         return data
 
 def htmlize(value):
@@ -131,7 +134,12 @@ class BasicView(GiottoView):
 
     def text_plain(self, result):
         out = []
-        for key, value in result.iteritems():
+        if hasattr(result, 'iteritems'):
+            to_iterate = result.iteritems()
+        else:
+            to_iterate = result.__dict__.iteritems()
+        
+        for key, value in to_iterate:
             row = "{0} - {1}".format(key, value)
             out.append(row)
 
