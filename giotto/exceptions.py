@@ -2,6 +2,10 @@ class InvalidInput(Exception):
     def __init__(self, data):
         self.__dict__ = data
 
+    def __str__(self):
+        ## for the cmd controller
+        return self.__dict__['message']
+
 class InvalidProgram(Exception):
     pass
 

@@ -2,6 +2,7 @@ import os
 
 from giotto.utils import parse_kwargs
 from giotto.controllers import GiottoController
+from giotto.control import Redirection
 
 cmd_execution_snippet = """
 args = sys.argv
@@ -13,6 +14,28 @@ from giotto.controllers.cmd import CMDController, CMDRequest
 request = CMDRequest(sys.argv)
 controller = CMDController(request=request, manifest=manifest, model_mock=mock)
 controller.get_response()"""
+
+
+def make_cmd_invocation(invocation, args, kwargs):
+    """
+    >>> make_cmd_invocation('path/program', ['arg1', 'arg2'], {'darg': 4})
+    ['./giotto-cmd', '/path/program/arg1/arg2/', '--darg=4']
+    """
+    if not invocation.endswith('/'):
+        invocation += '/'
+    if not invocation.startswith('/'):
+        invocation = '/' + invocation
+
+    cmd = invocation
+
+    for arg in args:
+        cmd += str(arg) + "/"
+
+    rendered_kwargs = []
+    for k, v in kwargs.iteritems():
+        rendered_kwargs.append("--%s=%s" % (k,v))
+    
+    return ['./giotto-cmd', cmd] + rendered_kwargs
 
 class CMDRequest(object):
     def __init__(self, argv):
@@ -49,10 +72,16 @@ class CMDController(GiottoController):
     def get_concrete_response(self):
         result = self.get_data_response()
         
-        response = {
-            'stdout': [result['body']],
-            'stderr': [],
-        }
+        if type(result) == Redirection:
+            invocation, args, kwargs = result.rendered_invocation
+            rendered_invocation = make_cmd_invocation(invocation, args, kwargs)
+            req = CMDRequest(rendered_invocation)
+            return CMDController(req, self.manifest, self.model_mock)
+        else:
+            response = {
+                'stdout': [result['body']],
+                'stderr': [],
+            }
 
         # now do middleware
         stdout = response['stdout']
