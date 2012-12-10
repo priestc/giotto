@@ -2,9 +2,12 @@ import copy
 import urllib
 import magic
 
-from giotto.controllers import GiottoController
-from werkzeug.wrappers import Request, Response
 from giotto.exceptions import NoViewMethod, InvalidInput
+from giotto.controllers import GiottoController
+from giotto.control import Redirection
+from werkzeug.wrappers import Request, Response
+from werkzeug.utils import redirect
+
 
 http_execution_snippet = """
 mock = '--model-mock' in sys.argv
@@ -13,6 +16,29 @@ from giotto.controllers.http import make_app
 application = make_app(manifest, model_mock=mock)
 if '--run' in sys.argv:
     run_simple('127.0.0.1', 5000, application, use_debugger=True, use_reloader=True)"""
+
+def make_url(invocation, args=[], kwargs={}):
+    """
+    >>> make_url('some/path/program', ['arg1', 'arg2'], {'arg3': 4})
+    '/some/path/program/arg1/arg2?arg3=4'
+    """
+    if not invocation.endswith('/'):
+        invocation += '/'
+    if not invocation.startswith('/'):
+        invocation = '/' + invocation
+
+    url = invocation
+
+    for arg in args:
+        url += str(arg) + "/"
+
+    if kwargs:
+        url = url[:-1]
+        url += "?" + urllib.urlencode(kwargs)
+    
+    return url
+
+
 
 class HTTPController(GiottoController):
     name = 'http'
@@ -62,11 +88,15 @@ class HTTPController(GiottoController):
             response.status_code = 400
             return response
 
-        response = Response(
-            status=code,
-            response=result['body'],
-            mimetype=result['mimetype'],
-        )
+        if type(result) == Redirection:
+            invocation, args, kwargs = result.rendered_invocation
+            response = redirect(make_url(invocation, args, kwargs))
+        else:
+            response = Response(
+                status=code,
+                response=result['body'],
+                mimetype=result['mimetype'],
+            )
 
         return response
 
@@ -99,12 +129,8 @@ def make_duplicate_request(request):
     """
     class Req(object):
         method = 'GET'
-        path = ''
-        headers = []
-        args = []
-    r = Req()
-    r.path = request.path
-    r.headers = request.headers
-    r.is_xhr = request.is_xhr
-    r.args = request.args
-    return r
+        path = request.path
+        headers = request.headers
+        args = request.args
+        is_xhr = request.is_xhr
+    return Req()

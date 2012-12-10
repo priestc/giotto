@@ -2,7 +2,7 @@ import inspect
 import re
 import os
 
-from giotto.exceptions import ProgramNotFound
+from giotto.exceptions import ProgramNotFound, MockNotFound
 from giotto.utils import super_accept_to_mimetype
 
 class GiottoProgram(object):
@@ -45,7 +45,13 @@ class GiottoProgram(object):
         return self.model[0]
 
     def get_model_mock(self):
-        return self.model[1]
+        if not self.model or not self.model[0]:
+            # no mock needed
+            return {}
+        try:
+            return self.model[1]
+        except IndexError:
+            raise MockNotFound("no mock for %s" % self.name)
 
     def execute_input_middleware_stream(self, request, controller):
         """

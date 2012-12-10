@@ -57,7 +57,7 @@ class GiottoController(object):
         """
 
         if self.model_mock:
-            data = program.get_model_mock()
+            data = self.program.get_model_mock()
         else:
             args, kwargs = self.program.get_model_args_kwargs()
             data = self.get_data_for_model(args, kwargs)
