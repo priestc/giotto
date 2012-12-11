@@ -12,6 +12,9 @@ class InvalidProgram(Exception):
 class ProgramNotFound(Exception):
     pass
 
+class DataNotFound(Exception):
+    pass
+
 class NoViewMethod(Exception):
     pass
 

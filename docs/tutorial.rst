@@ -80,15 +80,12 @@ Inside the ``manifest.py`` file, you will see the following::
     def multiply(x, y):
         return {'x': int(x), 'y': int(y), 'product': int(x) * int(y)}
 
-
-    class Multiply(GiottoProgram):
-        controllers = ('http-get', 'cmd', 'irc')
-        model = [multiply, {'x': 3, 'y': 3, 'product': 9}]
-        cache = None
-        view = ColoredMultiplyView
-
     manifest = ProgramManifest({
-        'multiply': Multiply()
+        'multiply': GiottoProgram(
+            controllers = ('http-get', 'cmd', 'irc'),
+            model=[multiply, {'x': 3, 'y': 3, 'product': 9}],
+            view=ColoredMultiplyView
+        )
     })
 
 All Giotto applications are made up a collection of Giotto Programs. Each program class
@@ -156,12 +153,17 @@ and the data moves between the user and the computer through the command lone, i
 Using Mocks
 -----------
 
-On the GiottoProgram class, add a ``model_mock`` attribute::
+On the GiottoProgram object, add a ``model_mock`` object to the list along with the model.
+A model mock is an object that gets returned in lieu of executing the model function.
+This object should be the same form as what the model returns::
 
-    class Multiply(GiottoProgram):
-        controllers = ('http-get', 'cmd', 'irc')
-        model = [multiply, {'x': 10, 'y': 10, 'product': 100}]
-        view = [ColoredMultiplyView]
+    manifest = ProgramManifest({
+        'multiply': GiottoProgram(
+            controllers=('http-get', 'cmd', 'irc'),
+            model=[multiply, {'x': 10, 'y': 10, 'product': 100}],
+            view=ColoredMultiplyView,
+        )
+    })
 
 When you run the dev server include the ``--model-mock`` flag::
 
@@ -169,8 +171,9 @@ When you run the dev server include the ``--model-mock`` flag::
 
 Now no matter what arguments you place in the url, the output will always be ``10 * 10 == 100``.
 If your model makes calls to the database or third party service,
-the ``model-mock`` option will bypass all of that.
+the moel mock option will bypass all of that.
 This feature is useful for front end designers who do not need to run the full model stack in order to create HTML templates.
+This feature is also sometimes called "generic models".
 
 -----
 Cache
@@ -178,11 +181,14 @@ Cache
 
 Add a ``cache`` attribute to the program::
 
-    class Multiply(GiottoProgram):
-        controllers = ('http-get', 'cmd', 'irc')
-        model = [multiply, {'x': 10, 'y': 10, 'product': 100}]
-        cache = 3600
-        view = [ColoredMultiplyView]
+    manifest = ProgramManifest({
+        'multiply': GiottoProgram(
+            controllers = ('http-get', 'cmd', 'irc'),
+            model=[multiply, {'x': 10, 'y': 10, 'product': 100}],
+            cache=3600,
+            view=ColoredMultiplyView
+        )
+    })
 
 Restart the cache server (this time leave off the ``--model-mock`` flag).
 Also, add a pause to the model method::
@@ -197,10 +203,7 @@ Configure the cache by setting the following to the ``cache``
 variable in the config file::
 
     from giotto.cache import CacheWithMemcache
-
-    cache = CacheWithMemcache(
-        host='localhost'
-    )
+    cache = CacheWithMemcache(host='localhost')
 
 To use the redis cache, change the class to ``CacheWithRedis``.
 Now when you load a page, it will take 5 seconds for the first render,
