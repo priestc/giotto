@@ -2,6 +2,7 @@ import re
 import bcrypt
 
 from giotto.exceptions import InvalidInput
+from giotto.primitives import LOGGED_IN_USER
 from giotto import config
 
 from sqlalchemy import Column, String
@@ -22,12 +23,16 @@ class User(config.Base):
         requirements
         """
         r = getattr(config, 'auth_regex', r'^[\d\w]{4,30}$')
+        errors = {}
         if not re.match(r, self.username):
-            raise InvalidInput('Username not valid')
+            errors['username'] = {'message': 'Username not valid', 'value': self.username}
         if len(self.raw_password) < 4:
-            raise InvalidInput('Password much be at least 4 characters')
+            errors['password'] = {'message': 'Password much be at least 4 characters'}
         if config.session.query(User).filter_by(username=self.username).first():
-            raise InvalidInput('Username already exists')
+            errors['username'] = {'message': 'Username already exists', 'value': self.username}
+
+        if errors:
+            raise InvalidInput(data=errors)
 
     @classmethod
     def get_user_by_password(cls, username, password):
@@ -48,10 +53,11 @@ class User(config.Base):
     @classmethod
     def get_user_by_hash(cls, username, hash_):
         return config.session.query(cls)\
-                      .filter_by(username=username, password=hash_).first()
+                     .filter_by(username=username, password=hash_)\
+                     .first()
 
     @classmethod
-    def new_user(cls, username, password):
+    def create(cls, username, password):
         """
         Create a new user instance
         """
@@ -67,3 +73,23 @@ class User(config.Base):
 
     def __repr__(self):
         return "<User('%s', '%s')>" % (self.username, self.password)
+
+def is_authenticated(message):
+    """
+    Is this request coming from a user who is logged in? This is a meta function.
+    When adding this to a program, call it with the mesage you want to be displayed
+    when no user is found.
+    """
+    def inner(user=LOGGED_IN_USER):
+        if not user:
+            raise InvalidInput(message)
+        return {'user', user}
+    return inner
+
+def basic_register(username, password, password2):
+    if password != password2:
+        raise InvalidInput(data={'password': {'message': "Passwords do not match"},
+                                 'username': {'value': username}})
+    return User.create(username, password)
+
+

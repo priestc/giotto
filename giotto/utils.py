@@ -3,45 +3,20 @@ from collections import defaultdict
 
 import giotto
 
-def itersubclasses(cls, _seen=None):
+class Mock(object):
     """
-    itersubclasses(cls)
-
-    Generator over all subclasses of a given class, in depth first order.
-
-    >>> list(itersubclasses(int)) == [bool]
-    True
-    >>> class A(object): pass
-    >>> class B(A): pass
-    >>> class C(A): pass
-    >>> class D(B,C): pass
-    >>> class E(D): pass
-    >>> 
-    >>> for cls in itersubclasses(A):
-    ...     print(cls.__name__)
-    B
-    D
-    E
-    C
-    >>> # get ALL (new-style) classes currently defined
-    >>> [cls.__name__ for cls in itersubclasses(object)] #doctest: +ELLIPSIS
-    ['type', ...'tuple', ...]
+    This class creates an object that will replace the error object when no error
+    object exists. It allows arbirtary attribute getting without raising an
+    attribute error.
+    >>> m = Mock()
+    >>> m.nothing.empty.made_up.wut.lol
+    ''
     """
-    
-    if not isinstance(cls, type):
-        raise TypeError('itersubclasses must be called with '
-                        'new-style classes, not %.100r' % cls)
-    if _seen is None: _seen = set()
-    try:
-        subs = cls.__subclasses__()
-    except TypeError: # fails only when cls is type
-        subs = cls.__subclasses__(cls)
-    for sub in subs:
-        if sub not in _seen:
-            _seen.add(sub)
-            yield sub
-            for sub in itersubclasses(sub, _seen):
-                yield sub
+    def __getattribute__(self, item):
+        return Mock()
+
+    def __str__(self):
+        return ''
 
 def parse_kwargs(kwargs):
     """
@@ -90,4 +65,3 @@ def get_config(obj, alternative=None):
         return getattr(giotto.config, obj, alternative)
     else:
         return getattr(giotto.config, obj)
-

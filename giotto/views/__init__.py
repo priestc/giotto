@@ -5,7 +5,7 @@ import magic
 from jinja2 import Template
 from jinja2.exceptions import TemplateNotFound
 from giotto.exceptions import NoViewMethod
-from giotto.utils import get_config
+from giotto.utils import get_config, Mock
 
 class GiottoView(object):
     """
@@ -17,7 +17,10 @@ class GiottoView(object):
         result == the output from the model
         """
         self.result = result
-        self.errors = errors
+        if errors:
+            self.errors = errors
+        else:
+            self.errors = Mock()
 
     def render(self, mimetype):
         status = 200
@@ -138,7 +141,7 @@ class BasicView(GiottoView):
             to_iterate = result.iteritems()
         else:
             to_iterate = result.__dict__.iteritems()
-        
+
         for key, value in to_iterate:
             row = "{0} - {1}".format(key, value)
             out.append(row)

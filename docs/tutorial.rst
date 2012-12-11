@@ -40,10 +40,6 @@ Inside the ``manifest.py`` file, you will see the following::
         def text_plain(self, result):
             return "{{ obj.x }} * {{ obj.y }} == {{ obj.product }}"
 
-        def application_json(self, result):
-            import json
-            return json.dumps(result)
-
         def text_html(self, result):
             return """<!DOCTYPE html>
             <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>

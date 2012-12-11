@@ -1,10 +1,16 @@
-class InvalidInput(Exception):
-    def __init__(self, data):
-        self.__dict__ = data
+from collections import defaultdict
+from giotto.utils import Mock
 
-    def __str__(self):
-        ## for the cmd controller
-        return self.__dict__['message']
+class InvalidInput(Exception):
+    def __init__(self, message=None, data=None):
+        if not data:
+            self.__dict__ = defaultdict(lambda: '', {'message': message})
+        else:
+            self.__dict__ = defaultdict(lambda: '', data)
+
+    def __getitem__(self, item):
+        if not item in self.__dict__:
+            return Mock()
 
 class InvalidProgram(Exception):
     pass

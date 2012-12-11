@@ -58,6 +58,7 @@ class GiottoProgram(object):
         Request comes from the controller. Returned is a request.
         controller arg is the name of the controller.
         """
+        controller = "".join(controller.split('-')[:1])
         for m in self.input_middleware:
             to_execute = getattr(m(), controller)
             if to_execute:
@@ -65,6 +66,7 @@ class GiottoProgram(object):
         return request
 
     def execute_output_middleware_stream(self, request, response, controller):
+        controller = "".join(controller.split('-')[:1]) # 'http-get' -> 'http'
         for m in self.output_middleware:
             to_execute = getattr(m(), controller, None)
             if to_execute:

@@ -34,7 +34,7 @@ class SetAuthenticationCookie(object):
     are used to authenticate each subsequent request.
     """
     def http(self, request, response):
-        if request.user:
+        if hasattr(request, 'user') and request.user:
             response.set_cookie('username', request.user.username)
             response.set_cookie('password', request.user.password)
         return response

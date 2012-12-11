@@ -13,7 +13,6 @@ class MakeTables(GiottoProgram):
     Program for creating the database tables for all imported models. Use this
     program internaly only. Do not hook it up through HTTP.
     """
-    name = "make_tables"
     controllers = ('cmd', )
     model = [make_tables]
     view = BasicView

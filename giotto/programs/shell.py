@@ -53,5 +53,5 @@ class Shell(GiottoProgram):
     Display a list of all instaled programs for all controllers for the
     currently invoked application.
     """
-    controllers = ('cmd')
+    controllers = ('cmd', )
     model = [shell]
