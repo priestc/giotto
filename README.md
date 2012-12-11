@@ -3,11 +3,14 @@
 What is Giotto?
 ===============
 
-Giotto is a python application framework. Not quite a web framework, but it does
-include plumbing for deploying applications through a web server.
+Giotto is a python web framework. It encourages a functional style where model, view and controlelr code is strongly decoupled.
 
-Giotto's goal is to promote wriring application that have explicitely defined boundaries between
-the application's model, view and controller layers.
+Key Features of Giotto include:
+
+* "Your code calls the framework" style over "Framework calls your code" style
+* Generic views, generic models and multiple pluggable controllers
+* Automatic URL routing
+* Extensible functionality
 
 To discuss Giotto, please visit the [google group](https://groups.google.com/forum/#!forum/giotto-framework)
 To read Giotto's documentation, go [here](http://giotto.readthedocs.org/en/latest/index.html)
