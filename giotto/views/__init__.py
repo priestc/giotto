@@ -139,6 +139,8 @@ class BasicView(GiottoView):
         out = []
         if hasattr(result, 'iteritems'):
             to_iterate = result.iteritems()
+        elif hasattr(result, 'lower'):
+            return {'body': result, 'mimetype': "text/plain"}
         else:
             to_iterate = result.__dict__.iteritems()
 
