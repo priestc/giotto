@@ -34,7 +34,7 @@ class AuthenticationMiddleware(object):
         return request
 
 
-class SetAuthenticationCookie(object):
+class SetAuthenticationCookies(object):
     """
     Place this middleware class in the output stream to set the cookies that
     are used to authenticate each subsequent request.

@@ -29,6 +29,12 @@ Login page
 
 To set up a login page, add the following to your project's manifest::
 
+    from giotto.contrib.auth.models import is_authenticated
+    from giotto.contrib.auth.middleware import SetAuthenticationCookies
+    from giotto.control import Redirection
+    from giotto.programs import GiottoProgram
+    from giotto.views import JinjaTemplateView
+
     {
         'login': [
             GiottoProgram(
@@ -41,7 +47,7 @@ To set up a login page, add the following to your project's manifest::
                 input_middleware=[AuthenticationMiddleware],
                 model=[is_authenticated("Invalid username or password")],
                 view=Redirection('/'),
-                output_middleware=[SetAuthenticationCookie],
+                output_middleware=[SetAuthenticationCookies],
             ),
         ],
     }
@@ -138,6 +144,7 @@ Adding a logout program is very simple, just add this to your project's manifest
     from giotto.programs import GiottoProgram
     from giotto.control import Redirection
     from giotto.contrib.auth.middleware import LogoutMiddleware
+
     {
         'logout': GiottoProgram(
             view=Redirection('/'),
@@ -181,6 +188,9 @@ It may be convenient to create a subclass of ``GiottoProgram`` with ``Authentica
     class AuthProgram(GiottoProgram):
         input_middleware=[AuthenticationMiddleware]
 
+    def show_logged_in_user(user=LOGGED_IN_USER):
+        return {'user': user}
+
      manifest = ProgramManifest({
         'show_logged_in': AuthProgram(
             model=[show_logged_in_user],
@@ -190,11 +200,15 @@ It may be convenient to create a subclass of ``GiottoProgram`` with ``Authentica
 
 You can also take advantage of a few middleware classes::
 
-``AuthenticatedOrRedirect`` and ``NotAuthenticatedOrRedirect``
---------------------------------------------------------------
+AuthenticatedOrRedirect and NotAuthenticatedOrRedirect
+------------------------------------------------------
 
 These middleware classes, if added to the input middleware stream,
 will redirect the request to another program (via 302 redirect) depending on authentication status::
+
+    from giotto.programs import GiottoProgram
+    from giotto.contrib.auth.middleware import AuthenticationMiddleware, NotAuthenticatedOrRedirect
+    from giotto.views import JinjaTemplateView
 
     GiottoProgram(
         input_middleware=[AuthenticationMiddleware, NotAuthenticatedOrRedirect('/')],
@@ -209,6 +223,10 @@ AuthenticatedOrDie
 ------------------
 
 This middleware class will return a 403 (error page) if the request is not authenticated::
+
+    from giotto.programs import GiottoProgram
+    from giotto.contrib.auth.middleware import AuthenticationMiddleware, AuthenticatedOrDie
+    from giotto.views import JinjaTemplateView
 
     {
         'new': [
