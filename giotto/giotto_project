@@ -16,7 +16,8 @@ parser.add_argument('--irc', action='store_true', help='Add the IRC controller')
 parser.add_argument('--cmd', action='store_true', help='Add the command line controller')
 args = parser.parse_args()
 
-config_template = '''from sqlalchemy import create_engine
+config_template = '''import os
+from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
@@ -27,6 +28,8 @@ engine = create_engine('sqlite+pysqlite:///file.db', module=sqlite)
 
 session = sessionmaker(bind=engine)()
 cache = None
+
+project_path = os.path.dirname(os.path.abspath(__file__))
 
 from jinja2 import Environment, FileSystemLoader
 jinja2_env = Environment(loader=FileSystemLoader(project_path))'''
@@ -46,8 +49,14 @@ from manifest import manifest
 '''
 
 blank_application = '''from giotto.programs import GiottoProgram, ProgramManifest
+from giotto.views import BasicView
 
-# define programs here'''
+manifest = ProgramManifest({
+    'hello': GiottoProgram(
+        model=[lambda: "hello world"],
+        view=BasicView
+    )
+})'''
 
 try:
     open('manifest.py', 'r')

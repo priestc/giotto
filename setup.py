@@ -20,6 +20,7 @@ setup(
     license='LICENSE',
     install_requires=[
         'werkzeug',
+        'irc',
         'python-magic',
         'jinja2',
         'py-bcrypt',
