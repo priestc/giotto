@@ -43,6 +43,14 @@ class SetAuthenticationCookies(object):
         if hasattr(request, 'user') and request.user:
             response.set_cookie('username', request.user.username)
             response.set_cookie('password', request.user.password)
+        elif 'password' in request.form and 'password' in request.form:
+            # user just registered.
+            username = request.form['username']
+            password = request.form['password']
+            user = User.get_user_by_password(username, password)
+            response.set_cookie('username', user.username)
+            response.set_cookie('password', user.password)
+
         return response
 
     def cmd(self, request, response):

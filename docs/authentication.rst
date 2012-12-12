@@ -229,12 +229,11 @@ This middleware class will return a 403 (error page) if the request is not authe
     from giotto.views import JinjaTemplateView
 
     {
-        'new': [
-            GiottoProgram(
-                input_middleware=[AuthenticationMiddleware, AuthenticatedOrDie],
-                view=JinjaTemplateView('new_blog.html'),
-                controllers=('http-get',),
-            ),
+        'new': GiottoProgram(
+            input_middleware=[AuthenticationMiddleware, AuthenticatedOrDie],
+            view=JinjaTemplateView('new_blog.html'),
+            controllers=('http-get',),
+        ),
     }
 
 In this example, only authenticated users can create a new blog. All other users will get a 403 page.
