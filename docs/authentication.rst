@@ -15,66 +15,227 @@ This user class is not intended to store all information that an application dev
 The developer is meant to create their own user profile table that connects to the User table via foreign key.
 
 Enabling Authentication for your application
---------------------------------------------
+============================================
 
-All you need to do is import the login and registration programs into your application's ``programs.py`` file::
+An authenticated application typically contans three parts:
 
-    from giotto.contrib.auth.programs import (
-        UserRegistrationSubmit, UserRegistrationForm, LoginForm, LoginSubmit
-    )
+1. A registration page.
+2. A login page.
+3. A log out page.
+4. Some way to authenticate requests so other parts of the application can utilize authentication.
 
-Then, to register a new account, point your browser to the ``register`` program.
-Enter your username and password and click submit. This will create a new user in the system.
-Usernames, by default have to conform to the following regex: ``^[\d\w]{4,30}$``.
-This can be changed by adding a regex string to ``auth_regex`` in your project's config file.
+Login page
+==========
 
-To login, point your browser to the ``login`` program. Enter your credentials.
-If the username/password you entered match a row int he user table, you will be logged in.
+To set up a login page, add the following to your project's manifest::
 
-How Authentication works under the hood
----------------------------------------
-When using the HTTP controller, loggin in sets two cookies, ``username`` and ``password``.
-The password cookie is not a raw password. It is the hashed cookie, hashed by bcrypt.
+    {
+        'login': [
+            GiottoProgram(
+                input_middleware=[AuthenticationMiddleware, NotAuthenticatedOrRedirect('/')],
+                controllers=('http-get',),
+                view=JinjaTemplateView('login.html'),
+            ),
+            GiottoProgram(
+                controllers=('http-post',),
+                input_middleware=[AuthenticationMiddleware],
+                model=[is_authenticated("Invalid username or password")],
+                view=Redirection('/'),
+                output_middleware=[SetAuthenticationCookie],
+            ),
+        ],
+    }
 
-To authenticate this username/password cookie,
-add the ``AuthenticationMiddleware`` to the input_middleware stream of your program.
-This middleware class will inspect the cookies, and add a ``user`` attribute to the request.
-Requests coming through this middleware that aren't authenticated will result in a ``request.user`` value that is ``None``.
+The first program handles generating the login form.
+The second program handles the submitted data from the login form.
+You may want to change the name of the template that is passed into the first program.
+The login template must contain a form that POSTS's its data to a page of the same name of the form.
+The name of the programs (``login`` in this example) can be anything.
+You can also change the path that the second program redirects to after successful registration.
+In this case, on successful registration, the user is redirected to the root program: ``/``.
 
-To access the authenticated user from within ght model, use the LOGGED_IN_USER primitive::
+The login template should look a little like this::
+
+    <!DOCTYPE html>
+    <html>
+        <body>
+            <h1>Login</h1>
+            {% if errors %}
+                <span style="color: red">{{ errors.message }}</span>
+            {% endif %}
+            <form method="post">
+                username: <input type="text" name="username">
+                <br>
+                password: <input type="password" name="password">
+                <br>
+                <input type="submit">
+            </form>
+        </body>
+    </html>
+
+The value of ``{{ errors }}`` will be empty when the login form is first rendered.
+If the data that is submitted is not valid (it does not match an existing user/pasword),
+the form is re-generated with the ``errors`` object containing error information.
+
+Register page
+=============
+
+To add a registration page to your application, add the following to your manifest::
+
+    from giotto.contrib.auth.models import basic_register
+    from giotto.contrib.auth.middleware import SetAuthenticationCookies
+    from giotto.control import Redirection
+    from giotto.programs import GiottoProgram
+    from giotto.views import JinjaTemplateView
+
+    {
+        'register': [
+            GiottoProgram(
+                controllers=('http-get',),
+                view=JinjaTemplateView('register.html'),
+            ),
+            GiottoProgram(
+                controllers=('http-post',),
+                model=[basic_register],
+                view=Redirection('/'),
+                output_middleware=[SetAuthenticationCookies],
+            ),
+        ],
+    }
+
+The register template should look like this::
+
+    <!DOCTYPE html>
+    <html>
+        <body>
+            <h1>Register</h1>
+            {% if errors %}
+                <span style="color: red">{{ errors.message }}</span>
+            {% endif %}
+            <form method="post">
+                <span style="color: red">{{ errors.username.message }}</span><br>
+                username: <input type="text" name="username" value="{{ errors.username.value }}">
+                <br>
+                <span style="color: red">{{ errors.password.message }}</span><br>
+                password: <input type="password" name="password">
+                password again: <input type="password" name="password2">
+                <br>
+                <input type="submit">
+            </form>
+        </body>
+    </html>
+
+The value of the ``errors`` object will have a ``password`` and ``username`` object,
+which will each contain ``message`` and ``value`` keys.
+``message`` contains the error message, and ``value`` contain the previous value that was entered.
+
+
+Logout Page
+===========
+
+Adding a logout program is very simple, just add this to your project's manifest::
+
+    from giotto.programs import GiottoProgram
+    from giotto.control import Redirection
+    from giotto.contrib.auth.middleware import LogoutMiddleware
+    {
+        'logout': GiottoProgram(
+            view=Redirection('/'),
+            output_middleware=[LogoutMiddleware],
+        ),
+    }
+
+You can change the url that you get redirected to after logging out by changing the value passed into ``Redirection``.
+
+Interacting with authentication with other programs
+===================================================
+
+To access the currently logged in user from within a model function,
+add the ``LOGGED_IN_USER`` primitive to your model function's arguments::
 
     from giotto.primitives import LOGGED_IN_USER
+    from giotto.programs import GiottoProgram, ProgramManifest
+    from giotto.contrib.auth.middleware import AuthenticationMiddleware
+    from giotto.views import BasicView
 
-    def some_model_function(user=LOGGED_IN_USER):
+    def show_logged_in_user(user=LOGGED_IN_USER):
         return {'user': user}
 
-If the program is accessed by a logged in uer,
-the value of ``LOGGED_IN_USER`` will be the User object that corresponds to the currently logged in user.
-If the program is accessed by a non-logged in user, ``LOGGED_IN_USER`` will be ``None``.
+    manifest = ProgramManifest({
+        'show_logged_in': GiottoProgram(
+            input_middleware=[AuthenticationMiddleware],
+            model=[show_logged_in_user]
+            view=BasicView,
+        )
+    })
 
-Another middleware class, ``SetAuthenticationCookie`` is put in the output middleware stream.
-It's job is to set the cookies so each subsequent request can be authenticated.
-By default, the authentication cookie expires after 30 days.
-This value can be changed by setting the ``auth_cookie_expire`` value to the number of hours the cookie shoudl live for,
-in your project's ``config.py``.
+The controller knows how to extract ``LOGGED_IN_USER`` from the incoming request.
+This primitive can only be used if the ``AuthenticationMiddleware`` is added to the input middleware stream.
+All programs that wish to take advantage of the authentication system need to have ``AuthenticationMiddleware`` added.
+It may be convenient to create a subclass of ``GiottoProgram`` with ``AuthenticationMiddleware`` baked in::
 
-Extending the views on the login/register programs
---------------------------------------------------
+    from giotto.programs import GiottoProgram, ProgramManifest
+    from giotto.contrib.auth.middleware import AuthenticationMiddleware
+    from giotto.views import BasicView
 
-To extend the way the default login looks, subclass the program with your own view defined::
+    class AuthProgram(GiottoProgram):
+        input_middleware=[AuthenticationMiddleware]
 
-    class MyLogin(LoginForm):
-        view = MyLoginView
+     manifest = ProgramManifest({
+        'show_logged_in': AuthProgram(
+            model=[show_logged_in_user]
+            view=BasicView,
+        )
+    })
 
-    class MyRegisterForm(UserRegistrationForm):
-        view = MyRegisterView
+You can also take advantage of a few middleware classes::
 
-or by defining the whole program yourself::
+``AuthenticatedOrRedirect`` and ``NotAuthenticatedOrRedirect``
+--------------------------------------------------------------
 
-    class LoginForm(GiottoProgram):
-        controllers = ('http-get', )
-        model = []
-        view = MyRegisterView
+These middleware classes, if added to the input middleware stream,
+will redirect the request to another program (via 302 redirect) depending on authentication status::
+
+    GiottoProgram(
+        input_middleware=[AuthenticationMiddleware, NotAuthenticatedOrRedirect('/')],
+        controllers=('http-get',),
+        view=JinjaTemplateView('login.html'),
+    ),
+
+In this example, only non authenticated users will see the ``login.html`` page.
+All authenticated users will get redirected to the root program.
+
+AuthenticatedOrDie
+------------------
+
+This middleware class will return a 403 (error page) if the request is not authenticated::
+
+    {
+        'new': [
+            GiottoProgram(
+                input_middleware=[AuthenticationMiddleware, AuthenticatedOrDie],
+                view=JinjaTemplateView('new_blog.html'),
+                controllers=('http-get',),
+            ),
+    }
+
+In this example, only authenticated users can create a new blog. All other users will get a 403 page.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 .. _SQLAlchemy: http://www.sqlalchemy.org/
 .. _bcrypt: http://www.mindrot.org/projects/py-bcrypt/

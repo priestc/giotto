@@ -88,6 +88,7 @@ def NotAuthenticatedOrRedirect(invocation, args=[], kwargs={}):
             return Redirection(invocation, args, kwargs)
     return NotAuthenticatedOrRedirect
 
+
 class LogoutMiddleware(object):
     def http(self, request, response):
         response.delete_cookie('username')
