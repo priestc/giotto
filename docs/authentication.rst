@@ -164,7 +164,7 @@ add the ``LOGGED_IN_USER`` primitive to your model function's arguments::
     manifest = ProgramManifest({
         'show_logged_in': GiottoProgram(
             input_middleware=[AuthenticationMiddleware],
-            model=[show_logged_in_user]
+            model=[show_logged_in_user],
             view=BasicView,
         )
     })
@@ -183,7 +183,7 @@ It may be convenient to create a subclass of ``GiottoProgram`` with ``Authentica
 
      manifest = ProgramManifest({
         'show_logged_in': AuthProgram(
-            model=[show_logged_in_user]
+            model=[show_logged_in_user],
             view=BasicView,
         )
     })
