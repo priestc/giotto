@@ -11,11 +11,18 @@ setup(
     packages=[
         'giotto',
         'giotto.controllers',
+        'giotto.programs',
         'giotto.contrib.auth',
         'giotto.contrib.static',
         'giotto.views'
     ],
     scripts=['giotto/giotto_project'],
     license='LICENSE',
-    install_requires=['werkzeug', 'python-magic', 'jinja2', 'py-bcrypt', 'decorator'],
+    install_requires=[
+        'werkzeug',
+        'python-magic',
+        'jinja2',
+        'py-bcrypt',
+        'sqlalchemy',
+    ],
 )
