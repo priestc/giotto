@@ -65,7 +65,7 @@ class AuthenticatedOrDie(object):
 
 def AuthenticatedOrRedirect(invocation, args=[], kwargs={}):
     """
-    Meta middleware class that redirects if the user is not logged in.
+    Middleware class factory that redirects if the user is not logged in.
     Otherwise, nothing is effected.
     """
     class AuthenticatedOrRedirect(object):
@@ -78,7 +78,7 @@ def AuthenticatedOrRedirect(invocation, args=[], kwargs={}):
 
 def NotAuthenticatedOrRedirect(invocation, args=[], kwargs={}):
     """
-    Meta middleware class that redirects if the user is not logged in.
+    Middleware class factory that redirects if the user is not logged in.
     Otherwise, nothing is effected.
     """
     class NotAuthenticatedOrRedirect(object):

@@ -2,8 +2,9 @@ import inspect
 import re
 import os
 
-from giotto.exceptions import ProgramNotFound, MockNotFound
+from giotto.exceptions import ProgramNotFound, MockNotFound, ControlMiddlewareInterrupt
 from giotto.utils import super_accept_to_mimetype
+from giotto.control import GiottoControl
 
 class GiottoProgram(object):
     name = None
@@ -62,7 +63,11 @@ class GiottoProgram(object):
         for m in self.input_middleware:
             to_execute = getattr(m(), controller)
             if to_execute:
-                request = to_execute(request)
+                result = to_execute(request)
+                if GiottoControl in type(result).mro():
+                    # a middleware class returned a control object (redirection, et al.)
+                    raise ControlMiddlewareInterrupt(control=result)
+                request = result
         return request
 
     def execute_output_middleware_stream(self, request, response, controller):

@@ -2,7 +2,7 @@ import inspect
 import json
 
 from giotto.programs import GiottoProgram
-from giotto.exceptions import InvalidInput, ProgramNotFound, MockNotFound
+from giotto.exceptions import InvalidInput, ProgramNotFound, MockNotFound, ControlMiddlewareInterrupt
 from giotto.primitives import GiottoPrimitive
 from giotto.cache import DummyCache
 
@@ -25,6 +25,8 @@ def do_argspec(source):
     return args, kwargs
 
 class GiottoController(object):
+    middleware_interrupt = None
+    
     def __init__(self, request, manifest, model_mock=False, errors=None):
         from giotto import config
         self.request = request
@@ -43,8 +45,14 @@ class GiottoController(object):
         self.mimetype = parsed['superformat_mime'] or self.mimetype_override() or self.default_mimetype
 
     def get_response(self):
+        control = None
         name = self.get_controller_name()
-        self.request = self.program.execute_input_middleware_stream(self.request, name)
+        try:
+            self.request = self.program.execute_input_middleware_stream(self.request, name)
+        except ControlMiddlewareInterrupt as exc:
+            # A middleware class returned a control object, save it to the class.
+            # The get_data_response method will use it.
+            self.middleware_interrupt = exc.control
 
         response = self.get_concrete_response()
 
@@ -55,6 +63,9 @@ class GiottoController(object):
         Execute the model and view, and handle the cache.
         Returns controller-agnostic response data.
         """
+
+        if self.middleware_interrupt:
+            return self.middleware_interrupt
 
         if self.model_mock:
             data = self.program.get_model_mock()
@@ -105,7 +116,7 @@ class GiottoController(object):
         controller = self.get_controller_name()
         model = self.get_program_name()
         data = self.get_data()
-        return "<%s %s - %s - %s>" % (
+        return "<%s %s - %s - %s>" % (  
             self.__class__.__name__, controller, model, data
         )
 

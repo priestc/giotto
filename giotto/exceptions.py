@@ -29,3 +29,11 @@ class MockNotFound(Exception):
 
 class NotAuthorized(Exception):
     pass
+
+class ControlMiddlewareInterrupt(Exception):
+    def __init__(self, message=None, control=None):
+        self.control = control
+        self.message = message
+
+        # render the control object now because this object will never
+        self.control(None).render('some_mimetype')
