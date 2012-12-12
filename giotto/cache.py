@@ -40,7 +40,7 @@ class CacheWithRedis(GiottoCache):
         self.redis = redis.StrictRedis(host=host, port=port, db=db)
 
     def set(self, key, obj, expire):
-        self.redis.setex(key, expire, pickel.dumps(obj))
+        self.redis.setex(key, expire, pickle.dumps(obj))
 
     def get(self, key):
         pickled_value = self.redis.get(key)

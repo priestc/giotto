@@ -68,21 +68,22 @@ class GiottoController(object):
             return self.middleware_interrupt
 
         if self.model_mock:
-            data = self.program.get_model_mock()
+            model_data = self.program.get_model_mock()
         else:
             args, kwargs = self.program.get_model_args_kwargs()
             data = self.get_data_for_model(args, kwargs)
 
-        if self.program.cache and not self.errors:
-            key = self.get_cache_key(data)
-            hit = self.cache.get(key)
-            if hit:
-                return hit
+            if self.program.cache and not self.errors:
+                key = self.get_cache_key(data)
+                hit = self.cache.get(key)
+                if hit:
+                    return hit
         
-        model_data = self.program.execute_model(data)
+            model_data = self.program.execute_model(data)
+        
         response = self.program.execute_view(model_data, self.mimetype, self.errors)
 
-        if self.program.cache and not self.errors:
+        if self.program.cache and not self.errors and not self.model_mock:
             self.cache.set(key, response, self.program.cache)
 
         return response
