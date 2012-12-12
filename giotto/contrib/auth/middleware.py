@@ -1,7 +1,13 @@
 from .models import User
 from giotto.exceptions import NotAuthorized
+from giotto.control import Redirection
 
 class AuthenticationMiddleware(object):
+    """
+    This input middleware class must preceed any other authentication middleware class.
+    It is used to extract authentiction information from the request, and
+    verify that the credientials are correct.
+    """
     def http(self, request):
         user = None
         if request.method == 'POST':
@@ -46,7 +52,7 @@ class SetAuthenticationCookie(object):
         return response
 
 
-class MustBeLoggedIn(object):
+class AuthenticatedOrDie(object):
     """
     Put this in the input middleware stream to fail any requests that aren't
     made by authenticated users
@@ -54,8 +60,36 @@ class MustBeLoggedIn(object):
     def http(self, request):
         if not request.user:
             raise NotAuthorized('Must be Logged in for this program')
+        return request
+
+
+def AuthenticatedOrRedirect(invocation, args=[], kwargs={}):
+    """
+    Meta middleware class that redirects if the user is not logged in.
+    Otherwise, nothing is effected.
+    """
+    class AuthenticatedOrRedirect(object):
+        def http(self, request):
+            if request.user:
+                return request
+            return Redirection(invocation, args, kwargs)
+    return AuthenticatedOrRedirect
+
+
+def NotAuthenticatedOrRedirect(invocation, args=[], kwargs={}):
+    """
+    Meta middleware class that redirects if the user is not logged in.
+    Otherwise, nothing is effected.
+    """
+    class NotAuthenticatedOrRedirect(object):
+        def http(self, request):
+            if not request.user:
+                return request
+            return Redirection(invocation, args, kwargs)
+    return NotAuthenticatedOrRedirect
 
 class LogoutMiddleware(object):
     def http(self, request, response):
         response.delete_cookie('username')
         response.delete_cookie('password')
+        return response

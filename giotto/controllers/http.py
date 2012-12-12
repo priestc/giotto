@@ -127,10 +127,11 @@ def make_duplicate_request(request):
     identical reuet object with immutable values so it can be retried after a
     POST failure.
     """
-    class Req(object):
+    class FakeRequest(object):
         method = 'GET'
         path = request.path
         headers = request.headers
         args = request.args
+        cookies = request.cookies
         is_xhr = request.is_xhr
-    return Req()
+    return FakeRequest()
