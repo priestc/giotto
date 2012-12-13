@@ -8,17 +8,20 @@ Cache is a way to improve performance in your application.
 It works by storing the return value of the model and view, so subsequent requests can skip the calculation.
 
 Configuring cache
------------------
-In your project's ``config.py``, add the following::
+=================
+To enable caching for your application, set a value for the ``cache`` variable in your project's ``config.py`` file.
+The value must be an instance of a class derived from the ``GiottoKeyValue`` class.
 
-    from giotto.keyvalue import RedisKeyValue
-    cache = RedisKeyValue() 
-
+RedisKeyValue
+-------------
 By default, this backend tries to connect to redis running on ``localhost``, port ``6379``.
 To change this, pass in connection data to the constructor::
 
+    from giotto.keyvalue import RedisKeyValue
     cache = RedisKeyValue(host="10.10.0.5", port=4000)
 
+MemcacheKeyValue
+----------------
 Additionally, if you want to use memcache::
 
     from giotto.keyvalue import MemcacheKeyValue
@@ -29,25 +32,32 @@ To change this, pass in connection data to the constructor::
 
     cache = MemcacheKeyValue(hosts=['10.10.0.5:11211'])
 
+DatabaseKeyValue
+----------------
 You can also use a cache backend that stores its data onto the database::
 
     from giotto.keyvalue import DatabaseKeyValue
     cache = DatabaseKeyValue(Base, session)
 
 You must pass in the SQLAlchemy ``Base`` class, as well as the SQLAlchemy session object.
+Before this backend can be used, you must run the ``make_tables`` program to create the database tables.
 
-For development, you can use the ``LocMemKeyValue`` which stores its data in a python dict::
+LocMemKeyValue
+--------------
+For development, you can use the ``LocMemKeyValue`` which stores its data internally in a python dictionary::
 
     from giotto.keyvalue import LocMemKeyValue
     cache = LocMemKeyValue()
 
 .. note::
-    ``LocMemKeyValue`` only saved data as long as the concrete controller lives.
-    While the http server is running, data will be saved,
+    ``LocMemKeyValue`` only saves data as long as the concrete controller lives.
+    For instance, while the http server is running, data will be saved,
     but if you restart the server, all data will be lost.
     This key/value backend is virtually useless with the command line controller,
     as all keys are cleared after each invocation.
 
+DummyKeyValue
+-------------
 You can also use ``DummyKeyValue`` which always returns misses for all keys::
 
     from giotto.keyvalue import DummyKeyValue
@@ -55,8 +65,7 @@ You can also use ``DummyKeyValue`` which always returns misses for all keys::
 
 
 Enabling caching for programs
------------------------------
-
+=============================
 To enable cache for a program, add a value (in seconds) to the ``cache`` attribute of the program instance::
 
     def square(x):
@@ -82,8 +91,7 @@ To configure the program to never expire cache values, set the ``cache`` value t
 To turn off cache, either omit the cache attribute, or set it to ``None``.
 
 Under the hood
---------------
-
+==============
 A cache key is constructed from each incoming request.
 The cache key is in the following format:
 
