@@ -18,16 +18,17 @@ args = parser.parse_args()
 
 config_template = '''import os
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from giotto.utils import better_base
 
-Base = declarative_base()
+Base = better_base()
 
 from sqlite3 import dbapi2 as sqlite
 engine = create_engine('sqlite+pysqlite:///file.db', module=sqlite)
 
 session = sessionmaker(bind=engine)()
 cache = None
+auth_session = None
 
 project_path = os.path.dirname(os.path.abspath(__file__))
 
