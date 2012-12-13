@@ -63,7 +63,6 @@ class GiottoController(object):
         Execute the model and view, and handle the cache.
         Returns controller-agnostic response data.
         """
-
         if self.middleware_interrupt:
             return self.middleware_interrupt
 

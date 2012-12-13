@@ -42,8 +42,9 @@ class DatabaseKeyValue(GiottoKeyValue):
             @classmethod
             def set(cls, key, obj, expire):
                 when_expire = datetime.datetime.now() + datetime.timedelta(seconds=expire)
-                data = {'value': pickle.dumps(obj), 'expires': when_expire}
-                new = session.query(cls).filter_by(key=key).update(data)
+                data = {'key': key, 'value': pickle.dumps(obj), 'expires': when_expire}
+                new = cls(**data)
+                session.merge(new)
                 session.commit()
 
             @classmethod
@@ -64,7 +65,7 @@ class DatabaseKeyValue(GiottoKeyValue):
         return DBKeyValue.get(key)
 
     def set(self, key, obj, expire):
-        return  DBKeyValue.set(key, obj, expire)
+        return DBKeyValue.set(key, obj, expire)
 
 locmem = {}
 class LocMemKeyValue(GiottoKeyValue):
