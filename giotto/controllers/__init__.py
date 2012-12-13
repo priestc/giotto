@@ -41,6 +41,7 @@ class GiottoController(object):
         parsed = self.manifest.parse_invocation(invocation, name)
 
         self.program = parsed['program']
+        self.program.name = parsed['name']
         self.path_args = parsed['args']
         self.mimetype = parsed['superformat_mime'] or self.mimetype_override() or self.default_mimetype
 
