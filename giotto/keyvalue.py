@@ -1,6 +1,7 @@
 from collections import defaultdict
 import datetime
 import pickle
+from sqlalchemy import Column, String, DateTime
 
 try:
     import pylibmc
@@ -12,12 +13,58 @@ try:
 except ImportError:
     redis = None
 
+DBKeyValue = None
+
 class GiottoKeyValue(object):
     def set(self, key, obj):
         raise NotImplementedError
 
     def get(self, key, obj):
         raise NotImplementedError
+
+class DatabaseKeyValue(GiottoKeyValue):
+    def __init__(self, base, session):
+        """
+        Since we can't get the base class by importing it (base class defined in
+        the config file, which is where this class is initialized). The base
+        class must be passed in via this constructor. The SQLAlchemy model
+        is then passed back into the mosule scope where it can be used
+        by the DatabaseKeyValue backend.
+        """
+        if not base:
+            return
+        class _DBKeyValue(base):
+            __tablename__ = 'giotto_keyvalue'
+            key = Column(String, primary_key=True)
+            value = Column(String)
+            expires = Column(DateTime)
+
+            @classmethod
+            def set(cls, key, obj, expire):
+                when_expire = datetime.datetime.now() + datetime.timedelta(seconds=expire)
+                data = {'value': pickle.dumps(obj), 'expires': when_expire}
+                new = session.query(cls).filter_by(key=key).update(data)
+                session.commit()
+
+            @classmethod
+            def get(cls, key):
+                value = session.query(cls)\
+                               .filter_by(key=key)\
+                               .filter(cls.expires > datetime.datetime.now())\
+                               .first()
+                
+                if value:
+                    return pickle.loads(str(value.value))
+                return None
+
+        global DBKeyValue
+        DBKeyValue = _DBKeyValue
+
+    def get(self, key):
+        return DBKeyValue.get(key)
+
+    def set(self, key, obj, expire):
+        return  DBKeyValue.set(key, obj, expire)
 
 locmem = {}
 class LocMemKeyValue(GiottoKeyValue):
