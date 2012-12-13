@@ -14,12 +14,22 @@ In your project's ``config.py``, add the following::
     from giotto.keyvalue import RedisKeyValue
     cache = RedisKeyValue() 
 
-or if you want to use memcache::
+By default, this backend tries to connect to redis running on ``localhost``, port ``6379``.
+To change this, pass in connection data to the constructor::
+
+    cache = RedisKeyValue(host="10.10.0.5", port=4000)
+
+Additionally, if you want to use memcache::
 
     from giotto.keyvalue import MemcacheKeyValue
     cache = MemcacheKeyValue()
 
-or for development, you can use the ``LocMemKeyValue`` which stores its data in a python dict::
+By default, this backend tries to connect to memcache on ``localhost``, port ``11211``.
+To change this, pass in connection data to the constructor::
+
+    cache = MemcacheKeyValue(hosts=['10.10.0.5:11211'])
+
+For development, you can use the ``LocMemKeyValue`` which stores its data in a python dict::
 
     from giotto.keyvalue import LocMemKeyValue
     cache = LocMemKeyValue()
