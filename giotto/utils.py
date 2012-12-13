@@ -3,6 +3,7 @@ import string
 import random
 from collections import defaultdict
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
+from sqlalchemy.orm import class_mapper, ColumnProperty
 
 import giotto
 
@@ -77,11 +78,11 @@ def better_base():
         @classmethod
         def attribute_names(cls):
             return [prop.key for prop in class_mapper(cls).iterate_properties
-                if isinstance(prop, sqlalchemy.orm.ColumnProperty)]
+                if isinstance(prop, ColumnProperty)]
 
         def todict(self):
             attrs = self.attribute_names()
-            return [(x, getattr(self, attr)) for attr in attrs]
+            return [(attr, getattr(self, attr)) for attr in attrs]
 
     return BetterBase
 
