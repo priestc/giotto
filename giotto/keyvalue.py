@@ -1,4 +1,7 @@
+from collections import defaultdict
+import datetime
 import pickle
+
 try:
     import pylibmc
 except ImportError:
@@ -9,14 +12,39 @@ try:
 except ImportError:
     redis = None
 
-class GiottoCache(object):
+class GiottoKeyValue(object):
     def set(self, key, obj):
         raise NotImplementedError
 
     def get(self, key, obj):
         raise NotImplementedError
 
-class CacheWithMemcache(GiottoCache):
+locmem = {}
+class LocMemKeyValue(GiottoKeyValue):
+    """
+    KeyValue backend that stores everything in a python dict.
+    """
+    def get(self, key):
+        if key not in locmem:
+            return None
+
+        result = locmem[key]
+        expire = result[1]
+        obj = result[0]
+
+        if datetime.datetime.now() < expire:
+            return obj
+
+        del locmem[key]
+        return None # obj has expired.
+
+
+    def set(self, key, obj, expire):
+        when_expire = datetime.datetime.now() + datetime.timedelta(seconds=expire)
+        locmem[key] = [obj, when_expire]
+
+
+class MemcacheKeyValue(GiottoKeyValue):
     def __init__(self, host=['localhost'], behavior={}):
         if not pylibmc:
             raise ImportError('pylibmc not installed! install with: pip install pylibmc')
@@ -33,7 +61,7 @@ class CacheWithMemcache(GiottoCache):
     def get(self, key):
         return self.client.get(key)
 
-class CacheWithRedis(GiottoCache):
+class RedisKeyValue(GiottoKeyValue):
     def __init__(self, host='localhost', port=6379, db=0):
         if not redis:
             raise ImportError('redis python wrapper not installed! install with: pip install redis')
@@ -48,7 +76,7 @@ class CacheWithRedis(GiottoCache):
             return None
         return pickle.loads(pickled_value)
 
-class DummyCache(GiottoCache):
+class DummyKeyValue(GiottoKeyValue):
     """
     Cache that does not save nor return a hit ever. Used as a placeholder.
     """
