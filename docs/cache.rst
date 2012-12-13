@@ -47,10 +47,10 @@ To enable cache for a program, add a value (in seconds) to the ``cache`` attribu
 
     manifest = ProgramManifest({
         'squared': GiottoProgram(
-            controllers=('http-get', 'cmd')
-            model=[square]
-            cache=3600 # one hour
-            view=MyViewClass
+            controllers=('http-get', 'cmd'),
+            model=[square],
+            cache=3600, # one hour
+            view=MyViewClass,
         )
     })
 
