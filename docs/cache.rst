@@ -70,15 +70,15 @@ Under the hood
 A cache key is constructed from each incoming request.
 The cache key is in the following format:
 
-    (model arguments)(model name)(mimetype)
+    (model arguments)(program name)(mimetype)
 
 The output of the view is what gets stored under this key.
 In the example above, the cache key (if invoked from within a web browser), would be the following::
 
     invocation -> curl http://localhost:5000/my_program?x=12
-    cache key -> {'x': 12}(my_model)(text/html)
+    cache key -> {'x': 12}(my_program)(text/html)
 
 If invoked from within the commandline controller, the cache key would be the following::
 
     invocation -> ./giotto-cmd my_program x=12
-    cache key -> {'x': 12}(my_model)(text/cmd)
+    cache key -> {'x': 12}(my_program)(text/cmd)
