@@ -29,6 +29,13 @@ To change this, pass in connection data to the constructor::
 
     cache = MemcacheKeyValue(hosts=['10.10.0.5:11211'])
 
+You can also use a cache backend that stores its data onto the database::
+
+    from giotto.keyvalue import DatabaseKeyValue
+    cache = DatabaseKeyValue(Base, session)
+
+You must pass in the SQLAlchemy ``Base`` class, as well as the SQLAlchemy session object.
+
 For development, you can use the ``LocMemKeyValue`` which stores its data in a python dict::
 
     from giotto.keyvalue import LocMemKeyValue
