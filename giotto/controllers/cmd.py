@@ -88,10 +88,10 @@ class CMDController(GiottoController):
 
         if hasattr(stdout, 'write'):
             # returned is a file, print out the contents through stdout
-            print stdout.write()
+            print(stdout.write())
         else:
             for line in stdout:
-                print line
+                print(line)
 
         for line in response['stderr']:
             sys.stderr.write(line)

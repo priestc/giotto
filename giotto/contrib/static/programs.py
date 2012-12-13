@@ -1,6 +1,5 @@
 from cStringIO import StringIO
 from giotto.programs import GiottoProgram
-from giotto.utils import get_config
 from giotto.views import GiottoView
 
 class FileView(GiottoView):

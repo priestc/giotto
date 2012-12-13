@@ -1,5 +1,8 @@
 import argparse
+import string
+import random
 from collections import defaultdict
+from sqlalchemy.ext.declarative import declarative_base, declared_attr
 
 import giotto
 
@@ -55,13 +58,37 @@ def super_accept_to_mimetype(ext):
 def initialize_giotto(config):
     setattr(giotto, 'config', config)
 
+def random_string(n):
+    return ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(n))
 
-def get_config(obj, alternative=None):
+def better_base():
     """
-    Function for getting stuff from the config. Use this instead of importing
-    gitto.config directly because the later will produce an import error.
+    Return a better SQLAlchemy Base class, for making things a little easier to
+    work with.
     """
-    if alternative is not None:
-        return getattr(giotto.config, obj, alternative)
-    else:
-        return getattr(giotto.config, obj)
+    Base = declarative_base()
+    class BetterBase(Base):
+        __abstract__ = True
+
+        @declared_attr
+        def __tablename__(cls):
+            return "giotto_" + cls.__name__.lower()
+
+        @classmethod
+        def attribute_names(cls):
+            return [prop.key for prop in class_mapper(cls).iterate_properties
+                if isinstance(prop, sqlalchemy.orm.ColumnProperty)]
+
+        def todict(self):
+            attrs = self.attribute_names()
+            return [(x, getattr(self, attr)) for attr in attrs]
+
+    return BetterBase
+
+
+
+
+
+
+
+

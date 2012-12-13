@@ -1,6 +1,7 @@
 from .models import User
 from giotto.exceptions import NotAuthorized
 from giotto.control import Redirection
+from giotto import config
 
 class AuthenticationMiddleware(object):
     """
@@ -41,15 +42,24 @@ class SetAuthenticationCookies(object):
     """
     def http(self, request, response):
         if hasattr(request, 'user') and request.user:
-            response.set_cookie('username', request.user.username)
-            response.set_cookie('password', request.user.password)
+            username = request.user.username
+            password = request.user.password
+            user = User.get_user_by_hash(username, password)
         elif 'password' in request.form and 'password' in request.form:
             # user just registered.
             username = request.form['username']
             password = request.form['password']
             user = User.get_user_by_password(username, password)
-            response.set_cookie('username', user.username)
-            response.set_cookie('password', user.password)
+        
+        if not user:
+            raise Exception
+
+        session_key = random_string(15)
+        while not config.session.get(session_key):
+            session_key = random_string(15)
+        
+        config.session.set(session_key, user.username)
+        response.set_cookie('giotto_session', session_key)
 
         return response
 

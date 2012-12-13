@@ -5,7 +5,7 @@ import magic
 from jinja2 import Template
 from jinja2.exceptions import TemplateNotFound
 from giotto.exceptions import NoViewMethod
-from giotto.utils import get_config, Mock
+from giotto.utils import Mock
 
 class GiottoView(object):
     """
