@@ -38,10 +38,9 @@ class LocMemKeyValue(GiottoKeyValue):
         del locmem[key]
         return None # obj has expired.
 
-
     def set(self, key, obj, expire):
         when_expire = datetime.datetime.now() + datetime.timedelta(seconds=expire)
-        locmem[key] = [obj, when_expire]
+        locmem[key] = (obj, when_expire)
 
 
 class MemcacheKeyValue(GiottoKeyValue):

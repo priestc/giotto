@@ -11,31 +11,48 @@ Configuring cache
 -----------------
 In your project's ``config.py``, add the following::
 
-    from giotto.cache import CacheWithRedis
-    cache = CacheWithRedis() 
+    from giotto.keyvalue import RedisKeyValue
+    cache = RedisKeyValue() 
 
 or if you want to use memcache::
 
-    from giotto.cache import CacheWithMemcache
-    cache = CacheWithMemcache()
+    from giotto.keyvalue import MemcacheKeyValue
+    cache = MemcacheKeyValue()
 
-You can also add parameters to the ``CacheWith*`` class such as port and host.
+or for development, you can use the ``LocMemKeyValue`` which stores its data in a python dict::
+
+    from giotto.keyvalue import LocMemKeyValue
+    cache = LocMemKeyValue()
+
+.. note::
+    ``LocMemKeyValue`` only saved data as long as the concrete controller lives.
+    While the http server is running, data will be saved,
+    but if you restart the server, all data will be lost.
+    This key/value backend is virtually useless with the command line controller,
+    as all keys are cleared after each invocation.
+
+You can also use ``DummyKeyValue`` which always returns misses for all keys::
+
+    from giotto.keyvalue import DummyKeyValue
+    cache = DummyKeyValue()
 
 
 Enabling caching for programs
 -----------------------------
 
-To enable cache for a program, add a value (in seconds) to the ``cache`` attribute of your program class::
+To enable cache for a program, add a value (in seconds) to the ``cache`` attribute of the program instance::
 
-    def my_model(x):
+    def square(x):
         return {'x': x * x}
 
-    class MyProgram(GiottoProgram):
-        name = 'my_program'
-        controllers = ('http-get', 'cmd')
-        model = [my_model]
-        cache = 3600 # one hour
-        view = MyViewClass
+    manifest = ProgramManifest({
+        'squared': GiottoProgram(
+            controllers=('http-get', 'cmd')
+            model=[square]
+            cache=3600 # one hour
+            view=MyViewClass
+        )
+    })
 
 The first request that comes into this program will be calculated.
 The result of this calculation (the model's return value) will be stored in the cache.
