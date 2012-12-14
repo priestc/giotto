@@ -145,7 +145,7 @@ class ProgramManifest(object):
         # we looped through all programs and found no match, maybe one program
         # has no explicitly defined controller tag? If so return that.
         for program in result:
-            if not program.controllers:
+            if not program.controllers or '*' in program.controllers:
                 return program
 
         # we found the key, and looped through all programs, but the controller
