@@ -50,7 +50,7 @@ class CMDController(GiottoController):
     and the rest being commandline arguments.
     """
     name = 'cmd'
-    default_mimetype = 'text/cmd'
+    default_mimetype = 'text/x-cmd'
 
     def get_invocation(self):
         return self.request.argv[1]

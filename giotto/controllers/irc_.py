@@ -33,7 +33,7 @@ listen(manifest, config, model_mock=args.model_mock)"""
 
 class IRCController(GiottoController):
     name = 'irc'
-    default_mimetype = 'text/irc'
+    default_mimetype = 'text/x-irc'
 
     def get_invocation(self):
         return self.request.program
