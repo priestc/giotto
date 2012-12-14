@@ -6,24 +6,6 @@ from giotto.exceptions import InvalidInput, ProgramNotFound, MockNotFound, Contr
 from giotto.primitives import GiottoPrimitive
 from giotto.cache import DummyCache
 
-def do_argspec(source):
-    """
-    Inspect the model (or view in the case of no model) and return the args
-    and kwargs. This functin is necessary because argspec returns in a silly format
-    by default.
-    """
-    if hasattr(source, 'render'):
-        # if 'source' is a view object, try to get the render method,
-        # otherwise, just use the __call__ method.
-        source = source.render
-
-    argspec = inspect.getargspec(source)
-    kwargs = dict(zip(*[reversed(l) for l in (argspec.args, argspec.defaults or [])]))
-    args = [x for x in argspec.args if x not in kwargs.keys()]
-    if args and args[0] == 'cls':
-        args = args[1:]
-    return args, kwargs
-
 class GiottoController(object):
     middleware_interrupt = None
     
@@ -34,7 +16,6 @@ class GiottoController(object):
         self.cache = config.cache or DummyCache()
         self.errors = errors
         self.manifest = manifest
-        import debug
 
         # the program that corresponds to this invocation
         invocation = self.get_invocation()
