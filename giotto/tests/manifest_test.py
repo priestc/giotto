@@ -60,15 +60,15 @@ class ManifestTest(unittest.TestCase):
     def __init__(self, *a, **k):
         super(ManifestTest, self).__init__(*a, **k)
         self.manifest = ProgramManifest({
-            '': GiottoProgram(model="root"),
-            'prog1': GiottoProgram(model="one"),
+            '': GiottoProgram(model="root", controllers=('get', )),
+            'prog1': GiottoProgram(model="one", controllers=('get', )),
             'path1': {
-                'prog2': GiottoProgram(model="two"),
+                'prog2': GiottoProgram(model="two", controllers=('get', )),
                 'path2': {
                     'prog3': GiottoProgram(model="three"),
                     'path3': {
-                        '': GiottoProgram(model="root"),
-                        'prog4': GiottoProgram(model="four"),
+                        '': GiottoProgram(model="root", controllers=('get', )),
+                        'prog4': GiottoProgram(model="four", controllers=('get', )),
                     },
                 },
             },
@@ -127,11 +127,8 @@ class ManifestTest(unittest.TestCase):
     def test_no_program(self):
         self.assertRaises(ProgramNotFound, lambda: self.manifest.parse_invocation('path1/path2', 'get'))
 
-    def test_program_finder(self):
-        models = {'one', 'two', 'three', 'four', 'root'}
-        result = {p.model for p in self.manifest.get_all_programs()}
-        self.assertEquals(result, models)
-
+    def test_no_matching_controller_tag(self):
+        self.assertRaises(ProgramNotFound, lambda: self.manifest.parse_invocation('path1/prog2', 'post'))
 
 class TestNestedBlankManifest(unittest.TestCase):
     def __init__(self, *a, **k):
@@ -139,37 +136,37 @@ class TestNestedBlankManifest(unittest.TestCase):
         self.nested_blank_manifest = ProgramManifest({
             '': ProgramManifest({
                 '': ProgramManifest({
-                    '': GiottoProgram(model='root'),
+                    '': GiottoProgram(model='root', controllers=('get', )),
                     'prog3': GiottoProgram(model='three'),
                 }),
-                'prog2': GiottoProgram(model='two'),
+                'prog2': GiottoProgram(model='two', controllers=('get', )),
             }),
             'prog1': GiottoProgram(model='one'),
         })
 
     def test_blank(self):
-        parsed = self.nested_blank_manifest.parse_invocation('/')
+        parsed = self.nested_blank_manifest.parse_invocation('/', 'get')
         self.assertEquals(parsed['program'].model, 'root')
         self.assertEquals(parsed['args'], [])
         self.assertEquals(parsed['name'], '')
         self.assertEquals(parsed['superformat'], None)
 
     def test_follow(self):
-        parsed = self.nested_blank_manifest.parse_invocation('prog2')
+        parsed = self.nested_blank_manifest.parse_invocation('prog2', 'get')
         self.assertEquals(parsed['program'].model, "two")
         self.assertEquals(parsed['args'], [])
         self.assertEquals(parsed['name'], 'prog2')
         self.assertEquals(parsed['superformat'], None)
 
     def test_follow_with_args(self):
-        parsed = self.nested_blank_manifest.parse_invocation('prog2/arg1/arg2')
+        parsed = self.nested_blank_manifest.parse_invocation('prog2/arg1/arg2', 'get')
         self.assertEquals(parsed['program'].model, 'two')
         self.assertEquals(parsed['args'], ['arg1', 'arg2'])
         self.assertEquals(parsed['name'], 'prog2')
         self.assertEquals(parsed['superformat'], None)
 
     def test_root_with_args(self):
-        parsed = self.nested_blank_manifest.parse_invocation('/args1/args2')
+        parsed = self.nested_blank_manifest.parse_invocation('/args1/args2', 'get')
         self.assertEquals(parsed['program'].model, 'root')
         self.assertEquals(parsed['args'], ['args1', 'args2'])
         self.assertEquals(parsed['name'], '')

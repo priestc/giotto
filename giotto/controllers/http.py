@@ -132,6 +132,7 @@ def make_duplicate_request(request):
         path = request.path
         headers = request.headers
         args = request.args
+        user = request.user
         cookies = request.cookies
         is_xhr = request.is_xhr
     return FakeRequest()

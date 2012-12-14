@@ -8,6 +8,7 @@ from giotto.control import GiottoControl
 
 class GiottoProgram(object):
     name = None
+    pre_input_middleware = ()
     input_middleware = ()
     controllers = ()
     cache = 0
@@ -60,7 +61,8 @@ class GiottoProgram(object):
         controller arg is the name of the controller.
         """
         controller = "".join(controller.split('-')[:1])
-        for m in self.input_middleware:
+        middlewares = list(self.pre_input_middleware) + list(self.input_middleware)
+        for m in middlewares:
             to_execute = getattr(m(), controller)
             if to_execute:
                 result = to_execute(request)
@@ -100,7 +102,7 @@ class ProgramManifest(object):
     """
     key_regex = r'^\w*$'
 
-    def __init__(self, manifest):
+    def __init__(self, manifest, backname=None):
         self.manifest = manifest
         # any sub manifests, convert to manifests objects
         for key, item in self.manifest.items():
@@ -114,40 +116,35 @@ class ProgramManifest(object):
                 raise ValueError("Invalid manifest key: %s" % key)
 
             if type_ is dict:
-                self.manifest[key] = ProgramManifest(item)
+                self.manifest[key] = ProgramManifest(item, backname=key)
             elif not is_manifest and not is_program and not is_list:
                 msg = "Manifest value must be either: a program, a list of programs, or another manifest"
                 raise TypeError(msg)
 
     def __repr__(self):
-        return "<Manifest (%s nodes)>" % len(self.manifest)
+        return "<Manifest %s (%s nodes)>" % (self.backname, len(self.manifest))
 
     def __getitem__(self, key):
         return self.manifest[key]
 
     def get_program(self, program_name, controller_tag):
+        """
+        Find the program within this manifest. If key is found, and it contains
+        a list, iterate over the list and return the program that matches
+        the controller tag. 
+        """
         result = self.manifest[program_name]
-        if type(result) is list:
-            for program in result:
-                if controller_tag in program.controllers:
-                    return program
-            raise KeyError
-        return result
-
-    def get_all_programs(self):
-        """
-        Tranverse this manifest and return all programs exist in this manifest.
-        """
-        out = set()
-        programs = self.manifest.values()
-        for program in programs:
-            if type(program) == ProgramManifest:
-                program_set = program.get_all_programs()
-            else:
-                program_set = set([program])
-            out.update(program_set)
-
-        return out
+        if type(result) == ProgramManifest:
+            return result
+        if type(result) is not list:
+            result = [result]
+        for program in result:
+            if controller_tag in program.controllers:
+                return program
+        # we found the key, and looped through all programs, but the controller
+        # tag could not be found.
+        msg = "Program '%s' does not allow '%s' controller" % (program_name, controller_tag)
+        raise ProgramNotFound(msg)
 
     def extract_superformat(self, name):
         """
@@ -160,7 +157,7 @@ class ProgramManifest(object):
         else:
             return (name, None)
 
-    def parse_invocation(self, invocation, controller_tag=''):
+    def parse_invocation(self, invocation, controller_tag):
         if invocation.endswith('/'):
             invocation = invocation[:-1]
         if invocation.startswith('/'):
