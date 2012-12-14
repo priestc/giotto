@@ -52,7 +52,7 @@ class SetAuthenticationCookies(object):
             user = User.get_user_by_password(username, password)
         
         if not user:
-            raise Exception
+            return response
 
         session_key = random_string(15)
         while config.auth_session.get(session_key):
@@ -109,6 +109,5 @@ def NotAuthenticatedOrRedirect(invocation, args=[], kwargs={}):
 
 class LogoutMiddleware(object):
     def http(self, request, response):
-        response.delete_cookie('username')
-        response.delete_cookie('password')
+        response.delete_cookie('giotto_session')
         return response
