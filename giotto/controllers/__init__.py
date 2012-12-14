@@ -34,6 +34,7 @@ class GiottoController(object):
         self.cache = config.cache or DummyCache()
         self.errors = errors
         self.manifest = manifest
+        import debug
 
         # the program that corresponds to this invocation
         invocation = self.get_invocation()

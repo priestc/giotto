@@ -178,11 +178,12 @@ class ProgramManifest(object):
         parsed['invocation'] = invocation
         return parsed
 
-    def _parse(self, program_name, args, controller_tag):
+    def _parse(self, raw_program_name, args, controller_tag):
         """
-        Recursive function to transversing nested manifests
+        Recursive function to transversing nested manifests.
+        raw_program_name == program with superformat intact
         """
-        program_name, superformat = self.extract_superformat(program_name)
+        program_name, superformat = self.extract_superformat(raw_program_name)
         try:
             program = self.get_program(program_name, controller_tag)
         except KeyError:
@@ -190,12 +191,12 @@ class ProgramManifest(object):
             if '' in self.manifest:
                 result = self.get_program('', controller_tag)
                 if type(result) == ProgramManifest:
-                    return result._parse(program_name, args, controller_tag)
+                    return result._parse(raw_program_name, args, controller_tag)
                 else:
                     return {
                         'program': result,
                         'name': '',
-                        'superformat': None,
+                        'superformat': superformat,
                         'superformat_mime': None,
                         'args': [program_name] + args,
                     }

@@ -151,6 +151,17 @@ class TestNestedBlankManifest(unittest.TestCase):
             'prog1': GiottoProgram(model='one'),
         })
 
+    def test_lost_superformat(self):
+        """
+        Superformat is lost when iterative over a blank manifest
+        """
+        parsed = self.nested_blank_manifest.parse_invocation('/prog2.json/arg1/arg2', 'get')
+        self.assertEquals(parsed['program'].model, 'two')
+        self.assertEquals(parsed['args'], ['arg1', 'arg2'])
+        self.assertEquals(parsed['name'], 'prog2')
+        self.assertEquals(parsed['superformat'], 'json')
+
+
     def test_blank(self):
         parsed = self.nested_blank_manifest.parse_invocation('/', 'get')
         self.assertEquals(parsed['program'].model, 'root')

@@ -39,7 +39,6 @@ class GiottoView(object):
 
     def render(self, mimetype):
         status = 200
-
         available_mimetypes = self.render_map.keys()
         target_mimetype = mimeparse.best_match(available_mimetypes, mimetype)
         
