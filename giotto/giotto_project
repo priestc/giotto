@@ -53,7 +53,7 @@ blank_application = '''from giotto.programs import GiottoProgram, ProgramManifes
 from giotto.views import BasicView
 
 manifest = ProgramManifest({
-    'hello': GiottoProgram(
+    '': GiottoProgram(
         model=[lambda: "hello world"],
         view=BasicView
     )
@@ -62,7 +62,7 @@ manifest = ProgramManifest({
 try:
     open('manifest.py', 'r')
 except IOError:
-    # create a blank programs file (if one doesn't already exist)
+    # create a blank manifest file (if one doesn't already exist)
     f = open('manifest.py', 'w')
     if args.demo:
         f.write(demo_application)

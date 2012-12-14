@@ -24,6 +24,7 @@ setup(
         'python-magic',
         'jinja2',
         'py-bcrypt',
+        'mimeparse',
         'sqlalchemy',
     ],
 )

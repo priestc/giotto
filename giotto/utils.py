@@ -86,7 +86,21 @@ def better_base():
 
     return BetterBase
 
+def htmlize(value):
+    """
+    Turn any object into a html viewable entity.
+    """
+    return str(value).replace('<', '&lt;').replace('>', '&gt;')
 
+def htmlize_list(items):
+    """
+    Turn a python list into an html list.
+    """
+    out = ["<ul>"]
+    for item in items:
+        out.append("<li>" + htmlize(item) + "</li>")
+    out.append("</ul>")
+    return "\n".join(out)
 
 
 

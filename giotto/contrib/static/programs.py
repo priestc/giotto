@@ -1,12 +1,14 @@
 from cStringIO import StringIO
 from giotto.programs import GiottoProgram
-from giotto.views import GiottoView
+from giotto.views import GiottoView, register_render
 
 class FileView(GiottoView):
-    def text_html(self, result):
+    @register_render('*/*')
+    def html(self, result):
         return {'body': result, 'mimetype': ''}
 
-    def text_cmd(self, result):
+    @register_render('text/x-cmd')
+    def cmd(self, result):
         return {'body': result.read(), 'mimetype': ''}
 
 def StaticServe(base_path):

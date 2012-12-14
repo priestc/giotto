@@ -2,76 +2,69 @@ import json
 import mimetypes
 
 import magic
+import mimeparse
+
 from jinja2 import Template
 from jinja2.exceptions import TemplateNotFound
 from giotto.exceptions import NoViewMethod
-from giotto.utils import Mock
+from giotto.utils import Mock, htmlize, htmlize_list
+
+def register_render(*mimetypes):
+    def decorator(func):
+        func.render_map = {}
+        for mimetype in mimetypes:
+            func.render_map[mimetype] = func.__name__
+        return func
+    return decorator
 
 class GiottoView(object):
     """
     Base class for all Giotto view objects. All Giotto Views must at least descend
     from this class, as ths class contains piping that the controller calls.
     """
+
+    render_map = {}
+
     def __init__(self, result, errors=None):
         """
         result == the output from the model
         """
         self.result = result
-        if errors:
-            self.errors = errors
-        else:
-            self.errors = Mock()
+        self.errors = errors or Mock()
+        for method in [x for x in dir(self) if not x.startswith('__')]:
+            attr = getattr(self, method)
+            render_map = getattr(attr, 'render_map', None)
+            if render_map and type(render_map) == dict:
+                self.render_map.update(render_map)
 
     def render(self, mimetype):
         status = 200
-        variable_mimetype = False
-        if mimetype.endswith('/*'):
-            # if the mimetype is defined with a variable subtype, then
-            # use the 'supertype' render method, and then determine the
-            # actual mimetype later.
-            variable_mimetype = True
-            mimetype = mimetype[:-2] # 'image/*' --> 'image'
+
+        available_mimetypes = self.render_map.keys()
+        target_mimetype = mimeparse.best_match(available_mimetypes, mimetype)
         
-        method = mimetype.replace('/', '_')
-        renderer = getattr(self, method, None)
-        
+        renderer = self.render_map[target_mimetype]
+
         if not renderer:
             raise NoViewMethod("%s not supported for this program" % mimetype)
 
-        data = renderer(self.result)
+        data = getattr(self, renderer)(self.result)
 
-        if variable_mimetype:
-            mimetype = magic.from_buffer(data.read(1024), mime=True)
-            data.seek(0)
-            data['mimetype'] = mimetype
+        if target_mimetype == '*/*':
+            data['mimetype'] = ''
 
         if not 'mimetype' in data:
-            data['mimetype'] = mimetype
+            data['mimetype'] = target_mimetype
 
         data['status'] = status
         return data
-
-def htmlize(value):
-    """
-    Turn any object into a html viewable entity.
-    """
-    return str(value).replace('<', '&lt;').replace('>', '&gt;')
-
-def htmlize_list(items):
-    """
-    Turn a python list into an html list.
-    """
-    out = ["<ul>"]
-    for item in items:
-        out.append("<li>" + htmlize(item) + "</li>")
-    out.append("</ul>")
-    return "\n".join(out)
 
 class BasicView(GiottoView):
     """
     Basic viewer that contains generic functionality for showing any data.
     """
-    def application_json(self, result):
+    @register_render('application/json')
+    def json(self, result):
         try:
             j = json.dumps(result)
         except TypeError:
@@ -79,13 +72,8 @@ class BasicView(GiottoView):
 
         return {'body': j, 'mimetype': 'application/json'}
 
-    def text_cmd(self, result):
-        return self.text_plain(result)
-
-    def text_irc(self, result):
-        return self.text_plain(result)
-
-    def text_html(self, result):
+    @register_render('text/html')
+    def html(self, result):
         """
         Try to display any object in sensible HTML.
         """
@@ -135,7 +123,8 @@ class BasicView(GiottoView):
         </html>""".format(css, h1, header, out),
         'mimetype': 'text/html'}
 
-    def text_plain(self, result):
+    @register_render('text/x-cmd', 'text/x-irc', 'text/plain')
+    def plaintext(self, result):
         out = []
         if hasattr(result, 'iteritems'):
             to_iterate = result.iteritems()
@@ -152,7 +141,8 @@ class BasicView(GiottoView):
 
 def JinjaTemplateView(template_name, name='model', mimetype="text/html"):
     class JinjaTemplateView(BasicView):
-        def text_html(self, result):
+        @register_render(mimetype)
+        def html(self, result):
             from giotto import config
             template = config.jinja2_env.get_template(template_name)
             context = {name: result, 'errors': self.errors}
@@ -167,7 +157,8 @@ class ImageViewer(GiottoView):
     data (doesn't matter the format).
     """
 
-    def text_plain(self, result):
+    @register_render('text/plain')
+    def plaintext(self, result):
         """
         Converts the image object into an ascii representation. Code taken from
         http://a-eter.blogspot.com/2010/04/image-to-ascii-art-in-python.html
