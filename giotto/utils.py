@@ -15,12 +15,17 @@ class Mock(object):
     >>> m = Mock()
     >>> m.nothing.empty.made_up.wut.lol
     ''
+    >>> bool(m.wut)
+    False
     """
     def __getattribute__(self, item):
         return Mock()
 
     def __str__(self):
         return ''
+
+    def __nonzero__(self):
+        return False
 
 def parse_kwargs(kwargs):
     """

@@ -42,8 +42,7 @@ class DatabaseKeyValue(GiottoKeyValue):
             @classmethod
             def set(cls, key, obj, expire):
                 when_expire = datetime.datetime.now() + datetime.timedelta(seconds=expire)
-                data = {'key': key, 'value': pickle.dumps(obj), 'expires': when_expire}
-                new = cls(**data)
+                new = cls(key=key, value=pickle.dumps(obj), expires=when_expire)
                 session.merge(new)
                 session.commit()
 

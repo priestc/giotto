@@ -138,7 +138,7 @@ class BasicView(GiottoView):
 
         return {'body': "\n".join(out), 'mimetype': "text/plain"}
 
-def JinjaTemplateView(template_name, name='model', mimetype="text/html"):
+def JinjaTemplateView(template_name, name='data', mimetype="text/html"):
     class JinjaTemplateView(BasicView):
         @register_render(mimetype)
         def html(self, result):
