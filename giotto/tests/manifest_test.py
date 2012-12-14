@@ -130,6 +130,13 @@ class ManifestTest(unittest.TestCase):
     def test_no_matching_controller_tag(self):
         self.assertRaises(ProgramNotFound, lambda: self.manifest.parse_invocation('path1/prog2', 'post'))
 
+    def test_every_controller(self):
+        """
+        If no controller tags are defined for a program, then whitelist all controllers.
+        """
+        parsed = self.manifest.parse_invocation('/path1/path2/prog3', 'post')
+        self.assertEquals(parsed['program'].model, 'three')
+
 class TestNestedBlankManifest(unittest.TestCase):
     def __init__(self, *a, **k):
         super(TestNestedBlankManifest, self).__init__(*a, **k)

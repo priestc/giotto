@@ -141,6 +141,13 @@ class ProgramManifest(object):
         for program in result:
             if controller_tag in program.controllers:
                 return program
+
+        # we looped through all programs and found no match, maybe one program
+        # has no explicitly defined controller tag? If so return that.
+        for program in result:
+            if not program.controllers:
+                return program
+
         # we found the key, and looped through all programs, but the controller
         # tag could not be found.
         msg = "Program '%s' does not allow '%s' controller" % (program_name, controller_tag)
