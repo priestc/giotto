@@ -2,6 +2,7 @@ from .models import User
 from giotto.exceptions import NotAuthorized
 from giotto.control import Redirection
 from giotto import config
+from giotto.utils import random_string
 
 class AuthenticationMiddleware(object):
     """
@@ -16,11 +17,10 @@ class AuthenticationMiddleware(object):
             p = request.form.get('password', None)
             user = User.get_user_by_password(u, p) if u and p else None
 
-        username = request.cookies.get('username', None)
-        hash_ = request.cookies.get('password', None)
-
-        if username and hash_:
-            user = User.get_user_by_hash(username, hash_)
+        session_key = request.cookies.get('giotto_session', None)
+        if session_key:
+            username = config.auth_session.get(session_key)
+            user = config.session.query(User).filter_by(username=username).first()
 
         setattr(request, 'user', user)
         return request
@@ -55,10 +55,10 @@ class SetAuthenticationCookies(object):
             raise Exception
 
         session_key = random_string(15)
-        while not config.session.get(session_key):
+        while config.auth_session.get(session_key):
             session_key = random_string(15)
         
-        config.session.set(session_key, user.username)
+        config.auth_session.set(session_key, user.username, config.auth_session_expire)
         response.set_cookie('giotto_session', session_key)
 
         return response
