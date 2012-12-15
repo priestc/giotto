@@ -46,7 +46,7 @@ class HTTPController(GiottoController):
 
     def mimetype_override(self):
         accept = self.request.headers['Accept']
-        has_json_in_view = hasattr(self.program.view, 'application_json')
+        has_json_in_view = any([x for x in self.program.view.render_map.keys() if 'json' in x])
         if accept == '*/*' and self.request.is_xhr and has_json_in_view:
             # return json on ajax calls if no accept headers are present.
             # and only if the view has implemented a application/json method

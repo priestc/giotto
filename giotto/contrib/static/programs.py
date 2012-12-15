@@ -1,13 +1,13 @@
 from cStringIO import StringIO
 from giotto.programs import GiottoProgram
-from giotto.views import GiottoView, register_render
+from giotto.views import GiottoView, renders
 
 class FileView(GiottoView):
-    @register_render('*/*')
+    @renders('*/*')
     def html(self, result):
         return {'body': result, 'mimetype': ''}
 
-    @register_render('text/x-cmd')
+    @renders('text/x-cmd')
     def cmd(self, result):
         return {'body': result.read(), 'mimetype': ''}
 

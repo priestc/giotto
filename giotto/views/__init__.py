@@ -9,7 +9,7 @@ from jinja2.exceptions import TemplateNotFound
 from giotto.exceptions import NoViewMethod
 from giotto.utils import Mock, htmlize, htmlize_list, pre_process_json
 
-def register_render(*mimetypes):
+def renders(*mimetypes):
     def decorator(func):
         func.render_map = {}
         for mimetype in mimetypes:
@@ -25,29 +25,25 @@ class GiottoView(object):
 
     render_map = {}
 
-    def __init__(self, result, errors=None):
-        """
-        result == the output from the model
-        """
-        self.result = result
-        self.errors = errors or Mock()
+    def __init__(self):
         for method in [x for x in dir(self) if not x.startswith('__')]:
+            # register all render methods based on the render decorator
             attr = getattr(self, method)
             render_map = getattr(attr, 'render_map', None)
             if render_map and type(render_map) == dict:
                 self.render_map.update(render_map)
 
-    def render(self, mimetype):
+    def render(self, result, mimetype, errors=None):
         status = 200
         available_mimetypes = self.render_map.keys()
         target_mimetype = mimeparse.best_match(available_mimetypes, mimetype)
-        
+        self.errors = errors or Mock()
         renderer = self.render_map[target_mimetype]
 
         if not renderer:
             raise NoViewMethod("%s not supported for this program" % mimetype)
 
-        data = getattr(self, renderer)(self.result)
+        data = getattr(self, renderer)(result)
 
         if target_mimetype == '*/*':
             data['mimetype'] = ''
@@ -62,13 +58,13 @@ class BasicView(GiottoView):
     """
     Basic viewer that contains generic functionality for showing any data.
     """
-    @register_render('application/json')
+    @renders('application/json')
     def json(self, result):
         obj = pre_process_json(result)
         j = json.dumps(obj)
         return {'body': j, 'mimetype': 'application/json'}
 
-    @register_render('text/html')
+    @renders('text/html')
     def html(self, result):
         """
         Try to display any object in sensible HTML.
@@ -119,7 +115,7 @@ class BasicView(GiottoView):
         </html>""".format(css, h1, header, out),
         'mimetype': 'text/html'}
 
-    @register_render('text/x-cmd', 'text/x-irc', 'text/plain')
+    @renders('text/x-cmd', 'text/x-irc', 'text/plain')
     def plaintext(self, result):
         out = []
         if hasattr(result, 'iteritems'):
@@ -137,7 +133,7 @@ class BasicView(GiottoView):
 
 def JinjaTemplateView(template_name, name='data', mimetype="text/html"):
     class JinjaTemplateView(BasicView):
-        @register_render(mimetype)
+        @renders(mimetype)
         def html(self, result):
             from giotto import config
             template = config.jinja2_env.get_template(template_name)
@@ -153,7 +149,7 @@ class ImageViewer(GiottoView):
     data (doesn't matter the format).
     """
 
-    @register_render('text/plain')
+    @renders('text/plain')
     def plaintext(self, result):
         """
         Converts the image object into an ascii representation. Code taken from

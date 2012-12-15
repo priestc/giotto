@@ -7,19 +7,12 @@ class Redirection(GiottoControl):
     """
 
     rendered_invocation = ()
+    render_map = {} # because regular giottoviews have this. This is always empty
 
     def __init__(self, invocation, args=[], kwargs={}):
         self.invocation = invocation
         self.args = args
         self.kwargs = kwargs
-
-    def __call__(self, result, errors=None):
-        """
-        This gets called by the controller as if it's the view.__init__ function.
-        """
-        self.result = result
-        return self
-
 
     def render_args_kwargs(self, model):
         new_args = []
@@ -34,8 +27,8 @@ class Redirection(GiottoControl):
 
         self.rendered_invocation = (self.invocation, new_args, new_kwargs)
 
-    def render(self, mimetype):
-        self.render_args_kwargs(self.result)
+    def render(self, result, mimetype, errors):
+        self.render_args_kwargs(result)
         return self
 
 class _M(object):

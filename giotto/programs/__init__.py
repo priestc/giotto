@@ -5,6 +5,7 @@ import os
 from giotto.exceptions import ProgramNotFound, MockNotFound, ControlMiddlewareInterrupt
 from giotto.utils import super_accept_to_mimetype
 from giotto.control import GiottoControl
+from giotto.views import GiottoView
 
 class GiottoProgram(object):
     name = None
@@ -13,11 +14,13 @@ class GiottoProgram(object):
     controllers = ()
     cache = 0
     model = ()
-    view = ()
+    view = None
     output_middleware = ()
 
     def __init__(self, **kwargs):
         self.__dict__ = kwargs
+        if hasattr(self.view, 'mro') and GiottoView in self.view.mro():
+            self.view = self.view()
 
     def get_model_args_kwargs(self):
         """
@@ -92,7 +95,7 @@ class GiottoProgram(object):
     def execute_view(self, data, mimetype, errors):
         if not self.view:
             return {'body': '', 'mimetype': ''}
-        return self.view(data, errors).render(mimetype)
+        return self.view.render(data, mimetype, errors)
 
 class ProgramManifest(object):
     """
