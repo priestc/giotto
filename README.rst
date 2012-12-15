@@ -15,6 +15,10 @@ Key Features of Giotto include:
 * Jinja2 for HTML templates (with an API for extending for other template engines)
 
 Links:
-* To discuss Giotto, please visit the [google group](https://groups.google.com/forum/#!forum/giotto-framework)
+
+* To discuss Giotto, please visit the `Google Group`_
 * Read [Giotto's documentation](http://giotto.readthedocs.org/en/latest/index.html)
-* Check out this [blog application written with the Giotto framework](https://github.com/priestc/giottoblog/)
+* Check out giottoblog_, a full featured blog application written with the Giotto framework.
+
+.. _Group: https://groups.google.com/forum/#!forum/giotto-framework/
+.. _giottoblog: https://github.com/priestc/giottoblog/
