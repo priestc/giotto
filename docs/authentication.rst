@@ -238,21 +238,5 @@ This middleware class will return a 403 (error page) if the request is not authe
 
 In this example, only authenticated users can create a new blog. All other users will get a 403 page.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 .. _SQLAlchemy: http://www.sqlalchemy.org/
 .. _bcrypt: http://www.mindrot.org/projects/py-bcrypt/

@@ -1,4 +1,2 @@
-README.rst
-LICENSE
-MANIFEST
-setup.py
+include *.rst
+include LICENSE

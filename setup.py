@@ -2,9 +2,9 @@ from setuptools import setup
 
 setup(
 	name='giotto',
-    version='0.9.3',
+    version='0.9.4',
     description='MVC Application Framework',
-    long_description=open('README.md').read(),
+    long_description=open('README.rst').read(),
     author='Chris Priest',
     author_email='cp368202@ohiou.edu',
     url='https://github.com/priestc/giotto',
@@ -12,6 +12,7 @@ setup(
         'giotto',
         'giotto.controllers',
         'giotto.programs',
+        'giotto.contrib',
         'giotto.contrib.auth',
         'giotto.contrib.static',
         'giotto.views'
