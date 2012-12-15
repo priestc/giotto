@@ -136,3 +136,7 @@ def pre_process_json(obj):
                 json.dumps(obj.__dict__)
             except TypeError:
                 return str(obj)
+            else:
+                return obj.__dict__
+        else:
+            return obj
