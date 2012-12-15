@@ -16,9 +16,10 @@ Key Features of Giotto include:
 
 Links:
 
-* To discuss Giotto, please visit the `Google Group`_
-* Read [Giotto's documentation](http://giotto.readthedocs.org/en/latest/index.html)
+* To discuss Giotto, please visit the Google Group_
+* Read Giotto's documentation_.
 * Check out giottoblog_, a full featured blog application written with the Giotto framework.
 
 .. _Group: https://groups.google.com/forum/#!forum/giotto-framework/
 .. _giottoblog: https://github.com/priestc/giottoblog/
+.. _documentation: http://giotto.readthedocs.org/en/latest/index.html
