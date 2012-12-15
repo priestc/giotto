@@ -40,6 +40,17 @@ class SetAuthenticationCookies(object):
     Place this middleware class in the output stream to set the cookies that
     are used to authenticate each subsequent request.
     """
+
+    def make_session(self, user):
+        """
+        Create a session for the user, and then return the key.
+        """
+        session_key = random_string(15)
+        while config.auth_session.get(session_key):
+            session_key = random_string(15)
+        config.auth_session.set(session_key, user.username, config.auth_session_expire)
+        return session_key
+
     def http(self, request, response):
         if hasattr(request, 'user') and request.user:
             username = request.user.username
@@ -54,19 +65,22 @@ class SetAuthenticationCookies(object):
         if not user:
             return response
 
-        session_key = random_string(15)
-        while config.auth_session.get(session_key):
-            session_key = random_string(15)
-        
-        config.auth_session.set(session_key, user.username, config.auth_session_expire)
+        session_key = self.make_session(user)
         response.set_cookie('giotto_session', session_key)
 
         return response
 
     def cmd(self, request, response):
-        if request.user:
-            request.environment['giotto_username'] = request.username
-            request.environment['giotto_password'] = request.password
+        if hasattr(request, 'user') and request.user:
+            username = request.user.username
+            password = request.user.password
+            user = User.get_user_by_hash(username, password)
+        elif 'password' in request.form and 'password' in request.form:
+            # user just registered.
+            username = request.form['username']
+            password = request.form['password']
+            user = User.get_user_by_password(username, password)
+        
         return response
 
 

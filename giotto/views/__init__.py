@@ -144,7 +144,7 @@ def JinjaTemplateView(template_name, name='data', mimetype="text/html"):
         def html(self, result):
             from giotto import config
             template = config.jinja2_env.get_template(template_name)
-            context = {name: result, 'errors': self.errors}
+            context = {name: result or Mock(), 'errors': self.errors}
             rendered = template.render(**context)
             return {'body': rendered, 'mimetype': mimetype}
 

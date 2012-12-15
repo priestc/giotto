@@ -16,5 +16,7 @@ Key Features of Giotto include:
 * SQLAlchemy for database persistence
 * Jinja2 for HTML templates (with an API for extending for other template engines)
 
-To discuss Giotto, please visit the [google group](https://groups.google.com/forum/#!forum/giotto-framework)
-To read Giotto's documentation, go [here](http://giotto.readthedocs.org/en/latest/index.html)
+Links:
+* To discuss Giotto, please visit the [google group](https://groups.google.com/forum/#!forum/giotto-framework)
+* Read [Giotto's documentation](http://giotto.readthedocs.org/en/latest/index.html)
+* Check out this [blog application written with the Giotto framework](https://github.com/priestc/giottoblog/)

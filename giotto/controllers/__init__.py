@@ -4,7 +4,7 @@ import json
 from giotto.programs import GiottoProgram
 from giotto.exceptions import InvalidInput, ProgramNotFound, MockNotFound, ControlMiddlewareInterrupt
 from giotto.primitives import GiottoPrimitive
-from giotto.cache import DummyCache
+from giotto.keyvalue import DummyKeyValue
 
 class GiottoController(object):
     middleware_interrupt = None
@@ -13,7 +13,7 @@ class GiottoController(object):
         from giotto import config
         self.request = request
         self.model_mock = model_mock
-        self.cache = config.cache or DummyCache()
+        self.cache = config.cache or DummyKeyValue()
         self.errors = errors
         self.manifest = manifest
 
