@@ -98,4 +98,4 @@ class CMDController(GiottoController):
 
 
     def get_primitive(self, name):
-        return "ff" # implement later
+        return None # implement later

@@ -26,12 +26,6 @@ class AuthenticationMiddleware(object):
         return request
 
     def cmd(self, request):
-        user = None
-        u = request.args('username', None)
-        p = request.args('password', None)
-        user = User.get_user_by_password(u, p) if u and p else None
-
-        setattr(request, 'user', user)
         return request
 
 
@@ -71,16 +65,6 @@ class SetAuthenticationCookies(object):
         return response
 
     def cmd(self, request, response):
-        if hasattr(request, 'user') and request.user:
-            username = request.user.username
-            password = request.user.password
-            user = User.get_user_by_hash(username, password)
-        elif 'password' in request.form and 'password' in request.form:
-            # user just registered.
-            username = request.form['username']
-            password = request.form['password']
-            user = User.get_user_by_password(username, password)
-        
         return response
 
 
