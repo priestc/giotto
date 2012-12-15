@@ -1,6 +1,8 @@
 import argparse
 import string
 import random
+import json
+
 from collections import defaultdict
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import class_mapper, ColumnProperty
@@ -107,8 +109,30 @@ def htmlize_list(items):
     out.append("</ul>")
     return "\n".join(out)
 
+def pre_process_json(obj):
+    """
+    Preprocess items in a dictionary or list and prepare them to be json serialized.
+    """
+    if type(obj) is dict:
+        new_dict = {}
+        for key, value in obj.iteritems():
+            new_dict[key] = pre_process_json(value)
+        return new_dict
 
+    elif type(obj) is list:
+        new_list = []
+        for item in list:
+            new_list.append(pre_process_json(item))
+        return new_list
 
+    elif hasattr(obj, 'todict'):
+        return dict(obj.todict())
 
-
-
+    else:
+        try:
+            json.dumps(obj)
+        except TypeError:
+            try:
+                json.dumps(obj.__dict__)
+            except TypeError:
+                return str(obj)

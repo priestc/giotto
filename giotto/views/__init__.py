@@ -7,7 +7,7 @@ import mimeparse
 from jinja2 import Template
 from jinja2.exceptions import TemplateNotFound
 from giotto.exceptions import NoViewMethod
-from giotto.utils import Mock, htmlize, htmlize_list
+from giotto.utils import Mock, htmlize, htmlize_list, pre_process_json
 
 def register_render(*mimetypes):
     def decorator(func):
@@ -64,11 +64,8 @@ class BasicView(GiottoView):
     """
     @register_render('application/json')
     def json(self, result):
-        try:
-            j = json.dumps(result)
-        except TypeError:
-            j = json.dumps(result.__dict__)
-
+        obj = pre_process_json(result)
+        j = json.dumps(obj)
         return {'body': j, 'mimetype': 'application/json'}
 
     @register_render('text/html')
