@@ -5,7 +5,6 @@ class Redirection(GiottoControl):
     """
     Represents the result of one invocation as the result of another.
     """
-
     rendered_invocation = ()
     render_map = {} # because regular giottoviews have this. This is always empty
 
