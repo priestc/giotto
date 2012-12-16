@@ -80,6 +80,7 @@ class GiottoController(object):
         values = args + kwargs.keys()
 
         output = {}
+        i = 0
         for i, value in enumerate(values):
             if value in defaults:
                 may_be_primitive = defaults[value]
