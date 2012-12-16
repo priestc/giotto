@@ -14,6 +14,15 @@ Encrypting is done automatically by the bcrypt_ library.
 This user class is not intended to store all information that an application developer would want to store for a user.
 The developer is meant to create their own user profile table that connects to the User table via foreign key.
 
+Configuring Authentication
+==========================
+
+In the config file of your application, add the following variables:
+
+* ``auth_session`` - To a instance of a GiottoKeyValue class. (See the cache documentation)
+* ``auth_regex`` - To a regular exression that represents what usernames can be.
+  If left blank, this will be 
+
 Enabling Authentication for your application
 ============================================
 
@@ -198,7 +207,7 @@ It may be convenient to create a subclass of ``GiottoProgram`` with ``Authentica
         )
     })
 
-You can also take advantage of a few middleware classes::
+You can also take advantage of a few middleware classes
 
 AuthenticatedOrRedirect and NotAuthenticatedOrRedirect
 ------------------------------------------------------

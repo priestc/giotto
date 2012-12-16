@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Getting Started with Giotto &mdash; Giotto 0.0.3pre documentation</title>
+    <title>Getting Started with Giotto &mdash; Giotto 0.9.4 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.0.3pre',
+        VERSION:     '0.9.4',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,8 +25,8 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Giotto 0.0.3pre documentation" href="index.html" />
-    <link rel="next" title="Terminology" href="terminology.html" />
+    <link rel="top" title="Giotto 0.9.4 documentation" href="index.html" />
+    <link rel="next" title="Manifests" href="manifests.html" />
     <link rel="prev" title="Introduction" href="introduction.html" /> 
   </head>
   <body>
@@ -37,12 +37,12 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="terminology.html" title="Terminology"
+          <a href="manifests.html" title="Manifests"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="introduction.html" title="Introduction"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Giotto 0.0.3pre documentation</a> &raquo;</li> 
+        <li><a href="index.html">Giotto 0.9.4 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -70,7 +70,7 @@ Instead of the above command, you can optionally install the latest version from
 <div class="highlight-python"><pre>$ cd demo
 $ giotto_project --http --cmd --demo</pre>
 </div>
-<p>This will create a <tt class="docutils literal"><span class="pre">programs.py</span></tt> file, which contains your program objects.
+<p>This will create a <tt class="docutils literal"><span class="pre">manifest.py</span></tt> file, which contains your program manifest.
 It will also create a series of &#8220;concrete controller files&#8221;,
 which will act as a gateway between your application and the outside world.
 The concrete controller files will be called <tt class="docutils literal"><span class="pre">giotto-http</span></tt> and <tt class="docutils literal"><span class="pre">giotto-cmd</span></tt>
@@ -79,14 +79,10 @@ which will be where you add your database information (and other things).</p>
 <p>If you only want to interact with you application through the command line,
 then you could leave off the <tt class="docutils literal"><span class="pre">--http</span></tt> flag when calling <tt class="docutils literal"><span class="pre">giotto_project</span></tt> (and vice versa).
 The option <tt class="docutils literal"><span class="pre">--demo</span></tt> tells giotto to include a simple &#8220;multiply&#8221; program to demonstrate how giotto works.</p>
-<p>Inside the <tt class="docutils literal"><span class="pre">programs.py</span></tt> file, you will see the following:</p>
+<p>Inside the <tt class="docutils literal"><span class="pre">manifest.py</span></tt> file, you will see the following:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">ColoredMultiplyView</span><span class="p">(</span><span class="n">GiottoTemplateView</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">text_plain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
         <span class="k">return</span> <span class="s">&quot;{{ obj.x }} * {{ obj.y }} == {{ obj.product }}&quot;</span>
-
-    <span class="k">def</span> <span class="nf">application_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
-        <span class="kn">import</span> <span class="nn">json</span>
-        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">text_html</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
         <span class="k">return</span> <span class="s">&quot;&quot;&quot;&lt;!DOCTYPE html&gt;</span>
@@ -124,13 +120,13 @@ The option <tt class="docutils literal"><span class="pre">--demo</span></tt> tel
 <span class="k">def</span> <span class="nf">multiply</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
     <span class="k">return</span> <span class="p">{</span><span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="s">&#39;y&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="s">&#39;product&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">)}</span>
 
-
-<span class="k">class</span> <span class="nc">Multiply</span><span class="p">(</span><span class="n">GiottoProgram</span><span class="p">):</span>
-    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;multiply&quot;</span>
-    <span class="n">controllers</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;http-get&#39;</span><span class="p">,</span> <span class="s">&#39;cmd&#39;</span><span class="p">,</span> <span class="s">&#39;irc&#39;</span><span class="p">)</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="p">[</span><span class="n">multiply</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s">&#39;y&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s">&#39;product&#39;</span><span class="p">:</span> <span class="mi">9</span><span class="p">}]</span>
-    <span class="n">cache</span> <span class="o">=</span> <span class="bp">None</span>
-    <span class="n">view</span> <span class="o">=</span> <span class="n">ColoredMultiplyView</span>
+<span class="n">manifest</span> <span class="o">=</span> <span class="n">ProgramManifest</span><span class="p">({</span>
+    <span class="s">&#39;multiply&#39;</span><span class="p">:</span> <span class="n">GiottoProgram</span><span class="p">(</span>
+        <span class="n">controllers</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;http-get&#39;</span><span class="p">,</span> <span class="s">&#39;cmd&#39;</span><span class="p">,</span> <span class="s">&#39;irc&#39;</span><span class="p">),</span>
+        <span class="n">model</span><span class="o">=</span><span class="p">[</span><span class="n">multiply</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s">&#39;y&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s">&#39;product&#39;</span><span class="p">:</span> <span class="mi">9</span><span class="p">}],</span>
+        <span class="n">view</span><span class="o">=</span><span class="n">ColoredMultiplyView</span>
+    <span class="p">)</span>
+<span class="p">})</span>
 </pre></div>
 </div>
 <p>All Giotto applications are made up a collection of Giotto Programs. Each program class
@@ -192,12 +188,16 @@ The only difference is the way the result is visualized,
 and the data moves between the user and the computer through the command lone, instead of a browser..</p>
 <div class="section" id="using-mocks">
 <h2>Using Mocks<a class="headerlink" href="#using-mocks" title="Permalink to this headline">¶</a></h2>
-<p>On the GiottoProgram class, add a <tt class="docutils literal"><span class="pre">model_mock</span></tt> attribute:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Multiply</span><span class="p">(</span><span class="n">GiottoProgram</span><span class="p">):</span>
-    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;multiply&quot;</span>
-    <span class="n">controllers</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;http-get&#39;</span><span class="p">,</span> <span class="s">&#39;cmd&#39;</span><span class="p">,</span> <span class="s">&#39;irc&#39;</span><span class="p">)</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="p">[</span><span class="n">multiply</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s">&#39;y&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s">&#39;product&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">}]</span>
-    <span class="n">view</span> <span class="o">=</span> <span class="p">[</span><span class="n">ColoredMultiplyView</span><span class="p">]</span>
+<p>On the GiottoProgram object, add a <tt class="docutils literal"><span class="pre">model_mock</span></tt> object to the list along with the model.
+A model mock is an object that gets returned in lieu of executing the model function.
+This object should be the same form as what the model returns:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">manifest</span> <span class="o">=</span> <span class="n">ProgramManifest</span><span class="p">({</span>
+    <span class="s">&#39;multiply&#39;</span><span class="p">:</span> <span class="n">GiottoProgram</span><span class="p">(</span>
+        <span class="n">controllers</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;http-get&#39;</span><span class="p">,</span> <span class="s">&#39;cmd&#39;</span><span class="p">,</span> <span class="s">&#39;irc&#39;</span><span class="p">),</span>
+        <span class="n">model</span><span class="o">=</span><span class="p">[</span><span class="n">multiply</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s">&#39;y&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s">&#39;product&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">}],</span>
+        <span class="n">view</span><span class="o">=</span><span class="n">ColoredMultiplyView</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="p">})</span>
 </pre></div>
 </div>
 <p>When you run the dev server include the <tt class="docutils literal"><span class="pre">--model-mock</span></tt> flag:</p>
@@ -205,18 +205,21 @@ and the data moves between the user and the computer through the command lone, i
 </div>
 <p>Now no matter what arguments you place in the url, the output will always be <tt class="docutils literal"><span class="pre">10</span> <span class="pre">*</span> <span class="pre">10</span> <span class="pre">==</span> <span class="pre">100</span></tt>.
 If your model makes calls to the database or third party service,
-the <tt class="docutils literal"><span class="pre">model-mock</span></tt> option will bypass all of that.
-This feature is useful for front end designers who do not need to run the full model stack in order to create HTML templates.</p>
+the moel mock option will bypass all of that.
+This feature is useful for front end designers who do not need to run the full model stack in order to create HTML templates.
+This feature is also sometimes called &#8220;generic models&#8221;.</p>
 </div>
 <div class="section" id="cache">
 <h2>Cache<a class="headerlink" href="#cache" title="Permalink to this headline">¶</a></h2>
 <p>Add a <tt class="docutils literal"><span class="pre">cache</span></tt> attribute to the program:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Multiply</span><span class="p">(</span><span class="n">GiottoProgram</span><span class="p">):</span>
-    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;multiply&quot;</span>
-    <span class="n">controllers</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;http-get&#39;</span><span class="p">,</span> <span class="s">&#39;cmd&#39;</span><span class="p">,</span> <span class="s">&#39;irc&#39;</span><span class="p">)</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="p">[</span><span class="n">multiply</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s">&#39;y&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s">&#39;product&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">}]</span>
-    <span class="n">cache</span> <span class="o">=</span> <span class="mi">3600</span>
-    <span class="n">view</span> <span class="o">=</span> <span class="p">[</span><span class="n">ColoredMultiplyView</span><span class="p">]</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">manifest</span> <span class="o">=</span> <span class="n">ProgramManifest</span><span class="p">({</span>
+    <span class="s">&#39;multiply&#39;</span><span class="p">:</span> <span class="n">GiottoProgram</span><span class="p">(</span>
+        <span class="n">controllers</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;http-get&#39;</span><span class="p">,</span> <span class="s">&#39;cmd&#39;</span><span class="p">,</span> <span class="s">&#39;irc&#39;</span><span class="p">),</span>
+        <span class="n">model</span><span class="o">=</span><span class="p">[</span><span class="n">multiply</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s">&#39;y&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s">&#39;product&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">}],</span>
+        <span class="n">cache</span><span class="o">=</span><span class="mi">3600</span><span class="p">,</span>
+        <span class="n">view</span><span class="o">=</span><span class="n">ColoredMultiplyView</span>
+    <span class="p">)</span>
+<span class="p">})</span>
 </pre></div>
 </div>
 <p>Restart the cache server (this time leave off the <tt class="docutils literal"><span class="pre">--model-mock</span></tt> flag).
@@ -231,10 +234,7 @@ You also need to have either Redis or Memcache installed and running.
 Configure the cache by setting the following to the <tt class="docutils literal"><span class="pre">cache</span></tt>
 variable in the config file:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">giotto.cache</span> <span class="kn">import</span> <span class="n">CacheWithMemcache</span>
-
-<span class="n">cache</span> <span class="o">=</span> <span class="n">CacheWithMemcache</span><span class="p">(</span>
-    <span class="n">host</span><span class="o">=</span><span class="s">&#39;localhost&#39;</span>
-<span class="p">)</span>
+<span class="n">cache</span> <span class="o">=</span> <span class="n">CacheWithMemcache</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s">&#39;localhost&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>To use the redis cache, change the class to <tt class="docutils literal"><span class="pre">CacheWithRedis</span></tt>.
@@ -262,8 +262,8 @@ and subsequent renders will be served from cache.</p>
   <p class="topless"><a href="introduction.html"
                         title="previous chapter">Introduction</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="terminology.html"
-                        title="next chapter">Terminology</a></p>
+  <p class="topless"><a href="manifests.html"
+                        title="next chapter">Manifests</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/tutorial.txt"
@@ -293,12 +293,12 @@ and subsequent renders will be served from cache.</p>
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="terminology.html" title="Terminology"
+          <a href="manifests.html" title="Manifests"
              >next</a> |</li>
         <li class="right" >
           <a href="introduction.html" title="Introduction"
              >previous</a> |</li>
-        <li><a href="index.html">Giotto 0.0.3pre documentation</a> &raquo;</li> 
+        <li><a href="index.html">Giotto 0.9.4 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

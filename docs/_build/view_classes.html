@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>View Classes &mdash; Giotto 0.0.3pre documentation</title>
+    <title>View Classes &mdash; Giotto 0.9.4 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.0.3pre',
+        VERSION:     '0.9.4',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,9 +25,9 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Giotto 0.0.3pre documentation" href="index.html" />
+    <link rel="top" title="Giotto 0.9.4 documentation" href="index.html" />
     <link rel="next" title="Middleware" href="middleware.html" />
-    <link rel="prev" title="Built-in Controller Classes" href="built_in_controller_classes.html" /> 
+    <link rel="prev" title="Creating your own controllers" href="creating_your_own_controllers.html" /> 
   </head>
   <body>
     <div class="related">
@@ -40,9 +40,9 @@
           <a href="middleware.html" title="Middleware"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="built_in_controller_classes.html" title="Built-in Controller Classes"
+          <a href="creating_your_own_controllers.html" title="Creating your own controllers"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Giotto 0.0.3pre documentation</a> &raquo;</li> 
+        <li><a href="index.html">Giotto 0.9.4 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -87,6 +87,17 @@ and the data the view is written to take in.
 For instance, the above mimetype method is designed to display a dictionary with three keys (<tt class="docutils literal"><span class="pre">x</span></tt>, <tt class="docutils literal"><span class="pre">y</span></tt>, and <tt class="docutils literal"><span class="pre">result</span></tt>).
 If the model was changed to return a list, this view method will crash.</p>
 </div>
+<div class="section" id="return-values">
+<h2>Return values<a class="headerlink" href="#return-values" title="Permalink to this headline">¶</a></h2>
+<p>Each mimetype render method should return either a string:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">return</span> <span class="s">&quot;return a string&quot;</span>
+</pre></div>
+</div>
+<p>or a dictionary with body and mimetype tags:</p>
+<div class="highlight-python"><pre>return {'body': "this is whats returned, 'mimetype': 'text/plain'}</pre>
+</div>
+<p>Not all <tt class="docutils literal"><span class="pre">text_html</span></tt> render methods will return <tt class="docutils literal"><span class="pre">text/html</span></tt> content.</p>
+</div>
 <div class="section" id="basicview">
 <h2>BasicView<a class="headerlink" href="#basicview" title="Permalink to this headline">¶</a></h2>
 <p>There is a view class called <tt class="docutils literal"><span class="pre">BasicView</span></tt> that was created to be a quick and dirty way to view most any data.
@@ -104,14 +115,15 @@ While developing your application, it is a good idea to use <tt class="docutils 
   <ul>
 <li><a class="reference internal" href="#">View Classes</a><ul>
 <li><a class="reference internal" href="#creating-view-classes">Creating View Classes</a></li>
+<li><a class="reference internal" href="#return-values">Return values</a></li>
 <li><a class="reference internal" href="#basicview">BasicView</a></li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="built_in_controller_classes.html"
-                        title="previous chapter">Built-in Controller Classes</a></p>
+  <p class="topless"><a href="creating_your_own_controllers.html"
+                        title="previous chapter">Creating your own controllers</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="middleware.html"
                         title="next chapter">Middleware</a></p>
@@ -147,9 +159,9 @@ While developing your application, it is a good idea to use <tt class="docutils 
           <a href="middleware.html" title="Middleware"
              >next</a> |</li>
         <li class="right" >
-          <a href="built_in_controller_classes.html" title="Built-in Controller Classes"
+          <a href="creating_your_own_controllers.html" title="Creating your own controllers"
              >previous</a> |</li>
-        <li><a href="index.html">Giotto 0.0.3pre documentation</a> &raquo;</li> 
+        <li><a href="index.html">Giotto 0.9.4 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

@@ -31,8 +31,6 @@ Contents:
    serving_static_files
    deployment
 
-
-
 Indices and tables
 ==================
 

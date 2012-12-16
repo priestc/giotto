@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Cache &mdash; Giotto 0.0.3pre documentation</title>
+    <title>Cache &mdash; Giotto 0.9.4 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.0.3pre',
+        VERSION:     '0.9.4',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Giotto 0.0.3pre documentation" href="index.html" />
+    <link rel="top" title="Giotto 0.9.4 documentation" href="index.html" />
     <link rel="next" title="Model Mocking" href="model_mocking.html" />
     <link rel="prev" title="Middleware" href="middleware.html" /> 
   </head>
@@ -42,7 +42,7 @@
         <li class="right" >
           <a href="middleware.html" title="Middleware"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Giotto 0.0.3pre documentation</a> &raquo;</li> 
+        <li><a href="index.html">Giotto 0.9.4 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -57,30 +57,79 @@
 It works by storing the return value of the model and view, so subsequent requests can skip the calculation.</p>
 <div class="section" id="configuring-cache">
 <h2>Configuring cache<a class="headerlink" href="#configuring-cache" title="Permalink to this headline">¶</a></h2>
-<p>In your project&#8217;s <tt class="docutils literal"><span class="pre">config.py</span></tt>, add the following:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">giotto.cache</span> <span class="kn">import</span> <span class="n">CacheWithRedis</span>
-<span class="n">cache</span> <span class="o">=</span> <span class="n">CacheWithRedis</span><span class="p">()</span>
+<p>To enable caching for your application, set a value for the <tt class="docutils literal"><span class="pre">cache</span></tt> variable in your project&#8217;s <tt class="docutils literal"><span class="pre">config.py</span></tt> file.
+The value must be an instance of a class derived from the <tt class="docutils literal"><span class="pre">GiottoKeyValue</span></tt> class.</p>
+<div class="section" id="rediskeyvalue">
+<h3>RedisKeyValue<a class="headerlink" href="#rediskeyvalue" title="Permalink to this headline">¶</a></h3>
+<p>By default, this backend tries to connect to redis running on <tt class="docutils literal"><span class="pre">localhost</span></tt>, port <tt class="docutils literal"><span class="pre">6379</span></tt>.
+To change this, pass in connection data to the constructor:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">giotto.keyvalue</span> <span class="kn">import</span> <span class="n">RedisKeyValue</span>
+<span class="n">cache</span> <span class="o">=</span> <span class="n">RedisKeyValue</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s">&quot;10.10.0.5&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">4000</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>or if you want to use memcache:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">giotto.cache</span> <span class="kn">import</span> <span class="n">CacheWithMemcache</span>
-<span class="n">cache</span> <span class="o">=</span> <span class="n">CacheWithMemcache</span><span class="p">()</span>
+</div>
+<div class="section" id="memcachekeyvalue">
+<h3>MemcacheKeyValue<a class="headerlink" href="#memcachekeyvalue" title="Permalink to this headline">¶</a></h3>
+<p>Additionally, if you want to use memcache:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">giotto.keyvalue</span> <span class="kn">import</span> <span class="n">MemcacheKeyValue</span>
+<span class="n">cache</span> <span class="o">=</span> <span class="n">MemcacheKeyValue</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>You can also add parameters to the <tt class="docutils literal"><span class="pre">CacheWith*</span></tt> class such as port and host.</p>
+<p>By default, this backend tries to connect to memcache on <tt class="docutils literal"><span class="pre">localhost</span></tt>, port <tt class="docutils literal"><span class="pre">11211</span></tt>.
+To change this, pass in connection data to the constructor:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">cache</span> <span class="o">=</span> <span class="n">MemcacheKeyValue</span><span class="p">(</span><span class="n">hosts</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;10.10.0.5:11211&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="databasekeyvalue">
+<h3>DatabaseKeyValue<a class="headerlink" href="#databasekeyvalue" title="Permalink to this headline">¶</a></h3>
+<p>You can also use a cache backend that stores its data onto the database:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">giotto.keyvalue</span> <span class="kn">import</span> <span class="n">DatabaseKeyValue</span>
+<span class="n">cache</span> <span class="o">=</span> <span class="n">DatabaseKeyValue</span><span class="p">(</span><span class="n">Base</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You must pass in the SQLAlchemy <tt class="docutils literal"><span class="pre">Base</span></tt> class, as well as the SQLAlchemy session object.
+Before this backend can be used, you must run the <tt class="docutils literal"><span class="pre">make_tables</span></tt> program to create the database tables.</p>
+</div>
+<div class="section" id="locmemkeyvalue">
+<h3>LocMemKeyValue<a class="headerlink" href="#locmemkeyvalue" title="Permalink to this headline">¶</a></h3>
+<p>For development, you can use the <tt class="docutils literal"><span class="pre">LocMemKeyValue</span></tt> which stores its data internally in a python dictionary:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">giotto.keyvalue</span> <span class="kn">import</span> <span class="n">LocMemKeyValue</span>
+<span class="n">cache</span> <span class="o">=</span> <span class="n">LocMemKeyValue</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><tt class="docutils literal"><span class="pre">LocMemKeyValue</span></tt> only saves data as long as the concrete controller lives.
+For instance, while the http server is running, data will be saved,
+but if you restart the server, all data will be lost.
+This key/value backend is virtually useless with the command line controller,
+as all keys are cleared after each invocation.</p>
+</div>
+</div>
+<div class="section" id="dummykeyvalue">
+<h3>DummyKeyValue<a class="headerlink" href="#dummykeyvalue" title="Permalink to this headline">¶</a></h3>
+<p>You can also use <tt class="docutils literal"><span class="pre">DummyKeyValue</span></tt> which always returns misses for all keys:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">giotto.keyvalue</span> <span class="kn">import</span> <span class="n">DummyKeyValue</span>
+<span class="n">cache</span> <span class="o">=</span> <span class="n">DummyKeyValue</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
 </div>
 <div class="section" id="enabling-caching-for-programs">
-<h2>Enabling Caching for programs<a class="headerlink" href="#enabling-caching-for-programs" title="Permalink to this headline">¶</a></h2>
-<p>To enable cache for a program, add a value (in seconds) to the <tt class="docutils literal"><span class="pre">cache</span></tt> attribute of your program class:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">my_model</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<h2>Enabling caching for programs<a class="headerlink" href="#enabling-caching-for-programs" title="Permalink to this headline">¶</a></h2>
+<p>To enable cache for a program, add a value (in seconds) to the <tt class="docutils literal"><span class="pre">cache</span></tt> attribute of the program instance:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">square</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
     <span class="k">return</span> <span class="p">{</span><span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span><span class="p">}</span>
 
-<span class="k">class</span> <span class="nc">MyProgram</span><span class="p">(</span><span class="n">GiottoProgram</span><span class="p">):</span>
-    <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;my_program&#39;</span>
-    <span class="n">controllers</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;http-get&#39;</span><span class="p">,</span> <span class="s">&#39;cmd&#39;</span><span class="p">)</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="p">[</span><span class="n">my_model</span><span class="p">]</span>
-    <span class="n">cache</span> <span class="o">=</span> <span class="mi">3600</span> <span class="c"># one hour</span>
-    <span class="n">view</span> <span class="o">=</span> <span class="n">MyViewClass</span>
+<span class="n">manifest</span> <span class="o">=</span> <span class="n">ProgramManifest</span><span class="p">({</span>
+    <span class="s">&#39;squared&#39;</span><span class="p">:</span> <span class="n">GiottoProgram</span><span class="p">(</span>
+        <span class="n">controllers</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;http-get&#39;</span><span class="p">,</span> <span class="s">&#39;cmd&#39;</span><span class="p">),</span>
+        <span class="n">model</span><span class="o">=</span><span class="p">[</span><span class="n">square</span><span class="p">],</span>
+        <span class="n">cache</span><span class="o">=</span><span class="mi">3600</span><span class="p">,</span> <span class="c"># one hour</span>
+        <span class="n">view</span><span class="o">=</span><span class="n">MyViewClass</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="p">})</span>
 </pre></div>
 </div>
 <p>The first request that comes into this program will be calculated.
@@ -97,15 +146,15 @@ To turn off cache, either omit the cache attribute, or set it to <tt class="docu
 <p>A cache key is constructed from each incoming request.
 The cache key is in the following format:</p>
 <blockquote>
-<div>(model arguments)(model name)(mimetype)</div></blockquote>
+<div>(model arguments)(program name)(mimetype)</div></blockquote>
 <p>The output of the view is what gets stored under this key.
 In the example above, the cache key (if invoked from within a web browser), would be the following:</p>
 <div class="highlight-python"><pre>invocation -&gt; curl http://localhost:5000/my_program?x=12
-cache key -&gt; {'x': 12}(my_model)(text/html)</pre>
+cache key -&gt; {'x': 12}(my_program)(text/html)</pre>
 </div>
 <p>If invoked from within the commandline controller, the cache key would be the following:</p>
 <div class="highlight-python"><pre>invocation -&gt; ./giotto-cmd my_program x=12
-cache key -&gt; {'x': 12}(my_model)(text/cmd)</pre>
+cache key -&gt; {'x': 12}(my_program)(text/cmd)</pre>
 </div>
 </div>
 </div>
@@ -119,8 +168,15 @@ cache key -&gt; {'x': 12}(my_model)(text/cmd)</pre>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Cache</a><ul>
-<li><a class="reference internal" href="#configuring-cache">Configuring cache</a></li>
-<li><a class="reference internal" href="#enabling-caching-for-programs">Enabling Caching for programs</a></li>
+<li><a class="reference internal" href="#configuring-cache">Configuring cache</a><ul>
+<li><a class="reference internal" href="#rediskeyvalue">RedisKeyValue</a></li>
+<li><a class="reference internal" href="#memcachekeyvalue">MemcacheKeyValue</a></li>
+<li><a class="reference internal" href="#databasekeyvalue">DatabaseKeyValue</a></li>
+<li><a class="reference internal" href="#locmemkeyvalue">LocMemKeyValue</a></li>
+<li><a class="reference internal" href="#dummykeyvalue">DummyKeyValue</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#enabling-caching-for-programs">Enabling caching for programs</a></li>
 <li><a class="reference internal" href="#under-the-hood">Under the hood</a></li>
 </ul>
 </li>
@@ -166,7 +222,7 @@ cache key -&gt; {'x': 12}(my_model)(text/cmd)</pre>
         <li class="right" >
           <a href="middleware.html" title="Middleware"
              >previous</a> |</li>
-        <li><a href="index.html">Giotto 0.0.3pre documentation</a> &raquo;</li> 
+        <li><a href="index.html">Giotto 0.9.4 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

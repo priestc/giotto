@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Welcome to Giotto’s documentation! &mdash; Giotto 0.0.3pre documentation</title>
+    <title>Welcome to Giotto’s documentation! &mdash; Giotto 0.9.4 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.0.3pre',
+        VERSION:     '0.9.4',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Giotto 0.0.3pre documentation" href="#" />
+    <link rel="top" title="Giotto 0.9.4 documentation" href="#" />
     <link rel="next" title="Introduction" href="introduction.html" /> 
   </head>
   <body>
@@ -38,7 +38,7 @@
         <li class="right" >
           <a href="introduction.html" title="Introduction"
              accesskey="N">next</a> |</li>
-        <li><a href="#">Giotto 0.0.3pre documentation</a> &raquo;</li> 
+        <li><a href="#">Giotto 0.9.4 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -66,17 +66,29 @@
 <li class="toctree-l2"><a class="reference internal" href="tutorial.html#cache">Cache</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="manifests.html">Manifests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="terminology.html">Terminology</a></li>
-<li class="toctree-l1"><a class="reference internal" href="built_in_controller_classes.html">Built-in Controller Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="built_in_controller_classes.html">Built-in Controller Classes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="built_in_controller_classes.html#http">HTTP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="built_in_controller_classes.html#command-line">Command Line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="built_in_controller_classes.html#irc">IRC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="built_in_controller_classes.html#overriding-default-mimetypes">Overriding default mimetypes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="creating_your_own_controllers.html">Creating your own controllers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="creating_your_own_controllers.html#concrete-controller-template">Concrete controller template</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="view_classes.html">View Classes</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="view_classes.html#creating-view-classes">Creating View Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="view_classes.html#return-values">Return values</a></li>
 <li class="toctree-l2"><a class="reference internal" href="view_classes.html#basicview">BasicView</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="middleware.html">Middleware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cache.html">Cache</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="cache.html#configuring-cache">Configuring cache</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cache.html#enabling-caching-for-programs">Enabling Caching for programs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cache.html#enabling-caching-for-programs">Enabling caching for programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cache.html#under-the-hood">Under the hood</a></li>
 </ul>
 </li>
@@ -85,9 +97,16 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="authentication.html">Authentication</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="authentication.html#configuring-authentication">Configuring Authentication</a></li>
 <li class="toctree-l2"><a class="reference internal" href="authentication.html#enabling-authentication-for-your-application">Enabling Authentication for your application</a></li>
-<li class="toctree-l2"><a class="reference internal" href="authentication.html#how-authentication-works-under-the-hood">How Authentication works under the hood</a></li>
-<li class="toctree-l2"><a class="reference internal" href="authentication.html#extending-the-views-on-the-login-register-programs">Extending the views on the login/register programs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authentication.html#login-page">Login page</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authentication.html#register-page">Register page</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authentication.html#logout-page">Logout Page</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authentication.html#interacting-with-authentication-with-other-programs">Interacting with authentication with other programs</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="serving_static_files.html">Serving Static Files</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="serving_static_files.html#singlestaticserve">SingleStaticServe</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="deployment.html">Deploying Giotto</a><ul>
@@ -156,7 +175,7 @@
         <li class="right" >
           <a href="introduction.html" title="Introduction"
              >next</a> |</li>
-        <li><a href="#">Giotto 0.0.3pre documentation</a> &raquo;</li> 
+        <li><a href="#">Giotto 0.9.4 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

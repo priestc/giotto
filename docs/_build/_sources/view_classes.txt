@@ -41,6 +41,19 @@ and the data the view is written to take in.
 For instance, the above mimetype method is designed to display a dictionary with three keys (``x``, ``y``, and ``result``).
 If the model was changed to return a list, this view method will crash.
 
+Return values
+-------------
+
+Each mimetype render method should return either a string::
+
+    return "return a string"
+
+or a dictionary with body and mimetype tags::
+
+    return {'body': "this is whats returned, 'mimetype': 'text/plain'}
+
+Not all ``text_html`` render methods will return ``text/html`` content.
+
 BasicView
 ---------
 

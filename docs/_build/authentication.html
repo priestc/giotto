@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Authentication &mdash; Giotto 0.0.3pre documentation</title>
+    <title>Authentication &mdash; Giotto 0.9.4 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.0.3pre',
+        VERSION:     '0.9.4',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,8 +25,8 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Giotto 0.0.3pre documentation" href="index.html" />
-    <link rel="next" title="Deploying Giotto" href="deployment.html" />
+    <link rel="top" title="Giotto 0.9.4 documentation" href="index.html" />
+    <link rel="next" title="Static Files" href="serving_static_files.html" />
     <link rel="prev" title="Model Mocking" href="model_mocking.html" /> 
   </head>
   <body>
@@ -37,12 +37,12 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="deployment.html" title="Deploying Giotto"
+          <a href="serving_static_files.html" title="Static Files"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="model_mocking.html" title="Model Mocking"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Giotto 0.0.3pre documentation</a> &raquo;</li> 
+        <li><a href="index.html">Giotto 0.9.4 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -60,62 +60,226 @@ The password is stored as an encrypted string.
 Encrypting is done automatically by the <a class="reference external" href="http://www.mindrot.org/projects/py-bcrypt/">bcrypt</a> library.</p>
 <p>This user class is not intended to store all information that an application developer would want to store for a user.
 The developer is meant to create their own user profile table that connects to the User table via foreign key.</p>
+<div class="section" id="configuring-authentication">
+<h2>Configuring Authentication<a class="headerlink" href="#configuring-authentication" title="Permalink to this headline">¶</a></h2>
+<p>In the config file of your application, add the following variables:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">auth_session</span></tt> - To a instance of a GiottoKeyValue class. (See the cache documentation)</li>
+<li><tt class="docutils literal"><span class="pre">auth_regex</span></tt> - To a regular exression that represents what usernames can be.
+If left blank, this will be</li>
+</ul>
+</div>
 <div class="section" id="enabling-authentication-for-your-application">
 <h2>Enabling Authentication for your application<a class="headerlink" href="#enabling-authentication-for-your-application" title="Permalink to this headline">¶</a></h2>
-<p>All you need to do is import the login and registration programs into your application&#8217;s <tt class="docutils literal"><span class="pre">programs.py</span></tt> file:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">giotto.contrib.auth.programs</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">UserRegistrationSubmit</span><span class="p">,</span> <span class="n">UserRegistrationForm</span><span class="p">,</span> <span class="n">LoginForm</span><span class="p">,</span> <span class="n">LoginSubmit</span>
-<span class="p">)</span>
+<p>An authenticated application typically contans three parts:</p>
+<ol class="arabic simple">
+<li>A registration page.</li>
+<li>A login page.</li>
+<li>A log out page.</li>
+<li>Some way to authenticate requests so other parts of the application can utilize authentication.</li>
+</ol>
+</div>
+<div class="section" id="login-page">
+<h2>Login page<a class="headerlink" href="#login-page" title="Permalink to this headline">¶</a></h2>
+<p>To set up a login page, add the following to your project&#8217;s manifest:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">giotto.contrib.auth.models</span> <span class="kn">import</span> <span class="n">is_authenticated</span>
+<span class="kn">from</span> <span class="nn">giotto.contrib.auth.middleware</span> <span class="kn">import</span> <span class="n">SetAuthenticationCookies</span>
+<span class="kn">from</span> <span class="nn">giotto.control</span> <span class="kn">import</span> <span class="n">Redirection</span>
+<span class="kn">from</span> <span class="nn">giotto.programs</span> <span class="kn">import</span> <span class="n">GiottoProgram</span>
+<span class="kn">from</span> <span class="nn">giotto.views</span> <span class="kn">import</span> <span class="n">JinjaTemplateView</span>
+
+<span class="p">{</span>
+    <span class="s">&#39;login&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">GiottoProgram</span><span class="p">(</span>
+            <span class="n">input_middleware</span><span class="o">=</span><span class="p">[</span><span class="n">AuthenticationMiddleware</span><span class="p">,</span> <span class="n">NotAuthenticatedOrRedirect</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)],</span>
+            <span class="n">controllers</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;http-get&#39;</span><span class="p">,),</span>
+            <span class="n">view</span><span class="o">=</span><span class="n">JinjaTemplateView</span><span class="p">(</span><span class="s">&#39;login.html&#39;</span><span class="p">),</span>
+        <span class="p">),</span>
+        <span class="n">GiottoProgram</span><span class="p">(</span>
+            <span class="n">controllers</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;http-post&#39;</span><span class="p">,),</span>
+            <span class="n">input_middleware</span><span class="o">=</span><span class="p">[</span><span class="n">AuthenticationMiddleware</span><span class="p">],</span>
+            <span class="n">model</span><span class="o">=</span><span class="p">[</span><span class="n">is_authenticated</span><span class="p">(</span><span class="s">&quot;Invalid username or password&quot;</span><span class="p">)],</span>
+            <span class="n">view</span><span class="o">=</span><span class="n">Redirection</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">),</span>
+            <span class="n">output_middleware</span><span class="o">=</span><span class="p">[</span><span class="n">SetAuthenticationCookies</span><span class="p">],</span>
+        <span class="p">),</span>
+    <span class="p">],</span>
+<span class="p">}</span>
 </pre></div>
 </div>
-<p>Then, to register a new account, point your browser to the <tt class="docutils literal"><span class="pre">register</span></tt> program.
-Enter your username and password and click submit. This will create a new user in the system.
-Usernames, by default have to conform to the following regex: <tt class="docutils literal"><span class="pre">^[\d\w]{4,30}$</span></tt>.
-This can be changed by adding a regex string to <tt class="docutils literal"><span class="pre">auth_regex</span></tt> in your project&#8217;s config file.</p>
-<p>To login, point your browser to the <tt class="docutils literal"><span class="pre">login</span></tt> program. Enter your credentials.
-If the username/password you entered match a row int he user table, you will be logged in.</p>
+<p>The first program handles generating the login form.
+The second program handles the submitted data from the login form.
+You may want to change the name of the template that is passed into the first program.
+The login template must contain a form that POSTS&#8217;s its data to a page of the same name of the form.
+The name of the programs (<tt class="docutils literal"><span class="pre">login</span></tt> in this example) can be anything.
+You can also change the path that the second program redirects to after successful registration.
+In this case, on successful registration, the user is redirected to the root program: <tt class="docutils literal"><span class="pre">/</span></tt>.</p>
+<p>The login template should look a little like this:</p>
+<div class="highlight-python"><pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+    &lt;body&gt;
+        &lt;h1&gt;Login&lt;/h1&gt;
+        {% if errors %}
+            &lt;span style="color: red"&gt;{{ errors.message }}&lt;/span&gt;
+        {% endif %}
+        &lt;form method="post"&gt;
+            username: &lt;input type="text" name="username"&gt;
+            &lt;br&gt;
+            password: &lt;input type="password" name="password"&gt;
+            &lt;br&gt;
+            &lt;input type="submit"&gt;
+        &lt;/form&gt;
+    &lt;/body&gt;
+&lt;/html&gt;</pre>
 </div>
-<div class="section" id="how-authentication-works-under-the-hood">
-<h2>How Authentication works under the hood<a class="headerlink" href="#how-authentication-works-under-the-hood" title="Permalink to this headline">¶</a></h2>
-<p>When using the HTTP controller, loggin in sets two cookies, <tt class="docutils literal"><span class="pre">username</span></tt> and <tt class="docutils literal"><span class="pre">password</span></tt>.
-The password cookie is not a raw password. It is the hashed cookie, hashed by bcrypt.</p>
-<p>To authenticate this username/password cookie,
-add the <tt class="docutils literal"><span class="pre">AuthenticationMiddleware</span></tt> to the input_middleware stream of your program.
-This middleware class will inspect the cookies, and add a <tt class="docutils literal"><span class="pre">user</span></tt> attribute to the request.
-Requests coming through this middleware that aren&#8217;t authenticated will result in a <tt class="docutils literal"><span class="pre">request.user</span></tt> value that is <tt class="docutils literal"><span class="pre">None</span></tt>.</p>
-<p>To access the authenticated user from within ght model, use the LOGGED_IN_USER primitive:</p>
+<p>The value of <tt class="docutils literal"><span class="pre">{{</span> <span class="pre">errors</span> <span class="pre">}}</span></tt> will be empty when the login form is first rendered.
+If the data that is submitted is not valid (it does not match an existing user/pasword),
+the form is re-generated with the <tt class="docutils literal"><span class="pre">errors</span></tt> object containing error information.</p>
+</div>
+<div class="section" id="register-page">
+<h2>Register page<a class="headerlink" href="#register-page" title="Permalink to this headline">¶</a></h2>
+<p>To add a registration page to your application, add the following to your manifest:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">giotto.contrib.auth.models</span> <span class="kn">import</span> <span class="n">basic_register</span>
+<span class="kn">from</span> <span class="nn">giotto.contrib.auth.middleware</span> <span class="kn">import</span> <span class="n">SetAuthenticationCookies</span>
+<span class="kn">from</span> <span class="nn">giotto.control</span> <span class="kn">import</span> <span class="n">Redirection</span>
+<span class="kn">from</span> <span class="nn">giotto.programs</span> <span class="kn">import</span> <span class="n">GiottoProgram</span>
+<span class="kn">from</span> <span class="nn">giotto.views</span> <span class="kn">import</span> <span class="n">JinjaTemplateView</span>
+
+<span class="p">{</span>
+    <span class="s">&#39;register&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">GiottoProgram</span><span class="p">(</span>
+            <span class="n">controllers</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;http-get&#39;</span><span class="p">,),</span>
+            <span class="n">view</span><span class="o">=</span><span class="n">JinjaTemplateView</span><span class="p">(</span><span class="s">&#39;register.html&#39;</span><span class="p">),</span>
+        <span class="p">),</span>
+        <span class="n">GiottoProgram</span><span class="p">(</span>
+            <span class="n">controllers</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;http-post&#39;</span><span class="p">,),</span>
+            <span class="n">model</span><span class="o">=</span><span class="p">[</span><span class="n">basic_register</span><span class="p">],</span>
+            <span class="n">view</span><span class="o">=</span><span class="n">Redirection</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">),</span>
+            <span class="n">output_middleware</span><span class="o">=</span><span class="p">[</span><span class="n">SetAuthenticationCookies</span><span class="p">],</span>
+        <span class="p">),</span>
+    <span class="p">],</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The register template should look like this:</p>
+<div class="highlight-python"><pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+    &lt;body&gt;
+        &lt;h1&gt;Register&lt;/h1&gt;
+        {% if errors %}
+            &lt;span style="color: red"&gt;{{ errors.message }}&lt;/span&gt;
+        {% endif %}
+        &lt;form method="post"&gt;
+            &lt;span style="color: red"&gt;{{ errors.username.message }}&lt;/span&gt;&lt;br&gt;
+            username: &lt;input type="text" name="username" value="{{ errors.username.value }}"&gt;
+            &lt;br&gt;
+            &lt;span style="color: red"&gt;{{ errors.password.message }}&lt;/span&gt;&lt;br&gt;
+            password: &lt;input type="password" name="password"&gt;
+            password again: &lt;input type="password" name="password2"&gt;
+            &lt;br&gt;
+            &lt;input type="submit"&gt;
+        &lt;/form&gt;
+    &lt;/body&gt;
+&lt;/html&gt;</pre>
+</div>
+<p>The value of the <tt class="docutils literal"><span class="pre">errors</span></tt> object will have a <tt class="docutils literal"><span class="pre">password</span></tt> and <tt class="docutils literal"><span class="pre">username</span></tt> object,
+which will each contain <tt class="docutils literal"><span class="pre">message</span></tt> and <tt class="docutils literal"><span class="pre">value</span></tt> keys.
+<tt class="docutils literal"><span class="pre">message</span></tt> contains the error message, and <tt class="docutils literal"><span class="pre">value</span></tt> contain the previous value that was entered.</p>
+</div>
+<div class="section" id="logout-page">
+<h2>Logout Page<a class="headerlink" href="#logout-page" title="Permalink to this headline">¶</a></h2>
+<p>Adding a logout program is very simple, just add this to your project&#8217;s manifest:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">giotto.programs</span> <span class="kn">import</span> <span class="n">GiottoProgram</span>
+<span class="kn">from</span> <span class="nn">giotto.control</span> <span class="kn">import</span> <span class="n">Redirection</span>
+<span class="kn">from</span> <span class="nn">giotto.contrib.auth.middleware</span> <span class="kn">import</span> <span class="n">LogoutMiddleware</span>
+
+<span class="p">{</span>
+    <span class="s">&#39;logout&#39;</span><span class="p">:</span> <span class="n">GiottoProgram</span><span class="p">(</span>
+        <span class="n">view</span><span class="o">=</span><span class="n">Redirection</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">),</span>
+        <span class="n">output_middleware</span><span class="o">=</span><span class="p">[</span><span class="n">LogoutMiddleware</span><span class="p">],</span>
+    <span class="p">),</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>You can change the url that you get redirected to after logging out by changing the value passed into <tt class="docutils literal"><span class="pre">Redirection</span></tt>.</p>
+</div>
+<div class="section" id="interacting-with-authentication-with-other-programs">
+<h2>Interacting with authentication with other programs<a class="headerlink" href="#interacting-with-authentication-with-other-programs" title="Permalink to this headline">¶</a></h2>
+<p>To access the currently logged in user from within a model function,
+add the <tt class="docutils literal"><span class="pre">LOGGED_IN_USER</span></tt> primitive to your model function&#8217;s arguments:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">giotto.primitives</span> <span class="kn">import</span> <span class="n">LOGGED_IN_USER</span>
+<span class="kn">from</span> <span class="nn">giotto.programs</span> <span class="kn">import</span> <span class="n">GiottoProgram</span><span class="p">,</span> <span class="n">ProgramManifest</span>
+<span class="kn">from</span> <span class="nn">giotto.contrib.auth.middleware</span> <span class="kn">import</span> <span class="n">AuthenticationMiddleware</span>
+<span class="kn">from</span> <span class="nn">giotto.views</span> <span class="kn">import</span> <span class="n">BasicView</span>
 
-<span class="k">def</span> <span class="nf">some_model_function</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">LOGGED_IN_USER</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">show_logged_in_user</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">LOGGED_IN_USER</span><span class="p">):</span>
     <span class="k">return</span> <span class="p">{</span><span class="s">&#39;user&#39;</span><span class="p">:</span> <span class="n">user</span><span class="p">}</span>
-</pre></div>
-</div>
-<p>If the program is accessed by a logged in uer,
-the value of <tt class="docutils literal"><span class="pre">LOGGED_IN_USER</span></tt> will be the User object that corresponds to the currently logged in user.
-If the program is accessed by a non-logged in user, <tt class="docutils literal"><span class="pre">LOGGED_IN_USER</span></tt> will be <tt class="docutils literal"><span class="pre">None</span></tt>.</p>
-<p>Another middleware class, <tt class="docutils literal"><span class="pre">SetAuthenticationCookie</span></tt> is put in the output middleware stream.
-It&#8217;s job is to set the cookies so each subsequent request can be authenticated.
-By default, the authentication cookie expires after 30 days.
-This value can be changed by setting the <tt class="docutils literal"><span class="pre">auth_cookie_expire</span></tt> value to the number of hours the cookie shoudl live for,
-in your project&#8217;s <tt class="docutils literal"><span class="pre">config.py</span></tt>.</p>
-</div>
-<div class="section" id="extending-the-views-on-the-login-register-programs">
-<h2>Extending the views on the login/register programs<a class="headerlink" href="#extending-the-views-on-the-login-register-programs" title="Permalink to this headline">¶</a></h2>
-<p>To extend the way the default login looks, subclass the program with your own view defined:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">MyLogin</span><span class="p">(</span><span class="n">LoginForm</span><span class="p">):</span>
-    <span class="n">view</span> <span class="o">=</span> <span class="n">MyLoginView</span>
 
-<span class="k">class</span> <span class="nc">MyRegisterForm</span><span class="p">(</span><span class="n">UserRegistrationForm</span><span class="p">):</span>
-    <span class="n">view</span> <span class="o">=</span> <span class="n">MyRegisterView</span>
+<span class="n">manifest</span> <span class="o">=</span> <span class="n">ProgramManifest</span><span class="p">({</span>
+    <span class="s">&#39;show_logged_in&#39;</span><span class="p">:</span> <span class="n">GiottoProgram</span><span class="p">(</span>
+        <span class="n">input_middleware</span><span class="o">=</span><span class="p">[</span><span class="n">AuthenticationMiddleware</span><span class="p">],</span>
+        <span class="n">model</span><span class="o">=</span><span class="p">[</span><span class="n">show_logged_in_user</span><span class="p">],</span>
+        <span class="n">view</span><span class="o">=</span><span class="n">BasicView</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="p">})</span>
 </pre></div>
 </div>
-<p>or by defining the whole program yourself:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">LoginForm</span><span class="p">(</span><span class="n">GiottoProgram</span><span class="p">):</span>
-    <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;login&#39;</span>
-    <span class="n">controllers</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;http-get&#39;</span><span class="p">,</span> <span class="p">)</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">view</span> <span class="o">=</span> <span class="n">MyRegisterView</span>
+<p>The controller knows how to extract <tt class="docutils literal"><span class="pre">LOGGED_IN_USER</span></tt> from the incoming request.
+This primitive can only be used if the <tt class="docutils literal"><span class="pre">AuthenticationMiddleware</span></tt> is added to the input middleware stream.
+All programs that wish to take advantage of the authentication system need to have <tt class="docutils literal"><span class="pre">AuthenticationMiddleware</span></tt> added.
+It may be convenient to create a subclass of <tt class="docutils literal"><span class="pre">GiottoProgram</span></tt> with <tt class="docutils literal"><span class="pre">AuthenticationMiddleware</span></tt> baked in:</p>
+<div class="highlight-python"><pre>from giotto.programs import GiottoProgram, ProgramManifest
+from giotto.contrib.auth.middleware import AuthenticationMiddleware
+from giotto.views import BasicView
+
+class AuthProgram(GiottoProgram):
+    input_middleware=[AuthenticationMiddleware]
+
+def show_logged_in_user(user=LOGGED_IN_USER):
+    return {'user': user}
+
+ manifest = ProgramManifest({
+    'show_logged_in': AuthProgram(
+        model=[show_logged_in_user],
+        view=BasicView,
+    )
+})</pre>
+</div>
+<p>You can also take advantage of a few middleware classes</p>
+<div class="section" id="authenticatedorredirect-and-notauthenticatedorredirect">
+<h3>AuthenticatedOrRedirect and NotAuthenticatedOrRedirect<a class="headerlink" href="#authenticatedorredirect-and-notauthenticatedorredirect" title="Permalink to this headline">¶</a></h3>
+<p>These middleware classes, if added to the input middleware stream,
+will redirect the request to another program (via 302 redirect) depending on authentication status:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">giotto.programs</span> <span class="kn">import</span> <span class="n">GiottoProgram</span>
+<span class="kn">from</span> <span class="nn">giotto.contrib.auth.middleware</span> <span class="kn">import</span> <span class="n">AuthenticationMiddleware</span><span class="p">,</span> <span class="n">NotAuthenticatedOrRedirect</span>
+<span class="kn">from</span> <span class="nn">giotto.views</span> <span class="kn">import</span> <span class="n">JinjaTemplateView</span>
+
+<span class="n">GiottoProgram</span><span class="p">(</span>
+    <span class="n">input_middleware</span><span class="o">=</span><span class="p">[</span><span class="n">AuthenticationMiddleware</span><span class="p">,</span> <span class="n">NotAuthenticatedOrRedirect</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)],</span>
+    <span class="n">controllers</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;http-get&#39;</span><span class="p">,),</span>
+    <span class="n">view</span><span class="o">=</span><span class="n">JinjaTemplateView</span><span class="p">(</span><span class="s">&#39;login.html&#39;</span><span class="p">),</span>
+<span class="p">),</span>
 </pre></div>
+</div>
+<p>In this example, only non authenticated users will see the <tt class="docutils literal"><span class="pre">login.html</span></tt> page.
+All authenticated users will get redirected to the root program.</p>
+</div>
+<div class="section" id="authenticatedordie">
+<h3>AuthenticatedOrDie<a class="headerlink" href="#authenticatedordie" title="Permalink to this headline">¶</a></h3>
+<p>This middleware class will return a 403 (error page) if the request is not authenticated:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">giotto.programs</span> <span class="kn">import</span> <span class="n">GiottoProgram</span>
+<span class="kn">from</span> <span class="nn">giotto.contrib.auth.middleware</span> <span class="kn">import</span> <span class="n">AuthenticationMiddleware</span><span class="p">,</span> <span class="n">AuthenticatedOrDie</span>
+<span class="kn">from</span> <span class="nn">giotto.views</span> <span class="kn">import</span> <span class="n">JinjaTemplateView</span>
+
+<span class="p">{</span>
+    <span class="s">&#39;new&#39;</span><span class="p">:</span> <span class="n">GiottoProgram</span><span class="p">(</span>
+        <span class="n">input_middleware</span><span class="o">=</span><span class="p">[</span><span class="n">AuthenticationMiddleware</span><span class="p">,</span> <span class="n">AuthenticatedOrDie</span><span class="p">],</span>
+        <span class="n">view</span><span class="o">=</span><span class="n">JinjaTemplateView</span><span class="p">(</span><span class="s">&#39;new_blog.html&#39;</span><span class="p">),</span>
+        <span class="n">controllers</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;http-get&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>In this example, only authenticated users can create a new blog. All other users will get a 403 page.</p>
 </div>
 </div>
 </div>
@@ -129,9 +293,16 @@ in your project&#8217;s <tt class="docutils literal"><span class="pre">config.py
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Authentication</a><ul>
+<li><a class="reference internal" href="#configuring-authentication">Configuring Authentication</a></li>
 <li><a class="reference internal" href="#enabling-authentication-for-your-application">Enabling Authentication for your application</a></li>
-<li><a class="reference internal" href="#how-authentication-works-under-the-hood">How Authentication works under the hood</a></li>
-<li><a class="reference internal" href="#extending-the-views-on-the-login-register-programs">Extending the views on the login/register programs</a></li>
+<li><a class="reference internal" href="#login-page">Login page</a></li>
+<li><a class="reference internal" href="#register-page">Register page</a></li>
+<li><a class="reference internal" href="#logout-page">Logout Page</a></li>
+<li><a class="reference internal" href="#interacting-with-authentication-with-other-programs">Interacting with authentication with other programs</a><ul>
+<li><a class="reference internal" href="#authenticatedorredirect-and-notauthenticatedorredirect">AuthenticatedOrRedirect and NotAuthenticatedOrRedirect</a></li>
+<li><a class="reference internal" href="#authenticatedordie">AuthenticatedOrDie</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -140,8 +311,8 @@ in your project&#8217;s <tt class="docutils literal"><span class="pre">config.py
   <p class="topless"><a href="model_mocking.html"
                         title="previous chapter">Model Mocking</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="deployment.html"
-                        title="next chapter">Deploying Giotto</a></p>
+  <p class="topless"><a href="serving_static_files.html"
+                        title="next chapter">Static Files</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/authentication.txt"
@@ -171,12 +342,12 @@ in your project&#8217;s <tt class="docutils literal"><span class="pre">config.py
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="deployment.html" title="Deploying Giotto"
+          <a href="serving_static_files.html" title="Static Files"
              >next</a> |</li>
         <li class="right" >
           <a href="model_mocking.html" title="Model Mocking"
              >previous</a> |</li>
-        <li><a href="index.html">Giotto 0.0.3pre documentation</a> &raquo;</li> 
+        <li><a href="index.html">Giotto 0.9.4 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

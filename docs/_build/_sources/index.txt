@@ -19,16 +19,17 @@ Contents:
 
    introduction
    tutorial
+   manifests
    terminology
    built_in_controller_classes
+   creating_your_own_controllers
    view_classes
    middleware
    cache
    model_mocking
    authentication
+   serving_static_files
    deployment
-
-
 
 Indices and tables
 ==================
