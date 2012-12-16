@@ -103,8 +103,10 @@ class BasicView(GiottoView):
 
         out = "\n".join(out)
         return {'body': """<!DOCTYPE html>
+
         <html>
             <head>{0}</head>
+            <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
             <body>
                 <h1>{1}</h1>
                 <table>

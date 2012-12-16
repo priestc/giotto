@@ -9,6 +9,8 @@ class InvalidInput(Exception):
             self.__dict__ = defaultdict(lambda: '', data)
 
     def __getitem__(self, item):
+        # be permissive of attribute errors because jinja templates
+        # need to not blow up when there are no errors.
         if not item in self.__dict__:
             return Mock()
 

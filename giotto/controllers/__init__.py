@@ -76,21 +76,29 @@ class GiottoController(object):
         this invocation that will go to the model.
         """
         raw_data = self.get_raw_data()
+        defaults = kwargs
+        values = args + kwargs.keys()
+
         output = {}
-        for i, arg in enumerate(args):
-            if i < len(self.path_args):
-                # use path args instead (if they have been supplied)
-                target = self.path_args[i]
-            else:
-                target = raw_data.get(arg, None)
+        for i, value in enumerate(values):
+            if value in defaults:
+                may_be_primitive = defaults[value]
+                if isinstance(may_be_primitive, GiottoPrimitive):
+                    output[value] = self.get_primitive(value.name)
+                else:
+                    output[value] = may_be_primitive
 
-            output[arg] = target
+            if i + 1 <= len(self.path_args):
+                output[value] = self.path_args[i]
+            if value in raw_data:
+                output[value] = raw_data[value]
 
-        for key, value in kwargs.iteritems():
-            if isinstance(value, GiottoPrimitive):
-                output[key] = self.get_primitive(value.name)
-            else:
-                output[key] = value
+        if len(self.path_args) > i + 1:
+            # there are too many positional arguments for this program.
+            raise ProgramNotFound("Too many positional arguments for program: '%s'" % self.program.name)
+
+        if not len(output) == len(values):
+            raise ProgramNotFound("Not enough data for program '%s'" % self.program.name)
 
         return output
 
