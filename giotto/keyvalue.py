@@ -1,6 +1,7 @@
 from collections import defaultdict
 import datetime
 import pickle
+
 from sqlalchemy import Column, String, DateTime
 
 try:
@@ -16,6 +17,10 @@ except ImportError:
 DBKeyValue = None
 
 class GiottoKeyValue(object):
+    """
+    Baseclass for all KeyValue object. This exists to demonstrate the API for
+    KeyValue subclasses.
+    """
     def set(self, key, obj):
         raise NotImplementedError
 
@@ -93,7 +98,8 @@ class LocMemKeyValue(GiottoKeyValue):
 class MemcacheKeyValue(GiottoKeyValue):
     def __init__(self, host=['localhost'], behavior={}):
         if not pylibmc:
-            raise ImportError('pylibmc not installed! install with: pip install pylibmc')
+            msg = 'pylibmc not installed! install with: pip install pylibmc'
+            raise ImportError(msg)
         if hasattr(host, 'lower'):
             host = [host]
         kwargs = {'servers': host, 'binary': True}
@@ -110,7 +116,8 @@ class MemcacheKeyValue(GiottoKeyValue):
 class RedisKeyValue(GiottoKeyValue):
     def __init__(self, host='localhost', port=6379, db=0):
         if not redis:
-            raise ImportError('redis python wrapper not installed! install with: pip install redis')
+            msg = 'redis python wrapper not installed! install with: pip install redis'
+            raise ImportError(msg)
         self.redis = redis.StrictRedis(host=host, port=port, db=db)
 
     def set(self, key, obj, expire):

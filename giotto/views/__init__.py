@@ -1,7 +1,4 @@
 import json
-import mimetypes
-
-import magic
 import mimeparse
 
 from jinja2 import Template

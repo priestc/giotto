@@ -11,22 +11,19 @@ class TestRedirection(unittest.TestCase):
             title = 'title'
         model = Model()
         r = Redirection('prog', args=[M.id, M.title])
-        r = r(model)
-        r.render('some/mimetype')
+        r.render(model, 'some/mimetype', errors=None)
         self.assertEquals(r.rendered_invocation, ('prog', ['id', 'title'], {}))
 
     def test_brackets(self):
         model = {'title': 'title', 'id': 'id'} 
         r = Redirection('prog', args=[M['id'], M['title']])
-        r = r(model)
-        r.render('some/mimetype')
+        r.render(model, 'some/mimetype', errors=None)
         self.assertEquals(r.rendered_invocation, ('prog', ['id', 'title'], {}))
 
     def test_kwargs(self):
         model = {'title': 'title', 'id': 'id'} 
         r = Redirection('prog', kwargs={'id': M['id'], 'title': M['title']})
-        r = r(model)
-        r.render('some/mimetype')
+        r.render(model, 'some/mimetype', errors=None)
         self.assertEquals(r.rendered_invocation, ('prog', [], {'id': 'id', 'title': 'title'}))
 
 if __name__ == '__main__':

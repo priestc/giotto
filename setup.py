@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
 	name='giotto',
-    version='0.9.4',
+    version='0.9.5',
     description='MVC Application Framework',
     long_description=open('README.rst').read(),
     author='Chris Priest',
@@ -22,7 +22,6 @@ setup(
     install_requires=[
         'werkzeug',
         'irc',
-        'python-magic',
         'jinja2',
         'py-bcrypt',
         'mimeparse',

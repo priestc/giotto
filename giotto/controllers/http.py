@@ -1,6 +1,5 @@
 import copy
 import urllib
-import magic
 
 from giotto.exceptions import NoViewMethod, InvalidInput
 from giotto.controllers import GiottoController
