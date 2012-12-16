@@ -16,6 +16,7 @@ application = make_app(manifest, model_mock=mock)
 if '--run' in sys.argv:
     run_simple('127.0.0.1', 5000, application, use_debugger=True, use_reloader=True)"""
 
+
 def make_url(invocation, args=[], kwargs={}):
     """
     >>> make_url('some/path/program', ['arg1', 'arg2'], {'arg3': 4})
@@ -36,7 +37,6 @@ def make_url(invocation, args=[], kwargs={}):
         url += "?" + urllib.urlencode(kwargs)
     
     return url
-
 
 
 class HTTPController(GiottoController):
@@ -107,6 +107,7 @@ class HTTPController(GiottoController):
         if primitive == 'ALL_PROGRAMS':
             return self.manifest.get_all_programs()
 
+
 def make_app(manifest, model_mock=False, cache=None):
     
     def application(environ, start_response):
@@ -119,6 +120,7 @@ def make_app(manifest, model_mock=False, cache=None):
         return wsgi_response(environ, start_response)
 
     return application
+
 
 def make_duplicate_request(request):
     """
