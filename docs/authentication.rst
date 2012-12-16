@@ -21,7 +21,7 @@ In the config file of your application, add the following variables:
 
 * ``auth_session`` - To a instance of a GiottoKeyValue class. (See the cache documentation)
 * ``auth_regex`` - To a regular exression that represents what usernames can be.
-  If left blank, this will be 
+  If left blank, this will be set to ``^[\d\w]{4,30}$``.
 
 Enabling Authentication for your application
 ============================================
