@@ -8,9 +8,9 @@ from giotto.utils import Mock, htmlize, htmlize_list, pre_process_json
 
 def renders(*mimetypes):
     def decorator(func):
-        func.render_map = {}
+        func.mimetypes = []
         for mimetype in mimetypes:
-            func.render_map[mimetype] = func.__name__
+            func.mimetypes.append(mimetype)
         return func
     return decorator
 
@@ -25,13 +25,15 @@ class GiottoView(object):
     def __init__(self):
         for method in [x for x in dir(self) if not x.startswith('__')]:
             # register all render methods based on the render decorator
-            attr = getattr(self, method)
-            render_map = getattr(attr, 'render_map', None)
-            if render_map and type(render_map) == dict:
-                self.render_map.update(render_map)
+            func = getattr(self, method)
+            mimetypes = getattr(func, 'mimetypes', [])
+            for mimetype in mimetypes:
+                self.render_map[mimetype] = method
 
     def render(self, result, mimetype, errors=None):
-        status = 200
+        """
+        Render a model result into `mimetype` format.
+        """
         available_mimetypes = self.render_map.keys()
         target_mimetype = mimeparse.best_match(available_mimetypes, mimetype)
         self.errors = errors or Mock()
@@ -40,15 +42,21 @@ class GiottoView(object):
         if not renderer:
             raise NoViewMethod("%s not supported for this program" % mimetype)
 
-        data = getattr(self, renderer)(result)
+        render_func = getattr(self, renderer)
+        principle_mimetype = render_func.mimetypes[0]
+        data = render_func(result)
 
-        if target_mimetype == '*/*':
-            data['mimetype'] = ''
+        if not hasattr(data, 'iteritems'):
+            # view returned string
+            data = {'body': data, 'mimetype': principle_mimetype}
+        else:
+            # result is a dict in for form {body: XX, mimetype: xx}
+            if not mimetype in data and target_mimetype == '*/*':
+                data['mimetype'] = ''
 
-        if not 'mimetype' in data:
-            data['mimetype'] = target_mimetype
+            if not 'mimetype' in data:
+                data['mimetype'] = target_mimetype
 
-        data['status'] = status
         return data
 
 class BasicView(GiottoView):

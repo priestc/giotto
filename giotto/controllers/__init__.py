@@ -74,6 +74,8 @@ class GiottoController(object):
         """
         In comes args and kwargs expected for the model. Out comes the data from
         this invocation that will go to the model.
+        In other words, this function does the 'data negotiation' between the
+        controller and the model.
         """
         raw_data = self.get_raw_data()
         defaults = kwargs
