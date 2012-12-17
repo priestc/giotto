@@ -1,11 +1,20 @@
 from cStringIO import StringIO
 from giotto.programs import GiottoProgram
 from giotto.views import GiottoView, renders
+from giotto.utils import super_accept_to_mimetype
+import os
+import magic
 
 class FileView(GiottoView):
     @renders('*/*')
     def html(self, result):
-        return {'body': result, 'mimetype': ''}
+        _, ext = os.path.splitext(result.name)
+        mimetype = super_accept_to_mimetype(ext)
+        if not mimetype:
+            mimetype = magic.from_buffer(result.read(1024), mime=True)
+            result.seek(0)
+        
+        return {'body': result, 'mimetype': mimetype}
 
     @renders('text/x-cmd')
     def cmd(self, result):

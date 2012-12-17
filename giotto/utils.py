@@ -52,6 +52,10 @@ def parse_kwargs(kwargs):
     return ret
 
 def super_accept_to_mimetype(ext):
+    if not ext:
+        return
+    if ext.startswith('.'):
+        ext = ext[1:]
     if ext in ('jpeg', 'jpg'):
         return 'image/jpeg'
     if ext == 'gif':
@@ -62,6 +66,9 @@ def super_accept_to_mimetype(ext):
         return 'text/html'
     if ext == 'json':
         return 'application/json'
+    if ext == 'css':
+        return "text/css"
+
 
 def initialize_giotto(config):
     setattr(giotto, 'config', config)
