@@ -85,7 +85,7 @@ class GiottoController(object):
             if value in defaults:
                 may_be_primitive = defaults[value]
                 if isinstance(may_be_primitive, GiottoPrimitive):
-                    output[value] = self.get_primitive(value.name)
+                    output[value] = self.get_primitive(may_be_primitive)
                 else:
                     output[value] = may_be_primitive
 
