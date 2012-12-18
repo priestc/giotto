@@ -78,7 +78,7 @@ except IOError:
 
 if args.http:
     from giotto.controllers.http import http_execution_snippet
-    filename = 'giotto-http'
+    filename = 'http'
     f = open(filename, 'w')
     st = os.stat(filename)
     f.write(template_controller + http_execution_snippet)
@@ -86,7 +86,7 @@ if args.http:
 
 if args.irc:
     from giotto.controllers.irc_ import irc_execution_snippet
-    filename = 'giotto-irc'
+    filename = 'irc'
     f = open(filename, 'w')
     f.write(template_controller + irc_execution_snippet)
     st = os.stat(filename)
@@ -94,7 +94,7 @@ if args.irc:
 
 if args.cmd:
     from giotto.controllers.cmd import cmd_execution_snippet
-    filename = 'giotto-cmd'
+    filename = 'cmd'
     f = open(filename, 'w')
     f.write(template_controller + cmd_execution_snippet)
     st = os.stat(filename)
