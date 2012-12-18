@@ -31,11 +31,12 @@ Each class needs to implement at least one mimetype method::
     from giotto.views import BaseView
 
     class MyView(BaseView):
-        def text_plain(self, result):
+        @renders('text/plain')
+        def plaintext(self, result):
             return "%(x)s * %(y)s == %(result)s" % result
 
-Each method is named after the mimetype it returns (with the ``/`` replaced with an underscore),
-and take one argument that will be the value that the model returns.
+Each method can be named whatever you want, and must be decorated with the ``@renders`` decorator.
+The ``renders`` decorator takes multiple string arguments representing the mimetype that method renders.
 When creating views, make sure there is no 'impedance mismatch' between the data that the model returns,
 and the data the view is written to take in.
 For instance, the above mimetype method is designed to display a dictionary with three keys (``x``, ``y``, and ``result``).
@@ -52,10 +53,17 @@ or a dictionary with body and mimetype tags::
 
     return {'body': "this is whats returned, 'mimetype': 'text/plain'}
 
-Not all ``text_html`` render methods will return ``text/html`` content.
+If the method returns just a string, the controller wil treat the content as the
+first mimetype passed into the ``renders`` decorator:::
+
+    @renders('text/plain', 'text/html', 'text/x-cmd')
+    def multi_render(self, result):
+        return "text"
+
+This content will be treated as ``text/plain`` by the controller.
 
 BasicView
 ---------
 
 There is a view class called ``BasicView`` that was created to be a quick and dirty way to view most any data.
-While developing your application, it is a good idea to use ``BaseView`` until you have settled on a consistent data type that your model returns.
+While developing your application, it is a good idea to use ``BaseView`` until you have settled on a consistent data type that your model returns. Also you should inherit all custom views from ``BasicView`` for convenience.
