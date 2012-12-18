@@ -4,8 +4,9 @@ from giotto.exceptions import NotAuthorized
 from giotto.control import Redirection
 from giotto import config
 from giotto.utils import random_string
+from giotto.middleware import GiottoOutputMiddleware, GiottoInputMiddleware
 
-class AuthenticationMiddleware(object):
+class AuthenticationMiddleware(GiottoInputMiddleware):
     """
     This input middleware class must preceed any other authentication middleware class.
     It is used to extract authentiction information from the request, and
@@ -30,7 +31,7 @@ class AuthenticationMiddleware(object):
         return request
 
 
-class PresentAuthenticationCredentials(object):
+class PresentAuthenticationCredentials(GiottoOutputMiddleware):
     """
     Place this middleware class in the output stream to set the cookies that
     are used to authenticate each subsequent request.
@@ -57,13 +58,20 @@ class PresentAuthenticationCredentials(object):
             password = request.form['password']
             user = User.get_user_by_password(username, password)
 
-        if 'json' in response.mimetype:
+        if 'json' in self.controller.mimetype:
             if not user:
                 response.data = 'Not Authenticated'
                 response.status_code = 401
                 return response
+
             session_key = self.make_session(user)
-            data = json.loads(response.data) or {}
+
+            try:
+                data = json.loads(response.data)
+            except ValueError:
+                # in the case of a redirect, the response data will be junk html
+                # so it should be OK if we overwrite it.
+                data = {}
             data['auth_session'] = session_key
             response.data = json.dumps(data)
         else:
@@ -78,7 +86,7 @@ class PresentAuthenticationCredentials(object):
         return response
 
 
-class AuthenticatedOrDie(object):
+class AuthenticatedOrDie(GiottoInputMiddleware):
     """
     Put this in the input middleware stream to fail any requests that aren't
     made by authenticated users
@@ -94,7 +102,7 @@ def AuthenticatedOrRedirect(invocation, args=[], kwargs={}):
     Middleware class factory that redirects if the user is not logged in.
     Otherwise, nothing is effected.
     """
-    class AuthenticatedOrRedirect(object):
+    class AuthenticatedOrRedirect(GiottoInputMiddleware):
         def http(self, request):
             if request.user:
                 return request
@@ -107,7 +115,7 @@ def NotAuthenticatedOrRedirect(invocation, args=[], kwargs={}):
     Middleware class factory that redirects if the user is not logged in.
     Otherwise, nothing is effected.
     """
-    class NotAuthenticatedOrRedirect(object):
+    class NotAuthenticatedOrRedirect(GiottoInputMiddleware):
         def http(self, request):
             if not request.user:
                 return request
@@ -115,7 +123,7 @@ def NotAuthenticatedOrRedirect(invocation, args=[], kwargs={}):
     return NotAuthenticatedOrRedirect
 
 
-class LogoutMiddleware(object):
+class LogoutMiddleware(GiottoOutputMiddleware):
     def http(self, request, response):
         response.delete_cookie('giotto_session')
         return response

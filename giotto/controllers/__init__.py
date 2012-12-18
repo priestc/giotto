@@ -28,10 +28,8 @@ class GiottoController(object):
         self.mimetype = parsed['superformat_mime'] or self.mimetype_override() or self.default_mimetype
 
     def get_response(self):
-        control = None
-        name = self.get_controller_name()
         try:
-            self.request = self.program.execute_input_middleware_stream(self.request, name)
+            self.request = self.program.execute_input_middleware_stream(self.request, self)
         except ControlMiddlewareInterrupt as exc:
             # A middleware class returned a control object, save it to the class.
             # The get_data_response method will use it.
@@ -39,7 +37,7 @@ class GiottoController(object):
 
         response = self.get_concrete_response()
 
-        return self.program.execute_output_middleware_stream(self.request, response, name)
+        return self.program.execute_output_middleware_stream(self.request, response, self)
 
     def get_data_response(self):
         """
