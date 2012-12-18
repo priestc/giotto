@@ -1,7 +1,7 @@
 import copy
 import urllib
 
-from giotto.exceptions import NoViewMethod, InvalidInput
+from giotto.exceptions import NoViewMethod, InvalidInput, NotAuthorized
 from giotto.controllers import GiottoController
 from giotto.control import Redirection
 from werkzeug.wrappers import Request, Response
@@ -90,6 +90,12 @@ class HTTPController(GiottoController):
         if type(result) == Redirection:
             invocation, args, kwargs = result.rendered_invocation
             response = redirect(make_url(invocation, args, kwargs))
+        elif type(result) == NotAuthorized:
+            response = Response(
+                status=403,
+                response="Not Authorized",
+                mimetype="text/plain"
+            )
         else:
             response = Response(
                 status=code,

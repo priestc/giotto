@@ -29,7 +29,7 @@ def StaticServe(base_path):
 
     class StaticServe(GiottoProgram):
         controllers = ('http-get', )
-        model = [get_file, StringIO("Mock file content")]
+        model = [get_file]
         view = FileView
 
     return StaticServe()
@@ -43,7 +43,7 @@ def SingleStaticServe(file_path):
 
     class SingleStaticServe(GiottoProgram):
         controllers = ('http-get', )
-        model = [get_file, StringIO("Mock file content")]
+        model = [get_file]
         view = FileView
 
     return SingleStaticServe()

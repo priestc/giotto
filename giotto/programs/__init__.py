@@ -49,6 +49,9 @@ class GiottoProgram(object):
             return None
         return self.model[0]
 
+    def has_mock_defined(self):
+        return len(self.model) > 1
+
     def get_model_mock(self):
         if not self.model or not self.model[0]:
             # no mock needed

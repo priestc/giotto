@@ -2,7 +2,7 @@ import inspect
 import json
 
 from giotto.programs import GiottoProgram
-from giotto.exceptions import InvalidInput, ProgramNotFound, MockNotFound, ControlMiddlewareInterrupt
+from giotto.exceptions import InvalidInput, ProgramNotFound, MockNotFound, ControlMiddlewareInterrupt, NotAuthorized
 from giotto.primitives import GiottoPrimitive
 from giotto.keyvalue import DummyKeyValue
 
@@ -34,6 +34,8 @@ class GiottoController(object):
             # A middleware class returned a control object, save it to the class.
             # The get_data_response method will use it.
             self.middleware_interrupt = exc.control
+        except NotAuthorized as exc:
+            self.middleware_interrupt = exc
 
         response = self.get_concrete_response()
 
@@ -47,7 +49,7 @@ class GiottoController(object):
         if self.middleware_interrupt:
             return self.middleware_interrupt
 
-        if self.model_mock:
+        if self.model_mock and self.program.has_mock_defined():
             model_data = self.program.get_model_mock()
         else:
             args, kwargs = self.program.get_model_args_kwargs()
