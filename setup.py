@@ -17,7 +17,7 @@ setup(
         'giotto.contrib.static',
         'giotto.views'
     ],
-    scripts=['giotto/giotto_project'],
+    scripts=['bin/giotto'],
     license='LICENSE',
     install_requires=[
         'werkzeug',
