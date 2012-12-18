@@ -14,6 +14,10 @@ class Redirection(GiottoControl):
         self.kwargs = kwargs
 
     def render_args_kwargs(self, model):
+        """
+        Now that we have the model data, render the actual url we want to
+        redirect to.
+        """
         new_args = []
         for arg in self.args:
             if type(arg) == _M:

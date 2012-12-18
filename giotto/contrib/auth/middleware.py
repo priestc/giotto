@@ -1,4 +1,5 @@
 from .models import User
+import json
 from giotto.exceptions import NotAuthorized
 from giotto.control import Redirection
 from giotto import config
@@ -55,17 +56,20 @@ class PresentAuthenticationCredentials(object):
             username = request.form['username']
             password = request.form['password']
             user = User.get_user_by_password(username, password)
-        
-        if not user:
-            return response
-
-        session_key = self.make_session(user)
 
         if 'json' in response.mimetype:
-            data = json.loads(response.data)
+            if not user:
+                response.data = 'Not Authenticated'
+                response.status_code = 401
+                return response
+            session_key = self.make_session(user)
+            data = json.loads(response.data) or {}
             data['auth_session'] = session_key
             response.data = json.dumps(data)
-        else:        
+        else:
+            if not user:
+                return response
+            session_key = self.make_session(user)
             response.set_cookie('giotto_session', session_key)
 
         return response
