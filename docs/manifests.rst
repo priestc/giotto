@@ -43,7 +43,7 @@ include the controller in the ``controllers`` argument of the program::
 
     {
         'signup': [
-            SignupProgram(
+            GiottoProgram(
                 view=JingaTemplateView('signup.html')
             ),
             GiottoProgram(

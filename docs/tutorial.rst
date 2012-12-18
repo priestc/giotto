@@ -208,25 +208,3 @@ variable in the config file::
 To use the redis cache, change the class to ``CacheWithRedis``.
 Now when you load a page, it will take 5 seconds for the first render,
 and subsequent renders will be served from cache.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
