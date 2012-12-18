@@ -1,7 +1,12 @@
 from collections import defaultdict
 from giotto.utils import Mock
 
-class InvalidInput(Exception):
+class GiottoException(Exception):
+    """
+    Represents an exception that Giotto catches internally.
+    """
+
+class InvalidInput(GiottoException):
     def __init__(self, message=None, data=None):
         if not data:
             self.__dict__ = defaultdict(lambda: '', {'message': message})
@@ -14,25 +19,25 @@ class InvalidInput(Exception):
         if not item in self.__dict__:
             return Mock()
 
-class InvalidProgram(Exception):
+class InvalidProgram(GiottoException):
     pass
 
-class ProgramNotFound(Exception):
+class ProgramNotFound(GiottoException):
     pass
 
-class DataNotFound(Exception):
+class DataNotFound(GiottoException):
     pass
 
-class NoViewMethod(Exception):
+class NoViewMethod(GiottoException):
     pass
 
-class MockNotFound(Exception):
+class MockNotFound(GiottoException):
     pass
 
-class NotAuthorized(Exception):
+class NotAuthorized(GiottoException):
     pass
 
-class ControlMiddlewareInterrupt(Exception):
+class ControlMiddlewareInterrupt(GiottoException):
     def __init__(self, message=None, control=None):
         self.control = control
         self.message = message
