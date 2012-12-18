@@ -1,19 +1,24 @@
 demo_application = '''from giotto.programs import GiottoProgram, ProgramManifest
-from giotto.views import BasicView
+from giotto.views import BasicView, renders
 
 class ColoredMultiplyView(BasicView):
+    @renders('text/plain')
+    def plaintext(self, result):
+        return "{{ obj.x }} * {{ obj.y }} == {{ obj.product }}"
 
-    def text_html(self, result):
+    @renders('text/html')
+    def html(self, result):
         return """<!DOCTYPE html>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
         <html>
             <body>
-                <span style="color: blue">%(x)s * %(y)s</span> == 
-                <span style="color: red">%(product)s</span>
+                <span style="color: blue">{{ obj.x }} * {{ obj.y }}</span> == 
+                <span style="color: red">{{ obj.product }}</span>
             </body>
-        </html>""" % result
+        </html>"""
 
-    def text_cmd(self, result):
+    @renders('text/x-cmd')
+    def cmd(self, result):
         from colorama import init, Fore
         init()
         return "{blue}{x} * {y}{reset} == {red}{product}{reset}".format(
@@ -25,7 +30,8 @@ class ColoredMultiplyView(BasicView):
             product=result['product'],
         )
 
-    def text_irc(self, result):
+    @renders('text/x-irc')
+    def irc(self, result):
         return "{blue}{x} * {y}{reset} == {red}{product}{reset}".format(
             blue="\x0302",
             red="\x0304",
@@ -38,7 +44,6 @@ class ColoredMultiplyView(BasicView):
 
 def multiply(x, y):
     return {'x': int(x), 'y': int(y), 'product': int(x) * int(y)}
-
 
 manifest = ProgramManifest({
     'multiply': GiottoProgram(

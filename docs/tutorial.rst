@@ -21,26 +21,28 @@ Now create a new directory::
 and inside that directory, run this command::
 
     $ cd demo
-    $ giotto_project --http --cmd --demo
+    $ giotto --http --cmd --demo
 
 This will create a ``manifest.py`` file, which contains your program manifest.
 It will also create a series of "concrete controller files",
 which will act as a gateway between your application and the outside world.
-The concrete controller files will be called ``giotto-http`` and ``giotto-cmd``
+The concrete controller files will be called ``http`` and ``cmd``
 This utility will also add a ``config.py`` file,
 which will be where you add your database information (and other things).
 
 If you only want to interact with you application through the command line,
-then you could leave off the ``--http`` flag when calling ``giotto_project`` (and vice versa).
+then you could leave off the ``--http`` flag when calling ``giotto`` (and vice versa).
 The option ``--demo`` tells giotto to include a simple "multiply" program to demonstrate how giotto works.
 
 Inside the ``manifest.py`` file, you will see the following::
 
-    class ColoredMultiplyView(GiottoTemplateView):
-        def text_plain(self, result):
+    class ColoredMultiplyView(BasicView):
+        @renders('text/plain')
+        def plaintext(self, result):
             return "{{ obj.x }} * {{ obj.y }} == {{ obj.product }}"
 
-        def text_html(self, result):
+        @renders('text/html')
+        def html(self, result):
             return """<!DOCTYPE html>
             <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
             <html>
@@ -50,7 +52,8 @@ Inside the ``manifest.py`` file, you will see the following::
                 </body>
             </html>"""
 
-        def text_cmd(self, result):
+        @renders('text/x-cmd')
+        def cmd(self, result):
             from colorama import init, Fore
             init()
             return "{blue}{x} * {y}{reset} == {red}{product}{reset}".format(
@@ -62,7 +65,8 @@ Inside the ``manifest.py`` file, you will see the following::
                 product=result['product'],
             )
 
-        def text_irc(self, result):
+        @renders('text/x-irc')
+        def irc(self, result):
             return "{blue}{x} * {y}{reset} == {red}{product}{reset}".format(
                 blue="\x0302",
                 red="\x0304",
@@ -99,7 +103,7 @@ All it does is take two numbers, and multiply them together.
 To see our example ``multiply`` program in action,
 start up the development server by running the following command::
 
-    $ giotto-http --run
+    $ http --run
 
 This will run the development server (you must have werkzeug installed).
 Point your browser to: http://localhost:5000/multiply?x=4&y=8
@@ -125,7 +129,7 @@ The following order of events are occurring:
 Now, open up your browser's javascript console (firebug if you're a firefox user).
 Type in the following::
 
-    $.ajax({url: window.location.href, success: function(a) {console.log(a)}})
+    $.ajax(window.location.href).done(function(r) {console.log(r)})
 
 You should see a json representation of the page. The HTTP controller automatically
 changes the return mimetype to "application/json" when the request comes from
@@ -136,7 +140,7 @@ to stop the dev server.
 
 Form the shell, run the following command::
 
-    $ giotto-cmd multiply x=4 y=8
+    $ cmd multiply x=4 y=8
 
 The output should be exactly the same. It should say `4 * 8 == 32` with the `32`
 in red and the `4 * 8` in blue.
@@ -163,7 +167,7 @@ This object should be the same form as what the model returns::
 
 When you run the dev server include the ``--model-mock`` flag::
 
-    $ giotto-http --run --model-mock
+    $ http --run --model-mock
 
 Now no matter what arguments you place in the url, the output will always be ``10 * 10 == 100``.
 If your model makes calls to the database or third party service,
