@@ -43,14 +43,14 @@ Inside the ``manifest.py`` file, you will see the following::
 
         @renders('text/html')
         def html(self, result):
-            return """<!DOCTYPE html>
-            <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
-            <html>
-                <body>
-                    <span style="color: blue">{{ obj.x }} * {{ obj.y }}</span> == 
-                    <span style="color: red">{{ obj.product }}</span>
-                </body>
-            </html>"""
+                return """<!DOCTYPE html>
+                <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+                <html>
+                    <body>
+                        <span style="color: blue">%(x)s * %(y)s</span> == 
+                        <span style="color: red">%(product)s</span>
+                    </body>
+                </html>""" % result
 
         @renders('text/x-cmd')
         def cmd(self, result):
