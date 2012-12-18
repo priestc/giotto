@@ -43,7 +43,7 @@ class MiddlewareTest(unittest.TestCase):
 
     def test_input_middleware(self):
         request = {'start':True}
-        request = ExampleProgram().execute_input_middleware_stream(request, 'test')
+        request = ExampleProgram().execute_input_middleware_stream(request, mock_controller)
         self.assertEquals(request, {'start': True, 'three': True, 'two': True, 'one': True})
 
     def test_output_middleware(self):

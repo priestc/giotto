@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
 	name='giotto',
-    version='0.9.7',
+    version='0.9.8',
     description='MVC Application Framework',
     long_description=open('README.rst').read(),
     author='Chris Priest',
