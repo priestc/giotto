@@ -29,7 +29,7 @@ class AuthenticationMiddleware(object):
         return request
 
 
-class SetAuthenticationCookies(object):
+class PresentAuthenticationCredentials(object):
     """
     Place this middleware class in the output stream to set the cookies that
     are used to authenticate each subsequent request.
@@ -60,7 +60,13 @@ class SetAuthenticationCookies(object):
             return response
 
         session_key = self.make_session(user)
-        response.set_cookie('giotto_session', session_key)
+
+        if 'json' in response.mimetype:
+            data = json.loads(response.data)
+            data['auth_session'] = session_key
+            response.data = json.dumps(data)
+        else:        
+            response.set_cookie('giotto_session', session_key)
 
         return response
 

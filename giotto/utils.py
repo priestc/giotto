@@ -128,7 +128,7 @@ def pre_process_json(obj):
 
     elif type(obj) is list:
         new_list = []
-        for item in list:
+        for item in obj:
             new_list.append(pre_process_json(item))
         return new_list
 

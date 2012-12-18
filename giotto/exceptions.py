@@ -38,4 +38,4 @@ class ControlMiddlewareInterrupt(Exception):
         self.message = message
 
         # render the control object now because this object will never
-        self.control(None).render('some_mimetype')
+        self.control.render(None, 'some_mimetype', None)
