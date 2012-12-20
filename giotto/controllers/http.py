@@ -107,7 +107,6 @@ class HTTPController(GiottoController):
     def persist(self, persist, response):
         for key, value in persist.iteritems():
             response.set_cookie(key, value)
-        import debug
         return response
 
     def get_primitive(self, primitive):
