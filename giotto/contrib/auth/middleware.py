@@ -3,7 +3,6 @@ import json
 from giotto.exceptions import NotAuthorized
 from giotto.control import Redirection
 from giotto import config
-from giotto.utils import random_string
 from giotto.middleware import GiottoOutputMiddleware, GiottoInputMiddleware
 
 class AuthenticationMiddleware(GiottoInputMiddleware):
@@ -18,14 +17,14 @@ class AuthenticationMiddleware(GiottoInputMiddleware):
             u = request.form.get('username', None)
             p = request.form.get('password', None)
             user = User.get_user_by_password(u, p) if u and p else None
-
-        session_key = request.cookies.get('giotto_session', None)
-        if not session_key and request.form:
-            session_key = request.form.get('auth_session', None)
-
-        if session_key:
-            username = config.auth_session.get(session_key)
-            user = config.session.query(User).filter_by(username=username).first()
+        
+        if not user:
+            session_key = request.cookies.get('giotto_session', None)
+            if not session_key and request.form:
+                session_key = request.form.get('auth_session', None)
+            if session_key:
+                username = config.auth_session.get(session_key)
+                user = config.session.query(User).filter_by(username=username).first()
 
         setattr(request, 'user', user)
         return request
@@ -39,16 +38,6 @@ class PresentAuthenticationCredentials(GiottoOutputMiddleware):
     Place this middleware class in the output stream to set the cookies that
     are used to authenticate each subsequent request.
     """
-
-    def make_session(self, user):
-        """
-        Create a session for the user, and then return the key.
-        """
-        session_key = random_string(15)
-        while config.auth_session.get(session_key):
-            session_key = random_string(15)
-        config.auth_session.set(session_key, user.username, config.auth_session_expire)
-        return session_key
 
     def http(self, request, response):
         if hasattr(request, 'user') and request.user:

@@ -1,12 +1,26 @@
 class GiottoControl(object):
     pass
 
+
 class Redirection(GiottoControl):
+    def __init__(self, path, persist={}):
+        self.path = path
+        self.persist = persist
+
+
+
+
+
+
+
+
+
+
+class OldRedirection(GiottoControl):
     """
     Represents the result of one invocation as the result of another.
     """
     rendered_invocation = ()
-    render_map = {} # because regular giottoviews have this. This is always empty
 
     def __init__(self, invocation, args=[], kwargs={}):
         self.invocation = invocation

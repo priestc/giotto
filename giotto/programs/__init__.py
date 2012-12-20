@@ -20,6 +20,7 @@ class GiottoProgram(object):
     def __init__(self, **kwargs):
         self.__dict__ = kwargs
         if hasattr(self.view, 'mro') and GiottoView in self.view.mro():
+            # instantiate all views that are defined as a class.
             self.view = self.view()
 
     def get_model_args_kwargs(self):

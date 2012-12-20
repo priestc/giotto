@@ -2,6 +2,7 @@ import re
 import bcrypt
 
 from giotto.exceptions import InvalidInput
+from giotto.utils import random_string
 from giotto.primitives import LOGGED_IN_USER
 from giotto import config
 
@@ -97,3 +98,14 @@ def basic_register(username, password, password2):
     return User.create(username, password)
 
 
+def create_session(user=LOGGED_IN_USER):
+    """
+    Create a session for the user, and then return the key.
+    """
+    if not user:
+        raise InvalidInput('Username or password incorrect')
+    session_key = random_string(15)
+    while config.auth_session.get(session_key):
+        session_key = random_string(15)
+    config.auth_session.set(session_key, user.username, config.auth_session_expire)
+    return {'session_key': session_key, 'user': user}

@@ -4,7 +4,8 @@ import mimeparse
 from jinja2 import Template
 from jinja2.exceptions import TemplateNotFound
 from giotto.exceptions import NoViewMethod
-from giotto.utils import Mock, htmlize, htmlize_list, pre_process_json
+from giotto.utils import Mock, htmlize, htmlize_list, pre_process_json, super_accept_to_mimetype
+from giotto.control import GiottoControl
 
 def renders(*mimetypes):
     def decorator(func):
@@ -22,13 +23,33 @@ class GiottoView(object):
 
     render_map = {}
 
-    def __init__(self):
+    def __init__(self, **kwargs):
+        for format, function in kwargs.iteritems():
+            ## key word arguments can be passed into the constructor to
+            ## override render methods from within the manifest.
+            mime = super_accept_to_mimetype(format)
+            setattr(function, 'mimetypes', [mime])
+            setattr(self, format, function)
+        
         for method in [x for x in dir(self) if not x.startswith('__')]:
             # register all render methods based on the render decorator
+            # and the 'mimetypes' function attribute
             func = getattr(self, method)
             mimetypes = getattr(func, 'mimetypes', [])
             for mimetype in mimetypes:
                 self.render_map[mimetype] = method
+
+    def can_render(self, partial_mimetype):
+        """
+        Given a partial mimetype (such as 'json' or 'html'), return if the 
+        view can render that type.
+        """
+        for mime in self.render_map.keys():
+            if mime == '*/*':
+                return True
+            if partial_mimetype in mime:
+                return True
+        return False
 
     def render(self, result, mimetype, errors=None):
         """
@@ -44,7 +65,16 @@ class GiottoView(object):
 
         render_func = getattr(self, renderer)
         principle_mimetype = render_func.mimetypes[0]
+
+        if GiottoControl in render_func.__class__.mro():
+            # redirection defined as view (not wrapped in lambda)
+            return {'body': data, 'persist': data.persist}
+
         data = render_func(result)
+
+        if GiottoControl in data.__class__.mro():
+            # render function returned a control object
+            return {'body': data, 'persist': data.persist}
 
         if not hasattr(data, 'iteritems'):
             # view returned string

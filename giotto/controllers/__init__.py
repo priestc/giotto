@@ -8,7 +8,8 @@ from giotto.keyvalue import DummyKeyValue
 
 class GiottoController(object):
     middleware_interrupt = None
-    
+    persist_data = None
+
     def __init__(self, request, manifest, model_mock=False, errors=None):
         from giotto import config
         self.request = request
@@ -39,6 +40,9 @@ class GiottoController(object):
 
         response = self.get_concrete_response()
 
+        if self.persist_data:
+            response = self.persist(self.persist_data, response)
+
         return self.program.execute_output_middleware_stream(self.request, response, self)
 
     def get_data_response(self):
@@ -68,6 +72,9 @@ class GiottoController(object):
         if self.program.cache and not self.errors and not self.model_mock:
             self.cache.set(key, response, self.program.cache)
 
+        if 'persist' in response:
+            self.persist_data = response['persist']
+
         return response
 
     def get_data_for_model(self, args, kwargs):
@@ -88,6 +95,7 @@ class GiottoController(object):
                 may_be_primitive = defaults[value]
                 if isinstance(may_be_primitive, GiottoPrimitive):
                     output[value] = self.get_primitive(may_be_primitive.name)
+                    continue # don't let user input override primitives.
                 else:
                     output[value] = may_be_primitive
 
@@ -97,7 +105,6 @@ class GiottoController(object):
                 output[value] = raw_data[value]
 
         if len(self.path_args) > i + 1:
-            # there are too many positional arguments for this program.
             raise ProgramNotFound("Too many positional arguments for program: '%s'" % self.program.name)
 
         if not len(output) == len(values):
@@ -105,10 +112,15 @@ class GiottoController(object):
 
         return output
 
+    def persist(self, values):
+        """
+        Persist this data between the user and the server.
+        """
+        raise NotImplementedError
 
     def __repr__(self):
         controller = self.get_controller_name()
-        model = self.get_program_name()
+        model = self.program.name
         data = self.get_data()
         return "<%s %s - %s - %s>" % (  
             self.__class__.__name__, controller, model, data

@@ -45,7 +45,7 @@ class HTTPController(GiottoController):
 
     def mimetype_override(self):
         accept = self.request.headers['Accept']
-        has_json_in_view = any([x for x in self.program.view.render_map.keys() if 'json' in x])
+        has_json_in_view = self.program.view.can_render('json')
         if accept == '*/*' and self.request.is_xhr and has_json_in_view:
             # return json on ajax calls if no accept headers are present.
             # and only if the view has implemented a application/json method
@@ -87,9 +87,8 @@ class HTTPController(GiottoController):
             response.status_code = 400
             return response
 
-        if type(result) == Redirection:
-            invocation, args, kwargs = result.rendered_invocation
-            response = redirect(make_url(invocation, args, kwargs))
+        if type(result['body']) == Redirection:
+            response = redirect(result['body'].path)
         elif type(result) == NotAuthorized:
             response = Response(
                 status=403,
@@ -103,6 +102,12 @@ class HTTPController(GiottoController):
                 mimetype=result['mimetype'],
             )
 
+        return response
+
+    def persist(self, persist, response):
+        for key, value in persist.iteritems():
+            response.set_cookie(key, value)
+        import debug
         return response
 
     def get_primitive(self, primitive):
