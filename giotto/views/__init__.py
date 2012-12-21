@@ -21,23 +21,31 @@ class GiottoView(object):
     from this class, as ths class contains piping that the controller calls.
     """
 
-    render_map = {}
-
     def __init__(self, **kwargs):
+        self.render_map = {}
+        class_defined_renderers = [x for x in dir(self) if not x.startswith('__')]
+        self._register_renderers(class_defined_renderers)
+
         for format, function in kwargs.iteritems():
             ## key word arguments can be passed into the constructor to
             ## override render methods from within the manifest.
             mime = super_accept_to_mimetype(format)
             setattr(function, 'mimetypes', [mime])
             setattr(self, format, function)
-        
-        for method in [x for x in dir(self) if not x.startswith('__')]:
-            # register all render methods based on the render decorator
-            # and the 'mimetypes' function attribute
+
+        # kwarg renderers kill any render methods that are defined by the class
+        self._register_renderers(kwargs.keys())
+
+    def _register_renderers(self, attrs):
+        """
+        Go through the passed in list of attributes and register those renderers
+        in the render map.
+        """
+        for method in attrs:
             func = getattr(self, method)
             mimetypes = getattr(func, 'mimetypes', [])
             for mimetype in mimetypes:
-                self.render_map[mimetype] = method
+                self.render_map[mimetype] = func
 
     def can_render(self, partial_mimetype):
         """
@@ -58,12 +66,11 @@ class GiottoView(object):
         available_mimetypes = self.render_map.keys()
         target_mimetype = mimeparse.best_match(available_mimetypes, mimetype)
         self.errors = errors or Mock()
-        renderer = self.render_map[target_mimetype]
+        render_func = self.render_map.get(target_mimetype, None)
 
-        if not renderer:
+        if not render_func:
             raise NoViewMethod("%s not supported for this program" % mimetype)
 
-        render_func = getattr(self, renderer)
         principle_mimetype = render_func.mimetypes[0]
 
         if GiottoControl in render_func.__class__.mro():
@@ -94,13 +101,13 @@ class BasicView(GiottoView):
     Basic viewer that contains generic functionality for showing any data.
     """
     @renders('application/json')
-    def json(self, result):
+    def generic_json(self, result):
         obj = pre_process_json(result)
         j = json.dumps(obj)
         return {'body': j, 'mimetype': 'application/json'}
 
     @renders('text/html')
-    def html(self, result):
+    def generic_html(self, result):
         """
         Try to display any object in sensible HTML.
         """
@@ -153,7 +160,7 @@ class BasicView(GiottoView):
         'mimetype': 'text/html'}
 
     @renders('text/x-cmd', 'text/x-irc', 'text/plain')
-    def plaintext(self, result):
+    def generic_text(self, result):
         out = []
         if hasattr(result, 'iteritems'):
             to_iterate = result.iteritems()
@@ -171,7 +178,7 @@ class BasicView(GiottoView):
 def JinjaTemplateView(template_name, name='data', mimetype="text/html"):
     class JinjaTemplateView(BasicView):
         @renders(mimetype)
-        def html(self, result):
+        def jinja_html(self, result):
             from giotto import config
             template = config.jinja2_env.get_template(template_name)
             context = {name: result or Mock(), 'errors': self.errors}
