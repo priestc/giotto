@@ -62,6 +62,16 @@ first mimetype passed into the ``renders`` decorator:::
 
 This content will be treated as ``text/plain`` by the controller.
 
+Persisting data
+---------------
+
+Sometimes, instead of mearly displaying model-generated values to the user, 
+you want to persist that value.
+An example of this is saving session data to a cookie instead of displaying it in the HTML.
+To do this, add the data to the ``persist`` key in the dictionary the render function returns::
+
+    {'body': "this is whats returned, 'mimetype': 'text/plain', 'persist': {'cookie_name': 'cookie value'}}
+
 BasicView
 ---------
 
