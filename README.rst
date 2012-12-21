@@ -17,7 +17,8 @@ Key Features of Giotto include:
 Getting started
 ===============
 
-::
+Install and create base project files::
+
     pip install giotto
     mkdir demo
     giotto --http
