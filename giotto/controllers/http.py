@@ -87,14 +87,14 @@ class HTTPController(GiottoController):
             response.status_code = 400
             return response
 
-        if type(result['body']) == Redirection:
-            response = redirect(result['body'].path)
-        elif type(result) == NotAuthorized:
+        if type(result) == NotAuthorized:
             response = Response(
                 status=403,
                 response="Not Authorized",
                 mimetype="text/plain"
             )
+        elif type(result['body']) == Redirection:
+            response = redirect(result['body'].path)
         else:
             response = Response(
                 status=code,

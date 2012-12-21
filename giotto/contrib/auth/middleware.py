@@ -116,6 +116,14 @@ def NotAuthenticatedOrRedirect(invocation, args=[], kwargs={}):
 
 
 class LogoutMiddleware(GiottoOutputMiddleware):
+    """
+    Logout the user. This not only deletes the session key in persistence (the
+    cookie), but also nukes the session in the database so it will never
+    ve valid again.
+    """
     def http(self, request, response):
+        if request.method == 'POST' and 'auth_session' in request.form:
+            key = request.form['auth_session']
+            session_key = config.auth_session.set(key, None, 1) # nuke session
         response.delete_cookie('giotto_session')
         return response
