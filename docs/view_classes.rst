@@ -77,3 +77,28 @@ BasicView
 
 There is a view class called ``BasicView`` that was created to be a quick and dirty way to view most any data.
 While developing your application, it is a good idea to use ``BaseView`` until you have settled on a consistent data type that your model returns. Also you should inherit all custom views from ``BasicView`` for convenience.
+
+Overriding Renderers
+--------------------
+
+In the manifest file, you can override a renderer by passing in the renderer function as a keyword argument to the view class::
+
+    manifest = ProgramManifest({
+        'multiply': GiottoProgram(
+            model=[multiply],
+            view=BasicView(
+                html=lambda m: str(m)
+            ),
+        ),
+    })
+
+This program will output a string representation of the model output when viewed in an HTML context.
+When viewed in a json context, the output will be the json renderer defined in ``BasicView``.
+
+Renderer functions
+------------------
+
+Renderer functions take two arguments, the first argument is the object that the model returns,
+and the second argument is the errors that may have came from a previous invocation.
+The second argument is optional.
+Renderer functions can be either defined as a method on the view class, or passed in to the view class constructor.
