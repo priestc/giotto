@@ -65,7 +65,6 @@ class GiottoView(object):
         """
         available_mimetypes = self.render_map.keys()
         target_mimetype = mimeparse.best_match(available_mimetypes, mimetype)
-        self.errors = errors or Mock()
         render_func = self.render_map.get(target_mimetype, None)
 
         if not render_func:
@@ -77,7 +76,11 @@ class GiottoView(object):
             # redirection defined as view (not wrapped in lambda)
             return {'body': render_func, 'persist': render_func.persist}
 
-        data = render_func(result)
+        try:
+            data = render_func(result, errors or Mock())
+        except TypeError:
+            # if the renderer only has one argument, don't pass in the 2nd arg.
+            data = render_func(result)
 
         if GiottoControl in data.__class__.mro():
             # render function returned a control object
@@ -101,13 +104,13 @@ class BasicView(GiottoView):
     Basic viewer that contains generic functionality for showing any data.
     """
     @renders('application/json')
-    def generic_json(self, result):
+    def generic_json(self, result, errors):
         obj = pre_process_json(result)
         j = json.dumps(obj)
         return {'body': j, 'mimetype': 'application/json'}
 
     @renders('text/html')
-    def generic_html(self, result):
+    def generic_html(self, result, errors):
         """
         Try to display any object in sensible HTML.
         """
@@ -160,7 +163,7 @@ class BasicView(GiottoView):
         'mimetype': 'text/html'}
 
     @renders('text/x-cmd', 'text/x-irc', 'text/plain')
-    def generic_text(self, result):
+    def generic_text(self, result, errors):
         out = []
         if hasattr(result, 'iteritems'):
             to_iterate = result.iteritems()
@@ -175,17 +178,17 @@ class BasicView(GiottoView):
 
         return {'body': "\n".join(out), 'mimetype': "text/plain"}
 
-def JinjaTemplateView(template_name, name='data', mimetype="text/html"):
-    class JinjaTemplateView(BasicView):
-        @renders(mimetype)
-        def jinja_html(self, result):
-            from giotto import config
-            template = config.jinja2_env.get_template(template_name)
-            context = {name: result or Mock(), 'errors': self.errors}
-            rendered = template.render(**context)
-            return {'body': rendered, 'mimetype': mimetype}
-
-    return JinjaTemplateView
+def jinja_template(template_name, name='data', mimetype="text/html"):
+    """
+    Meta-renderer for rendering jinja templates
+    """
+    def jinja_renderer(result, errors):
+        from giotto import config
+        template = config.jinja2_env.get_template(template_name)
+        context = {name: result or Mock(), 'errors': errors}
+        rendered = template.render(**context)
+        return {'body': rendered, 'mimetype': mimetype}
+    return jinja_renderer
 
 class ImageViewer(GiottoView):
     """
