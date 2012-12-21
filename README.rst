@@ -14,8 +14,10 @@ Key Features of Giotto include:
 * SQLAlchemy for database persistence.
 * Jinja2 for HTML templates (with an API for extending for other template engines)
 
-Getting started::
+Getting started
+===============
 
+::
     pip install giotto
     mkdir demo
     giotto --http
