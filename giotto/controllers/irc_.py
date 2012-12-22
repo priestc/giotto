@@ -3,6 +3,7 @@ import socket
 import string 
 import os
 import traceback
+from werkzeug.serving import run_with_reloader
 
 try:
   import irc.bot
@@ -14,7 +15,7 @@ from giotto.exceptions import ProgramNotFound
 from giotto.utils import parse_kwargs
 
 irc_execution_snippet = """
-parser = argparse.ArgumentParser(description='Giotto Project Creator')
+parser = argparse.ArgumentParser(description='Giotto IRC Controller')
 parser.add_argument('--model-mock', action='store_true', help='Mock out the model')
 args = parser.parse_args()
 
@@ -95,12 +96,12 @@ class IRCRequest(object):
     ident = ''
 
     def __init__(self, event, magic_token, nick):
-        self.ident = event.source()
+        self.ident = event.source
         self.username = self.ident.split("!")[0]
-        self.msg_type = event.eventtype()
-        self.sent_to = event.target()
+        self.msg_type = event.type
+        self.sent_to = event.target
         self.private_message = self.msg_type == "privmsg"
-        self.raw_message = event.arguments()[0]
+        self.raw_message = event.arguments[0]
         self.program, self.args = self.get_program_and_args(self.raw_message,magic_token)
         #print self.__repr__()
 
@@ -143,37 +144,45 @@ class IrcBot(irc.bot.SingleServerIRCBot):
             print "Joining Channels: %s" % channels
         self.config = config
   
-    def on_nicknameinuse(self, c, e):
-        c.nick(c.get_nickname() + "_")
+    def on_nicknameinuse(self, connection, event):
+        connection.nick(connection.get_nickname + "_")
 
-    def on_welcome(self, c, e):
-        c.join(self.channel)
+    def on_welcome(self, connection, event):
+        connection.join(self.channel)
 
-    def on_privmsg(self, c, e):
-        self.process_message(c, e)
+    def on_privmsg(self, connection, event):
+        self.process_message(connection, event)
 
-    def on_pubmsg(self, c, e):
-        if e.arguments()[0].startswith(self.config['magic_token']) == False: return
-        self.process_message(c, e)
+    def on_pubmsg(self, connection, event):
+        if event.arguments[0].startswith(self.config['magic_token']) == False:
+            return
+        self.process_message(connection, event)
  
-    def process_message(self, c, e):
-        request = IRCRequest(e,self.config['magic_token'],c.get_nickname())
+    def process_message(self, connection, event):
+        request = IRCRequest(
+            event,
+            self.config['magic_token'],
+            connection.get_nickname()
+        )
         
         try:
             controller = IRCController(request, self.config['manifest'], self.config['model_mock'])
             result = controller.get_response()
         except Exception as exc:
             cls = exc.__class__.__name__
-            c.privmsg(request.sent_to, "\x0304%s - %s: %s" % (request.program, cls, exc))
+            connection.privmsg(request.sent_to, "\x0304%s - %s: %s" % (request.program, cls, exc))
             traceback.print_exc(file=sys.stdout)
         else:
             msg = "%s: %s" % (request.username, result['response'])
             if request.private_message:
-                c.privmsg(request.username, msg)
+                for m in msg.split('\n'):
+                    connection.privmsg(request.username, m)
             else:
-                c.privmsg(request.sent_to, msg)
+                for m in msg.split('\n'):
+                    connection.privmsg(request.sent_to, m)
 
 
+#@run_with_reloader
 def listen(manifest, config, model_mock=False):
     """
     IRC listening process.
