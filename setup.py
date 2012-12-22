@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
 	name='giotto',
     version='0.9.9',
-    description='MVC Application Framework',
+    description='Functional Web Framework',
     long_description=open('README.rst').read(),
     author='Chris Priest',
     author_email='cp368202@ohiou.edu',
