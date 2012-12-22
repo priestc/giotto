@@ -1,7 +1,7 @@
 import json
 import mimeparse
 
-from jinja2 import Template
+from jinja2 import Template, DebugUndefined
 from jinja2.exceptions import TemplateNotFound
 from giotto.exceptions import NoViewMethod
 from giotto.utils import Mock, htmlize, htmlize_list, pre_process_json, super_accept_to_mimetype
@@ -189,6 +189,25 @@ def jinja_template(template_name, name='data', mimetype="text/html"):
         rendered = template.render(**context)
         return {'body': rendered, 'mimetype': mimetype}
     return jinja_renderer
+
+def partial_jinja_template(template_name, name='data', mimetype="text/html"):
+    """
+    Partial render of jinja templates. This is useful if you want to re-render
+    the template in the output middleware phase.
+    These templates are rendered in a way that all undefined variables will be 
+    kept in the emplate intact.
+    """
+    def partial_jinja_renderer(result, errors):
+        from giotto import config
+        template = config.jinja2_env.get_template(template_name)
+        old = template.environment.undefined
+        template.environment.undefined = DebugUndefined
+        context = {name: result or Mock(), 'errors': errors}
+        rendered = template.render(**context)
+        template.environment.undefined = old
+        return {'body': rendered, 'mimetype': mimetype}
+    return partial_jinja_renderer
+        
 
 class ImageViewer(GiottoView):
     """
