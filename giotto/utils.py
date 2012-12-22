@@ -68,6 +68,8 @@ def super_accept_to_mimetype(ext):
         return 'application/json'
     if ext == 'css':
         return "text/css"
+    if ext == 'irc':
+        return 'text/x-irc'
 
 
 def initialize_giotto(config):
