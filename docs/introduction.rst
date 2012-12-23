@@ -3,35 +3,55 @@
 ============
 Introduction
 ============
-Giotto is a full featured application framework inspired by the **Model, View, Controller** concept.
-Its purpose is to enforce a style that separate the model and view,
-so front end development and back end development are more closely linked.
 
-Rationale
----------
-Often times in web development shops, the development process is split up into two teams, **back-end** and **front-end**.
-This occurs because front-end tasks are carried out by template designers,
-who are not specialized in back end technologies such as databases and messaging queues.
-A pain point in this separation is that front end developers work in isolation to back-end developers,
-and miscommunication results.
-For instance, front-end developers, in redesigning the HTML of a web project,
-may add a new feature that (unbeknown to that front end dev),
-requires significant back-end re-engineering.
+Giotto is a framework for building applications ina functional style.
+It is based on the concept of Model, View and Controllers.
 
-Philosophy
-----------
-1. Giotto allows application developers to create application that can be written with all other web frameworks.
-2. Giotto **does** force users to do things the "Giotto way". In other words, **convention over configuration**
 
-Multiple Pluggable Controllers
-------------------------------
-One design aim of Giotto is to easily plug in controllers to a project
-without having to make modifications to the model or view.
+Invocation cycle
+----------------
 
-For instance, you can create a blog application that has both a complete web interface,
-as well as a complete command line interface.
+.. image:: http://i.imgur.com/1YszO.png
 
-The advantage of this design is that back-end developers can write the model using the command line interface,
-while the front-end developers build the HTML.
-This optimizes the development process by making it easier to determine if a bug is coming from the model,
-or if it is a result of the view.
+The invocation cycle is as folows:
+
+1. The controller process is started.
+   An example of a controller process is Apache, or gunicorn.
+   A manifest is given to the controller process when it is started.
+   All incoming requests to the controller process will be routed to a program contained within the manifest.
+   A manifest is just a collection of programs.
+
+2. A user makes a request to the controller process.
+   This can be a web request, or a command line invocation, or any other action that is handled by a controller process.
+
+3. The controller packages up the request into a ``request`` object.
+   In the image above, the invocation being depicted is basically a user saying, 
+   "Give me the contents of blog # 3 in an html document"
+
+4. That request in inspected by the controller.
+   The appropriate program is determined from the manifest based on attributes of the request.
+   In the image above, the path of the request (``/blog``) determines the program.
+   A program is a collection of a model, a view, a cache expire time, a set of input middleware classes, and a set of output middleware classes.
+
+5. Once the program has been determined, the request object is routed through the input middleware.
+   The middleware objects are functions that take in a request object, and return a request object.
+
+6. After each input middleware class associated with the program has been ran,
+   the controller sends off data to the model, and the model is executed.
+   In the example above, the model is a function that retrieves blog data from a database.
+   The data it requires is the ID of the blog. In this case, the ID is 3.
+
+7. When the model is done, it returns its data, and it gets passed in directly to the view.
+   At the same time, the controller sends the mimetype of the invocation to the view as well.
+   In the example, the mimetype is ``text/html``.
+
+8. The view renders the blog data into an HTML document.
+   The data is then passed onto the controller, but before that, it is stored in the cache.
+   How long the data will stay in the cache is an attribute of the program.
+
+9. The controller takes this html document and packages it up into a response object.
+
+10. This response object is passed on through the output middleware classes.
+   Such classes are very similar to input middleware classes, except they take in a response, and return a response.
+
+11. That response gets returned to the user.
