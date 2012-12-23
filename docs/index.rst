@@ -27,6 +27,7 @@ Contents:
    rendering_templates
    middleware
    cache
+   models
    model_mocking
    authentication
    serving_static_files
