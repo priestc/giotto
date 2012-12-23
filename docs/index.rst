@@ -24,6 +24,7 @@ Contents:
    built_in_controller_classes
    creating_your_own_controllers
    view_classes
+   rendering_templates
    middleware
    cache
    model_mocking
