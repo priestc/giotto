@@ -7,6 +7,8 @@ Introduction
 Giotto is a framework for building applications ina functional style.
 It is based on the concept of Model, View and Controllers.
 
+The framework is designed to enforce a clean style that results in code that is maintainable over a long period.
+
 
 Invocation cycle
 ----------------
@@ -52,6 +54,6 @@ The invocation cycle is as folows:
 9. The controller takes this html document and packages it up into a response object.
 
 10. This response object is passed on through the output middleware classes.
-   Such classes are very similar to input middleware classes, except they take in a response, and return a response.
+    Such classes are very similar to input middleware classes, except they take in a response, and return a response.
 
 11. That response gets returned to the user.
