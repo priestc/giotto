@@ -55,3 +55,31 @@ This program, by default, will only be available via the command line controller
 The ``make_tables`` command will only find models you have defined with that baseclass,
 if that model has been imported into your project's manifest.
 This is unlike Django and other frameworks, that use a ``models.py`` convention.
+
+InvalidInput
+------------
+When a model recieves data from a POST request, and the data does not validate,
+the model should raise the ``giotto.exceptions.InvalidInput`` exception.
+The controller will catch this exception and re-render the get portion of the request.
+When the exception is raised, you can add key word arguments to the exception constructor describing the dat that was invalid.
+As an example, consider the following model function that only accepts numbers below 100::
+
+    from giotto.exceptions import InvalidInput
+
+    def multiply(x, y):
+        try:
+            x = int(x or 0)
+            y = int(y or 0)
+        except:
+            raise InvalidInput("Numbers only", x={'value': x}, y={'value': y})
+
+        if x > 100 and y > 100:
+            raise InvalidInput('x and y are too large', x={'message': 'too large', 'value': x}, y={'message': 'too large', 'value': y})
+        if x > 100:
+            raise InvalidInput('x is too large', x={'message': 'too large', 'value': x}, y={'value': y})
+        if y > 100:
+            raise InvalidInput('y is too large', y={'message': 'too large', 'value': y}, x={'value': x})
+
+        return {'x': x, 'y': y, 'product': x * y}
+
+The values of the keyword argument should be a dictionary with two keys, ``value`` and ``message``.
