@@ -1,7 +1,7 @@
 import json
 import mimeparse
 
-from jinja2 import Template, DebugUndefined
+from jinja2 import Template, DebugUndefined, Environment, PackageLoader
 from jinja2.exceptions import TemplateNotFound
 from giotto.exceptions import NoViewMethod
 from giotto.utils import Mock, htmlize, htmlize_list, pre_process_json, super_accept_to_mimetype
@@ -114,22 +114,12 @@ class BasicView(GiottoView):
         """
         Try to display any object in sensible HTML.
         """
-        css = """
-        <style>
-            table {border-collapse: collapse}
-            td, th {border: 1px solid black; padding: 10px}
-            th {background: white;}
-            tr:nth-child(even) {background: #DDEE00}
-            tr:nth-child(odd) {background: #00EEDD}
-        </style>
-        """
         h1 = htmlize(type(result))
-
-        if result is None:
-            return "<!DOCTYPE html><html><body>None</body></html>"
-
         out = []
+        result = pre_process_json(result)
+
         if not hasattr(result, 'iteritems'):
+            # result is a non-container
             header = "<tr><th>Value</th></tr>"
             if type(result) is list:
                 result = htmlize_list(result)
@@ -146,21 +136,10 @@ class BasicView(GiottoView):
                 row = "<tr><td>{0}</td><td>{1}</td></tr>".format(key, v)
                 out.append(row)
 
-        out = "\n".join(out)
-        return {'body': """<!DOCTYPE html>
-
-        <html>
-            <head>{0}</head>
-            <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
-            <body>
-                <h1>{1}</h1>
-                <table>
-                    {2}
-                    {3}
-                </table>
-            </body>
-        </html>""".format(css, h1, header, out),
-        'mimetype': 'text/html'}
+        env = Environment(loader=PackageLoader('giotto.views'))
+        template = env.get_template('generic.html')
+        rendered = template.render({'header': h1, 'table_header': header, 'table_body': out})
+        return {'body': rendered, 'mimetype': 'text/html'}
 
     @renders('text/x-cmd', 'text/x-irc', 'text/plain')
     def generic_text(self, result, errors):

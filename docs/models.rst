@@ -37,7 +37,7 @@ You must also define a ``engine`` and ``session`` variable in the config file.
 The default config file created by the ``giotto`` command line utility contains boilerplate for defining these variables.
 
 
-Creatng tables
+Creating tables
 --------------
 Add the manageent manifest to your project::
 

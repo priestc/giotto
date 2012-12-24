@@ -1,0 +1,22 @@
+<!DOCTYPE html>       
+<html>
+    <head>
+        <style>
+            table {border-collapse: collapse}
+            td, th {border: 1px solid black; padding: 10px}
+            th {background: white;}
+            tr:nth-child(even) {background: #DDEE00}
+            tr:nth-child(odd) {background: #00EEDD}
+        </style>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    </head>
+    <body>
+        <h1>{{ header }}</h1>
+        <table>
+            {{ table_header }}
+            {% for row in table_body %}
+            {{ row }}
+            {% endfor %}
+        </table>
+    </body>
+</html>
