@@ -7,11 +7,17 @@ class GiottoException(Exception):
     """
 
 class InvalidInput(GiottoException):
-    def __init__(self, message=None, data=None):
-        if not data:
-            self.__dict__ = defaultdict(lambda: '', {'message': message})
-        else:
-            self.__dict__ = defaultdict(lambda: '', data)
+    def __init__(self, message=None, **kwargs):
+        self.message = message
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+            if not 'message' in v:
+                getattr(self, k)['message'] = ''
+            if not 'value' in v:
+                setattr(self, k)['value'] = ''
+
+    def __str__(self):
+        return self.message
 
     def __getitem__(self, item):
         # be permissive of attribute errors because jinja templates

@@ -144,7 +144,7 @@ def make_duplicate_request(request):
         headers = request.headers
         args = request.args
         form = request.form
-        user = request.user
+        user = getattr(request, 'user', None)
         cookies = request.cookies
         is_xhr = request.is_xhr
     return FakeRequest()
