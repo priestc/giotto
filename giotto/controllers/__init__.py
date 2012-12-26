@@ -2,9 +2,11 @@ import inspect
 import json
 
 from giotto.programs import GiottoProgram
-from giotto.exceptions import InvalidInput, ProgramNotFound, MockNotFound, ControlMiddlewareInterrupt, NotAuthorized
+from giotto.exceptions import (GiottoException, InvalidInput, ProgramNotFound,
+    MockNotFound, ControlMiddlewareInterrupt, NotAuthorized)
 from giotto.primitives import GiottoPrimitive
 from giotto.keyvalue import DummyKeyValue
+from giotto.control import GiottoControl
 
 class GiottoController(object):
     middleware_interrupt = None
@@ -17,6 +19,8 @@ class GiottoController(object):
         self.cache = config.cache or DummyKeyValue()
         self.errors = errors
         self.manifest = manifest
+        self.middleware_interrupt_exc = None
+        self.middleware_control = None
 
         # the program that corresponds to this invocation
         invocation = self.get_invocation()
@@ -30,13 +34,19 @@ class GiottoController(object):
 
     def get_response(self):
         try:
-            self.request = self.program.execute_input_middleware_stream(self.request, self)
-        except ControlMiddlewareInterrupt as exc:
-            # A middleware class returned a control object, save it to the class.
-            # The get_data_response method will use it.
-            self.middleware_interrupt = exc.control
-        except NotAuthorized as exc:
-            self.middleware_interrupt = exc
+            last_good_request, middleware_result = self.program.execute_input_middleware_stream(self.request, self)
+        except GiottoException as exc:
+            # save this exception so it can be re-raised from within
+            # get_data_response() so that get_concrete_response() can handle it
+            self.middleware_interrupt_exc = exc
+            self.request = last_good_request
+        else:
+            self.request = middleware_result # middleware ended cleanly
+
+        if GiottoControl in type(middleware_result).mro():
+            # middleware returned a control object
+            self.middleware_control = middleware_result
+            self.request = last_good_request
 
         response = self.get_concrete_response()
 
@@ -50,8 +60,15 @@ class GiottoController(object):
         Execute the model and view, and handle the cache.
         Returns controller-agnostic response data.
         """
-        if self.middleware_interrupt:
-            return self.middleware_interrupt
+        if self.middleware_interrupt_exc:
+            ## the middleware raised an exception, re-raise it here so
+            ## get_concrete_response (defined in subclasses) can catch it.
+            raise self.middleware_interrupt_exc
+
+        if self.middleware_control:
+            ## this redirect object came from middleware but return it as if it
+            ## came from a view.
+            return {'body': self.middleware_control}
 
         if self.model_mock and self.program.has_mock_defined():
             model_data = self.program.get_model_mock()

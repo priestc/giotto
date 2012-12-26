@@ -67,6 +67,7 @@ class GiottoProgram(object):
         Request comes from the controller. Returned is a request.
         controller arg is the name of the controller.
         """
+        start_request = request
         # either 'http' or 'cmd' or 'irc'
         controller_name = "".join(controller.get_controller_name().split('-')[:1])
         middlewares = list(self.pre_input_middleware) + list(self.input_middleware)
@@ -76,9 +77,10 @@ class GiottoProgram(object):
                 result = to_execute(request)
                 if GiottoControl in type(result).mro():
                     # a middleware class returned a control object (redirection, et al.)
-                    raise ControlMiddlewareInterrupt(control=result)
+                    # ignore all other middleware classes
+                    return request, result
                 request = result
-        return request
+        return start_request, request
 
     def execute_output_middleware_stream(self, request, response, controller):
         controller_name = "".join(controller.get_controller_name().split('-')[:1]) # 'http-get' -> 'http'
