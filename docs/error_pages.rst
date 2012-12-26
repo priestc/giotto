@@ -27,7 +27,7 @@ This template, when rendered, will contain the following variables:
   If your project's taget audience are technically capable people,
   it may benefitial to include tracebacks in the error template.
 
-Switching between eror pages and the debug page
+Switching between error pages and the debug page
 -----------------------------------------------
 In your config file, there is a setting called ``debug``.
 If it is set to ``True`` the debug page will be used when your application throws an exception.
