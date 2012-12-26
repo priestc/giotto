@@ -196,6 +196,21 @@ def partial_jinja_template(template_name, name='data', mimetype="text/html"):
     return partial_jinja_renderer
         
 
+def lazy_jinja_template(template_name, name='data', mimetype='text/html'):
+    """
+    Jinja template renderer that does not render the template at all.
+    Instead of returns the context and template object blended together.
+    Make sure to add ``giotto.middleware.RenderLazytemplate`` to the output
+    middleware stread of any program that uses this renderer.
+    """
+    def lazy_jinja_renderer(result, errors):
+        from giotto import config
+        template = config.jinja2_env.get_template(template_name)
+        context = {name: result or Mock(), 'errors': errors}
+        data = ('jinja2', template, context)
+        return {'body': data, 'mimetype': mimetype}
+    return lazy_jinja_renderer
+
 class ImageViewer(GiottoView):
     """
     For viewing images. The 'result' must be a file object that contains image

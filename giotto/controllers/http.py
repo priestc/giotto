@@ -73,15 +73,14 @@ class HTTPController(GiottoController):
         return data
 
     def get_concrete_response(self):
-        code = 200
         try:
             result = self.get_data_response()
-        except NoViewMethod:
-            code = 415
-            result = {
-                'mimetype': 'text/plain',
-                'body': 'Unsupported Media Type: %s' % self.mimetype
-            }
+        except NoViewMethod as exc:
+            return Response(
+                status=415,
+                response=render_error_page(415, exc),
+                mimetype="text/html"
+            )
         except InvalidInput as exc:
             ## if the model raises a InvalidInput, retry the request as
             ## a GET request for the same program, and set the code to 400.
@@ -104,26 +103,32 @@ class HTTPController(GiottoController):
                 mimetype="text/html"
             )
         except Exception as exc:
-            if config.debug == True:
+            if config.debug:
                 raise
-            else:
-                sio = StringIO.StringIO()
-                traceback.print_exc(file=sio)
-                sio.seek(0)
-                return Response(
-                    status=500,
-                    response=render_error_page(500, exc, sio.read()),
-                    mimetype="text/html"
-                )
+            sio = StringIO.StringIO()
+            traceback.print_exc(file=sio)
+            sio.seek(0)
+            return Response(
+                status=500,
+                response=render_error_page(500, exc, sio.read()),
+                mimetype="text/html"
+            )
 
         if type(result['body']) == Redirection:
             response = redirect(result['body'].path)
         else:
+            lazy = None
+            body = result['body']
+            if type(body) == tuple:
+                lazy = body
+                body = ''
+
             response = Response(
-                status=code,
-                response=result['body'],
+                status=200,
+                response=body,
                 mimetype=result['mimetype'],
             )
+            response.lazy_data = lazy
 
         return response
 
