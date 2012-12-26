@@ -1,5 +1,7 @@
-from .models import User
 import json
+import getpass
+
+from .models import User
 from giotto.exceptions import NotAuthorized
 from giotto.control import Redirection
 from giotto import config
@@ -30,53 +32,13 @@ class AuthenticationMiddleware(GiottoInputMiddleware):
         return request
 
     def cmd(self, request):
+        user = None
+        if 'giotto_session' in request.enviornment:
+            session_key = request.environment['giotto_session']
+            user = config.auth_session.get(session_key)
+
+        setattr(request, 'user', user)
         return request
-
-
-class PresentAuthenticationCredentials(GiottoOutputMiddleware):
-    """
-    Place this middleware class in the output stream to set the cookies that
-    are used to authenticate each subsequent request.
-    """
-
-    def http(self, request, response):
-        if hasattr(request, 'user') and request.user:
-            username = request.user.username
-            password = request.user.password
-            user = User.get_user_by_hash(username, password)
-        elif 'password' in request.form and 'password' in request.form:
-            # user just registered.
-            username = request.form['username']
-            password = request.form['password']
-            user = User.get_user_by_password(username, password)
-
-        if 'json' in self.controller.mimetype:
-            if not user:
-                response.data = 'Not Authenticated'
-                response.status_code = 401
-                return response
-
-            session_key = self.make_session(user)
-
-            try:
-                data = json.loads(response.data)
-            except ValueError:
-                # in the case of a redirect, the response data will be junk html
-                # so it should be OK if we overwrite it.
-                data = {}
-            data['auth_session'] = session_key
-            response.data = json.dumps(data)
-        else:
-            if not user:
-                return response
-            session_key = self.make_session(user)
-            response.set_cookie('giotto_session', session_key)
-
-        return response
-
-    def cmd(self, request, response):
-        return response
-
 
 class AuthenticatedOrDie(GiottoInputMiddleware):
     """
@@ -86,6 +48,20 @@ class AuthenticatedOrDie(GiottoInputMiddleware):
     def http(self, request):
         if not request.user:
             raise NotAuthorized('Must be Logged in for this program')
+        return request
+
+    def cmd(self, request):
+        user = getattr(request, 'user', None)
+        if not user:
+            print "Username:",
+            username = raw_input()
+            p = getpass.getpass()
+            user = User.get_user_by_password(username, p)
+        
+        if not user:
+            raise SystemExit("Must be logged in")
+
+        setattr(request, 'user', user)
         return request
 
 
@@ -99,6 +75,12 @@ def AuthenticatedOrRedirect(invocation):
             if request.user:
                 return request
             return Redirection(invocation)
+
+        def cmd(self, request):
+            if request.user:
+                return request
+            return Redirection(invocation)
+
     return AuthenticatedOrRedirect
 
 
@@ -112,6 +94,12 @@ def NotAuthenticatedOrRedirect(invocation):
             if not request.user:
                 return request
             return Redirection(invocation)
+
+        def cmd(self, request):
+            if not request.user:
+                return request
+            return Redirection(invocation)
+
     return NotAuthenticatedOrRedirect
 
 
