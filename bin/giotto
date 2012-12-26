@@ -33,7 +33,10 @@ auth_session = None
 project_path = os.path.dirname(os.path.abspath(__file__))
 
 from jinja2 import Environment, FileSystemLoader
-jinja2_env = Environment(loader=FileSystemLoader(project_path))'''
+jinja2_env = Environment(loader=FileSystemLoader(project_path))
+
+debug = True
+error_template = None'''
 
 template_controller = '''\
 #!/usr/bin/env python
