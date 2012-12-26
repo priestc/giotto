@@ -25,6 +25,7 @@ Contents:
    creating_your_own_controllers
    view_classes
    rendering_templates
+   error_pages
    middleware
    cache
    models
