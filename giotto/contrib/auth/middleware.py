@@ -37,6 +37,12 @@ class AuthenticationMiddleware(GiottoInputMiddleware):
             session_key = request.environment['giotto_session']
             user = config.auth_session.get(session_key)
 
+        if not user:
+            print "Username:",
+            username = raw_input()
+            password = getpass.getpass()
+            user = User.get_user_by_password(username, password)
+
         setattr(request, 'user', user)
         return request
 
@@ -53,15 +59,7 @@ class AuthenticatedOrDie(GiottoInputMiddleware):
     def cmd(self, request):
         user = getattr(request, 'user', None)
         if not user:
-            print "Username:",
-            username = raw_input()
-            p = getpass.getpass()
-            user = User.get_user_by_password(username, p)
-        
-        if not user:
             raise SystemExit("Must be logged in")
-
-        setattr(request, 'user', user)
         return request
 
 

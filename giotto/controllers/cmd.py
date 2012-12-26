@@ -96,6 +96,9 @@ class CMDController(GiottoController):
         for line in response['stderr']:
             sys.stderr.write(line)
 
+    def persist(self, persist, response):
+        print "persist", persist
 
     def get_primitive(self, name):
-        return None # implement later
+        if name == 'LOGGED_IN_USER':
+            return getattr(self.request, 'user', None)
