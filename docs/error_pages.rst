@@ -11,7 +11,7 @@ Instead, you can define an error page template.
 When the HTTP controller gets an exception coming from your program,
 it will return to the user your error template rendered with the details of the error.
 
-Configuring up error pages
+Configuring error pages
 --------------------------
 In your application's config file, set the ``error_template`` variable
 to the path of the template you want gitto to render in order to make your error page.
