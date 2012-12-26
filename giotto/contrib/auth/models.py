@@ -37,7 +37,7 @@ class User(config.Base):
             errors['username'] = {'message': 'Username already exists', 'value': self.username}
 
         if errors:
-            raise InvalidInput(data=errors)
+            raise InvalidInput("User data not valid", **errors)
 
     @classmethod
     def get_user_by_password(cls, username, password):
