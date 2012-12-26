@@ -97,8 +97,9 @@ class CMDController(GiottoController):
             sys.stderr.write(line)
 
     def persist(self, persist, response):
+        print "persist\n================"
         for key, value in persist.iteritems():
-            self.request.enviornment[key] = value
+            print "export %s=%s" % (key.upper(), value)
 
     def get_primitive(self, name):
         if name == 'LOGGED_IN_USER':

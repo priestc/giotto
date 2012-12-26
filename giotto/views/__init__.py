@@ -21,7 +21,8 @@ class GiottoView(object):
     from this class, as ths class contains piping that the controller calls.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, persist=None, **kwargs):
+        self.persist = persist
         self.render_map = {}
         class_defined_renderers = [x for x in dir(self) if not x.startswith('__')]
         self._register_renderers(class_defined_renderers)
@@ -74,7 +75,13 @@ class GiottoView(object):
 
         if GiottoControl in render_func.__class__.mro():
             # redirection defined as view (not wrapped in lambda)
-            return {'body': render_func, 'persist': render_func.persist}
+            return {'body': render_func, 'persist': persist}
+
+        if callable(self.persist):
+            # persist (cookie data) can be either an object, or a callable)
+            persist = self.persist(result)
+        else:
+            persist = self.persist
 
         try:
             data = render_func(result, errors or Mock())
@@ -84,7 +91,7 @@ class GiottoView(object):
 
         if GiottoControl in data.__class__.mro():
             # render function returned a control object
-            return {'body': data, 'persist': data.persist}
+            return {'body': data, 'persist': persist}
 
         if not hasattr(data, 'iteritems'):
             # view returned string
@@ -97,6 +104,7 @@ class GiottoView(object):
             if not 'mimetype' in data:
                 data['mimetype'] = target_mimetype
 
+        data['persist'] = persist
         return data
 
 class BasicView(GiottoView):

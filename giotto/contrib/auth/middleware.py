@@ -33,8 +33,8 @@ class AuthenticationMiddleware(GiottoInputMiddleware):
 
     def cmd(self, request):
         user = None
-        if 'giotto_session' in request.enviornment:
-            session_key = request.environment['giotto_session']
+        session_key = request.enviornment.get('GIOTTO_SESSION', None)
+        if session_key:
             user = config.auth_session.get(session_key)
 
         if not user:
@@ -62,6 +62,21 @@ class AuthenticatedOrDie(GiottoInputMiddleware):
             raise SystemExit("Must be logged in")
         return request
 
+class NotAuthenticatedOrDie(GiottoInputMiddleware):
+    """
+    Put this in the input middleware stream to fail any requests that aren't
+    made by authenticated users
+    """
+    def http(self, request):
+        if request.user:
+            raise NotAuthorized('Must not be Logged in for this program')
+        return request
+
+    def cmd(self, request):
+        user = getattr(request, 'user', None)
+        if user:
+            raise SystemExit("Must not be logged in for this program")
+        return request
 
 def AuthenticatedOrRedirect(invocation):
     """
