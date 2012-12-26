@@ -1,12 +1,15 @@
 import copy
 import urllib
+import traceback
+import StringIO
 
-from giotto.exceptions import NoViewMethod, InvalidInput, NotAuthorized
+from giotto import config
+from giotto.exceptions import NoViewMethod, InvalidInput, NotAuthorized, DataNotFound
 from giotto.controllers import GiottoController
 from giotto.control import Redirection
+from giotto.utils import render_error_page
 from werkzeug.wrappers import Request, Response
 from werkzeug.utils import redirect
-
 
 http_execution_snippet = """
 mock = '--model-mock' in sys.argv
@@ -80,20 +83,40 @@ class HTTPController(GiottoController):
                 'body': 'Unsupported Media Type: %s' % self.mimetype
             }
         except InvalidInput as exc:
+            ## if the model raises a InvalidInput, retry the request as
+            ## a GET request for the same program, and set the code to 400.
             request = make_duplicate_request(self.request)
             request.method = 'GET'
             c = HTTPController(request, self.manifest, self.model_mock, errors=exc)
             response = c.get_response()
             response.status_code = 400
             return response
-
-        if type(result) == NotAuthorized:
-            response = Response(
+        except NotAuthorized as exc:
+            return Response(
                 status=403,
-                response="Not Authorized",
-                mimetype="text/plain"
+                response=render_error_page(403, exc),
+                mimetype="text/html"
             )
-        elif type(result['body']) == Redirection:
+        except DataNotFound as exc:
+            return Response(
+                status=404,
+                response=render_error_page(404, exc),
+                mimetype="text/html"
+            )
+        except Exception as exc:
+            if config.debug == True:
+                raise
+            else:
+                sio = StringIO.StringIO()
+                traceback.print_exc(file=sio)
+                sio.seek(0)
+                return Response(
+                    status=500,
+                    response=render_error_page(500, exc, sio.read()),
+                    mimetype="text/html"
+                )
+
+        if type(result['body']) == Redirection:
             response = redirect(result['body'].path)
         else:
             response = Response(

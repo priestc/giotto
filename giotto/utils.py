@@ -2,6 +2,8 @@ import argparse
 import string
 import random
 import json
+import StringIO
+import traceback
 
 from collections import defaultdict
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
@@ -149,3 +151,19 @@ def pre_process_json(obj):
                 return obj.__dict__
         else:
             return obj
+
+
+def render_error_page(code, exc, traceback=''):
+    """
+    Render the error page
+    """
+    et = giotto.config.error_template
+    if not et:
+        return "%s %s\n%s" % (code, str(exc), traceback)
+    template = giotto.config.jinja2_env.get_template(et)
+    return template.render(
+        code=code,
+        exception=exc.__class__.__name__,
+        message=str(exc),
+        traceback=traceback
+    )

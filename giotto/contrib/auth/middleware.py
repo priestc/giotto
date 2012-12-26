@@ -89,7 +89,7 @@ class AuthenticatedOrDie(GiottoInputMiddleware):
         return request
 
 
-def AuthenticatedOrRedirect(invocation, args=[], kwargs={}):
+def AuthenticatedOrRedirect(invocation):
     """
     Middleware class factory that redirects if the user is not logged in.
     Otherwise, nothing is effected.
@@ -98,11 +98,11 @@ def AuthenticatedOrRedirect(invocation, args=[], kwargs={}):
         def http(self, request):
             if request.user:
                 return request
-            return Redirection(invocation, args, kwargs)
+            return Redirection(invocation)
     return AuthenticatedOrRedirect
 
 
-def NotAuthenticatedOrRedirect(invocation, args=[], kwargs={}):
+def NotAuthenticatedOrRedirect(invocation):
     """
     Middleware class factory that redirects if the user is not logged in.
     Otherwise, nothing is effected.
@@ -111,7 +111,7 @@ def NotAuthenticatedOrRedirect(invocation, args=[], kwargs={}):
         def http(self, request):
             if not request.user:
                 return request
-            return Redirection(invocation, args, kwargs)
+            return Redirection(invocation)
     return NotAuthenticatedOrRedirect
 
 
