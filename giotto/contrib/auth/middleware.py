@@ -15,18 +15,12 @@ class AuthenticationMiddleware(GiottoInputMiddleware):
     """
     def http(self, request):
         user = None
-        if request.method == 'POST':
-            u = request.form.get('username', None)
-            p = request.form.get('password', None)
-            user = User.get_user_by_password(u, p) if u and p else None
-        
-        if not user:
-            session_key = request.cookies.get('giotto_session', None)
-            if not session_key and request.form:
-                session_key = request.form.get('auth_session', None)
-            if session_key:
-                username = config.auth_session.get(session_key)
-                user = config.session.query(User).filter_by(username=username).first()
+        session_key = request.cookies.get('giotto_session', None)
+        if not session_key and request.form:
+            session_key = request.form.get('auth_session', None)
+        if session_key:
+            username = config.auth_session.get(session_key)
+            user = config.session.query(User).filter_by(username=username).first()
 
         setattr(request, 'user', user)
         return request

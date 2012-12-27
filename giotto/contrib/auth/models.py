@@ -16,7 +16,7 @@ class User(config.Base):
         self.username = username
         hashed = ''
         if not password == '':
-            # skip hashng process if the password field is left blank
+            # skip hashing process if the password field is left blank
             # helpful for creating mock user objects without slowing things down.
             hashed = bcrypt.hashpw(password, bcrypt.gensalt())
         self.password = hashed
