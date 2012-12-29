@@ -1,24 +1,17 @@
-from giotto.programs import GiottoProgram
 import os
 
 def shell(shell):
     from giotto import config
     
     if shell == "bpython":
-        try:
-            import bpython
-            bpython.embed()
-            return None
-        except ImportError:
-            pass
+        import bpython
+        bpython.embed()
+        return
 
     elif shell == 'ipython':
-        try:
-            from IPython import embed
-            embed()
-            return None
-        except ImportError:
-            pass
+        from IPython import embed
+        embed()
+        return
 
     else:
         import code
@@ -46,12 +39,4 @@ def shell(shell):
                     pass
         code.interact(local=imported_objects)
 
-    return {'body': "bpython or IPython required"}
-
-class Shell(GiottoProgram):
-    """
-    Display a list of all instaled programs for all controllers for the
-    currently invoked application.
-    """
-    controllers = ('cmd', )
-    model = [shell]
+    return
