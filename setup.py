@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
 	name='giotto',
-    version='0.9.10',
+    version='0.9.13',
     description='Functional Web Framework',
     long_description=open('README.rst').read(),
     author='Chris Priest',
@@ -18,6 +18,7 @@ setup(
         'giotto.views'
     ],
     scripts=['bin/giotto'],
+    include_package_data=True,
     license='LICENSE',
     install_requires=[
         'werkzeug',

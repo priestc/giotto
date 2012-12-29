@@ -144,7 +144,7 @@ class BasicView(GiottoView):
                 row = "<tr><td>{0}</td><td>{1}</td></tr>".format(key, v)
                 out.append(row)
 
-        env = Environment(loader=PackageLoader('giotto.views'))
+        env = Environment(loader=PackageLoader('giotto'))
         template = env.get_template('generic.html')
         rendered = template.render({'header': h1, 'table_header': header, 'table_body': out})
         return {'body': rendered, 'mimetype': 'text/html'}
