@@ -21,7 +21,7 @@ setup(
     license='LICENSE',
     install_requires=[
         'werkzeug',
-        'irc==0.4.8',
+        'irc==5.0.1',
         'jinja2',
         'py-bcrypt',
         'mimeparse',

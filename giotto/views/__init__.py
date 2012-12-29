@@ -165,6 +165,7 @@ class BasicView(GiottoView):
 
         return {'body': "\n".join(out), 'mimetype': "text/plain"}
 
+
 def jinja_template(template_name, name='data', mimetype="text/html"):
     """
     Meta-renderer for rendering jinja templates
@@ -176,6 +177,7 @@ def jinja_template(template_name, name='data', mimetype="text/html"):
         rendered = template.render(**context)
         return {'body': rendered, 'mimetype': mimetype}
     return jinja_renderer
+
 
 def partial_jinja_template(template_name, name='data', mimetype="text/html"):
     """
@@ -194,7 +196,7 @@ def partial_jinja_template(template_name, name='data', mimetype="text/html"):
         template.environment.undefined = old
         return {'body': rendered, 'mimetype': mimetype}
     return partial_jinja_renderer
-        
+
 
 def lazy_jinja_template(template_name, name='data', mimetype='text/html'):
     """
@@ -210,6 +212,7 @@ def lazy_jinja_template(template_name, name='data', mimetype='text/html'):
         data = ('jinja2', template, context)
         return {'body': data, 'mimetype': mimetype}
     return lazy_jinja_renderer
+
 
 class ImageViewer(GiottoView):
     """
