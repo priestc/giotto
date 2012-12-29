@@ -14,6 +14,9 @@ def blast_tables():
     """
     Drop all existing tables in the database, and then recreate them.
     """
+    yn = raw_input("This will delete all data in your tables, are you sure? [yN]")
+    if yn.lower() != 'y':
+        return "Aborting"
     from giotto import config
     config.Base.metadata.drop_all(config.engine)
     print("blasting away all tables...")
