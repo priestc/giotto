@@ -3,7 +3,6 @@ import urllib
 import traceback
 import StringIO
 
-from giotto import config
 from giotto.exceptions import NoViewMethod, InvalidInput, NotAuthorized, DataNotFound
 from giotto.controllers import GiottoController
 from giotto.control import Redirection
@@ -103,6 +102,7 @@ class HTTPController(GiottoController):
                 mimetype="text/html"
             )
         except Exception as exc:
+            from giotto import config
             if config.debug:
                 raise
             sio = StringIO.StringIO()
