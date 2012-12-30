@@ -3,12 +3,12 @@ import os
 def shell(shell):
     from giotto import config
     
-    if shell == "bpython":
+    if shell == "bpython" or shell == 'b':
         import bpython
         bpython.embed()
         return
 
-    elif shell == 'ipython':
+    elif shell == 'ipython' or shell == 'i':
         from IPython import embed
         embed()
         return
