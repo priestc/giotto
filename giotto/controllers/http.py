@@ -138,7 +138,7 @@ class HTTPController(GiottoController):
         return response
 
     def get_primitive(self, primitive):
-        if primitive == 'RAW_PAYLOAD':
+        if primitive == 'ALL_DATA':
             return self.get_raw_data()
         if primitive == 'LOGGED_IN_USER':
             return self.request.user

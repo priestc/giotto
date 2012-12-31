@@ -1,8 +1,11 @@
 from cStringIO import StringIO
+import os
+
 from giotto.programs import GiottoProgram
 from giotto.views import GiottoView, renders
 from giotto.utils import super_accept_to_mimetype
-import os
+from giotto.exceptions import DataNotFound
+
 
 class FileView(GiottoView):
     @renders('*/*')
@@ -25,7 +28,10 @@ def StaticServe(base_path):
     Meta program for serving any file based on the path
     """
     def get_file(path):
-        return open(base_path + path, 'r')
+        try:
+            return open(base_path + path, 'r')
+        except IOError:
+            raise DataNotFound()
 
     class StaticServe(GiottoProgram):
         controllers = ('http-get', )
