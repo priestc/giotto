@@ -4,6 +4,8 @@ import random
 import json
 import StringIO
 import traceback
+import re
+import unicodedata
 
 from collections import defaultdict
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
@@ -100,7 +102,7 @@ def better_base():
 
         def todict(self):
             attrs = self.attribute_names()
-            return [(attr, getattr(self, attr)) for attr in attrs]
+            return dict((attr, getattr(self, attr)) for attr in attrs)
 
     return BetterBase
 
@@ -167,3 +169,20 @@ def render_error_page(code, exc, traceback=''):
         message=str(exc),
         traceback=traceback
     )
+
+def slugify(s):
+    slug = unicodedata.normalize('NFKD', unicode(s))
+    slug = slug.encode('ascii', 'ignore').lower()
+    slug = re.sub(r'[^a-z0-9]+', '-', slug).strip('-')
+    slug = re.sub(r'--+', '-', slug)
+    return slug
+
+def jsonify(obj):
+    def handler(obj):
+        if hasattr(obj, 'isoformat'):
+            return obj.isoformat()
+        if hasattr(obj, 'todict'):
+            return obj.todict()
+        else:
+            raise TypeError('Object of type %s with value of %s is not JSON serializable' % (type(obj), repr(obj)))
+    return json.dumps(obj, default=handler)

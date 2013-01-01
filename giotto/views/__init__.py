@@ -4,7 +4,7 @@ import mimeparse
 from jinja2 import Template, DebugUndefined, Environment, PackageLoader
 from jinja2.exceptions import TemplateNotFound
 from giotto.exceptions import NoViewMethod
-from giotto.utils import Mock, htmlize, htmlize_list, pre_process_json, super_accept_to_mimetype
+from giotto.utils import Mock, htmlize, htmlize_list, pre_process_json, super_accept_to_mimetype, jsonify
 from giotto.control import GiottoControl
 
 def renders(*mimetypes):
@@ -113,9 +113,7 @@ class BasicView(GiottoView):
     """
     @renders('application/json')
     def generic_json(self, result, errors):
-        obj = pre_process_json(result)
-        j = json.dumps(obj)
-        return {'body': j, 'mimetype': 'application/json'}
+        return {'body': jsonify(result), 'mimetype': 'application/json'}
 
     @renders('text/html')
     def generic_html(self, result, errors):
