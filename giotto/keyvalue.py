@@ -108,10 +108,10 @@ class MemcacheKeyValue(GiottoKeyValue):
         self.client = pylibmc.Client(**kwargs)
 
     def set(self, key, obj, expire):
-        self.client.set(key, obj, time=expire)
+        self.client.set(str(key), obj, time=expire)
 
     def get(self, key):
-        return self.client.get(key)
+        return self.client.get(str(key))
 
 class RedisKeyValue(GiottoKeyValue):
     def __init__(self, host='localhost', port=6379, db=0):
