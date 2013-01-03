@@ -33,6 +33,7 @@ Contents:
    authentication
    serving_static_files
    deployment
+   wsgi_middleware
 
 Indices and tables
 ==================
