@@ -13,8 +13,13 @@ from werkzeug.utils import redirect
 http_execution_snippet = """
 mock = '--model-mock' in sys.argv
 from werkzeug.serving import run_simple
-from giotto.controllers.http import make_app
+from giotto.controllers.http import make_app, error_handler
+
 application = make_app(manifest, model_mock=mock)
+
+if not config.debug:
+    application = error_handler(application)
+
 if '--run' in sys.argv:
     run_simple('127.0.0.1', 5000, application, use_debugger=True, use_reloader=True)"""
 
@@ -101,18 +106,6 @@ class HTTPController(GiottoController):
                 response=render_error_page(404, exc),
                 mimetype="text/html"
             )
-        except Exception as exc:
-            from giotto import config
-            if config.debug:
-                raise
-            sio = StringIO.StringIO()
-            traceback.print_exc(file=sio)
-            sio.seek(0)
-            return Response(
-                status=500,
-                response=render_error_page(500, exc, sio.read()),
-                mimetype="text/html"
-            )
 
         if type(result['body']) == Redirection:
             response = redirect(result['body'].path)
@@ -146,20 +139,6 @@ class HTTPController(GiottoController):
             return self.manifest.get_all_programs()
 
 
-def make_app(manifest, model_mock=False, cache=None):
-    
-    def application(environ, start_response):
-        """
-        WSGI app for serving giotto applications
-        """
-        request = Request(environ)
-        controller = HTTPController(request, manifest, model_mock=model_mock)
-        wsgi_response = controller.get_response()
-        return wsgi_response(environ, start_response)
-
-    return application
-
-
 def make_duplicate_request(request):
     """
     Since werkzeug request objects are immutable, this is needed to create an
@@ -176,3 +155,43 @@ def make_duplicate_request(request):
         cookies = request.cookies
         is_xhr = request.is_xhr
     return FakeRequest()
+
+
+def make_app(manifest, model_mock=False, cache=None):
+    
+    def application(environ, start_response):
+        """
+        WSGI app for serving giotto applications
+        """
+        request = Request(environ)
+        controller = HTTPController(request, manifest, model_mock=model_mock)
+        wsgi_response = controller.get_response()
+        return wsgi_response(environ, start_response)
+
+    return application
+
+
+def error_handler(app):
+    """
+    WGSI middleware for catching errors and rendering the error page.
+    """
+    def application(environ, start_response):
+        try:
+            return app(environ, start_response)
+        except Exception as exc:
+            sio = StringIO.StringIO()
+            traceback.print_exc(file=sio)
+            sio.seek(0)
+            response =  Response(
+                status=500,
+                response=render_error_page(500, exc, sio.read()),
+                mimetype="text/html"
+            )
+            return response(environ, start_response)
+
+    return application
+
+
+
+
+
