@@ -3,7 +3,7 @@ import urllib
 import traceback
 import StringIO
 
-from giotto.exceptions import NoViewMethod, InvalidInput, NotAuthorized, DataNotFound
+from giotto.exceptions import NoViewMethod, InvalidInput, NotAuthorized, DataNotFound, ProgramNotFound
 from giotto.controllers import GiottoController
 from giotto.control import Redirection
 from giotto.utils import render_error_page
@@ -100,7 +100,7 @@ class HTTPController(GiottoController):
                 response=render_error_page(403, exc),
                 mimetype="text/html"
             )
-        except DataNotFound as exc:
+        except (DataNotFound, ProgramNotFound) as exc:
             return Response(
                 status=404,
                 response=render_error_page(404, exc),
