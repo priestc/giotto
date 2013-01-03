@@ -14,7 +14,7 @@ When the HTTP controller gets an exception coming from your program,
 it will return to the user your error template rendered with the details of the error.
 
 Configuring error pages
---------------------------
+-----------------------
 In your application's config file, set the ``error_template`` variable
 to the path of the template you want gitto to render in order to make your error page.
 This path should be assessible by the jinja2 enviornment defined in the same config file.
@@ -28,7 +28,7 @@ This template, when rendered, will contain the following variables:
   it may benefitial to include tracebacks in the error template.
 
 Switching between error pages and the debug page
------------------------------------------------
+------------------------------------------------
 In your config file, there is a setting called ``debug``.
 If it is set to ``True`` the debug page will be used when your application throws an exception.
 Set it to ``False`` to use the error template.

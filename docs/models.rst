@@ -38,7 +38,7 @@ The default config file created by the ``giotto`` command line utility contains 
 
 
 Creating tables
---------------
+---------------
 Add the manageent manifest to your project::
 
     from giotto.programs import management_manifest, ProgramManifest

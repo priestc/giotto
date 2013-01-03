@@ -1,4 +1,4 @@
-.. _ref-wsgi_midleware:
+.. _ref-wsgi_middleware:
 
 ===============
 WSGI Middleware
