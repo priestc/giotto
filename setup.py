@@ -1,8 +1,8 @@
 from setuptools import setup
 
 setup(
-	name='giotto',
-    version='0.9.16',
+    name='giotto',
+    version='0.9.17',
     description='Functional Web Framework',
     long_description=open('README.rst').read(),
     author='Chris Priest',
