@@ -46,7 +46,7 @@ class HTTPController(GiottoController):
     default_mimetype = 'text/html'
 
     def mimetype_override(self):
-        accept = self.request.headers['Accept']
+        accept = self.request.headers.get('Accept', '')
         has_json_in_view = self.program.view.can_render('json')
         if accept == '*/*' and self.request.is_xhr and has_json_in_view:
             # return json on ajax calls if no accept headers are present.

@@ -21,12 +21,12 @@ setup(
     include_package_data=True,
     license='LICENSE',
     install_requires=[
-        'werkzeug',
+        'werkzeug==0.8.3',
         'irc==5.0.1',
-        'jinja2',
-        'py-bcrypt',
-        'mimeparse',
-        'python-magic',
-        'sqlalchemy',
+        'jinja2==2.6',
+        'py-bcrypt==0.2',
+        'mimeparse==0.1.3',
+        'python-magic==0.4.3',
+        'sqlalchemy==0.7.9',
     ],
 )

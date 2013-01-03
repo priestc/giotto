@@ -1,5 +1,6 @@
 import json
 import mimeparse
+import inspect
 
 from jinja2 import Template, DebugUndefined, Environment, PackageLoader
 from jinja2.exceptions import TemplateNotFound
@@ -83,9 +84,13 @@ class GiottoView(object):
         else:
             persist = self.persist
 
-        try:
+        # render functins can take either one or two arguments, both are
+        # supported by the API
+        arg_names = inspect.getargspec(render_func).args
+        num_args = len(set(arg_names) - set(['self', 'cls']))
+        if num_args == 2:
             data = render_func(result, errors or Mock())
-        except TypeError:
+        else:
             # if the renderer only has one argument, don't pass in the 2nd arg.
             data = render_func(result)
 
