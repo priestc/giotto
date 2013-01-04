@@ -15,8 +15,7 @@ from webob.exc import (
 
 http_execution_snippet = """
 mock = '--model-mock' in sys.argv
-from werkzeug.serving import run_simple
-from giotto.controllers.http import make_app, error_handler
+from giotto.controllers.http import make_app, error_handler, serve
 
 application = make_app(manifest, model_mock=mock)
 
@@ -24,8 +23,25 @@ if not config.debug:
     application = error_handler(application)
 
 if '--run' in sys.argv:
-    run_simple('127.0.0.1', 5000, application, use_debugger=True, use_reloader=True)"""
+    serve('127.0.0.1', 5000, application, use_debugger=True, use_reloader=True)"""
 
+
+def serve(ip, port, application, **kwargs):
+    """
+    Serve a wsgi app (any wsgi app) through with either werkzeug's runserver
+    or the one that comes with python.
+    """
+    try:
+        from werkzeug.serving import run_simple
+        run_simple(ip, port, application, **kwargs)
+    except ImportError:
+        from wsgiref.simple_server import make_server
+        server = make_server(ip, port, application)
+        print("Serving on %s:%s" % (ip, port))
+        try:
+            server.serve_forever()
+        except KeyboardInterrupt:
+            pass
 
 def make_url(invocation, args=[], kwargs={}):
     """

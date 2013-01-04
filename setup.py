@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='giotto',
-    version='0.9.17',
+    version='0.9.18',
     description='Functional Web Framework',
     long_description=open('README.rst').read(),
     author='Chris Priest',
@@ -21,8 +21,7 @@ setup(
     include_package_data=True,
     license='LICENSE',
     install_requires=[
-        'werkzeug==0.8.3',
-        'webob=1.2.3',
+        'webob==1.2.3',
         'irc==5.0.1',
         'jinja2==2.6',
         'py-bcrypt==0.2',
