@@ -133,18 +133,17 @@ class HTTPController(GiottoController):
                 content_type="text/html"
             )
 
-        #import debug
-
         if type(result['body']) == Redirection:
             response = HTTPTemporaryRedirect(location=result['body'].path)
         else:
             lazy = None
             body = result['body']
+
             if type(body) == tuple:
                 lazy = body
                 body = ''
 
-            if type(body) == file:
+            if hasattr(body, 'read'):
                 body = body.read()
 
             response = Response(
@@ -152,6 +151,8 @@ class HTTPController(GiottoController):
                 body=body,
                 content_type=result['mimetype'],
             )
+
+
             response.lazy_data = lazy
 
         return response

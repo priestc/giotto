@@ -98,7 +98,7 @@ class GiottoView(object):
             # render function returned a control object
             return {'body': data, 'persist': persist}
 
-        if not hasattr(data, 'iteritems'):
+        if not hasattr(data, 'items'):
             # view returned string
             data = {'body': data, 'mimetype': principle_mimetype}
         else:
