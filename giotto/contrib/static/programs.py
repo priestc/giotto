@@ -10,13 +10,7 @@ from giotto.exceptions import DataNotFound
 class FileView(GiottoView):
     @renders('*/*')
     def any(self, result):
-        file = result[0]
-        if hasattr(file, 'encoding'):
-            # python 3
-            encoding = file.encoding
-        else:
-            encoding = result[2]
-        return {'body': result[0], 'mimetype': result[1], 'encoding': encoding}
+        return {'body': result[0], 'mimetype': result[1]}
 
     @renders('text/x-cmd')
     def cmd(self, result):
@@ -30,7 +24,7 @@ def StaticServe(base_path):
         fullpath = base_path + path
         try:
             mime, encoding = mimetypes.guess_type(fullpath)
-            return open(fullpath, 'r'), mime or 'application/octet-stream', encoding
+            return open(fullpath, 'rb'), mime or 'application/octet-stream'
         except IOError:
             raise DataNotFound("File does not exist")
 
@@ -47,7 +41,7 @@ def SingleStaticServe(file_path):
     """
     def get_file():
         mime, encoding = mimetypes.guess_type(file_path)
-        return open(file_path, 'r'), mime or 'application/octet-stream', encoding
+        return open(file_path, 'rb'), mime or 'application/octet-stream'
 
     class SingleStaticServe(GiottoProgram):
         controllers = ['http-get']

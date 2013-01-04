@@ -138,7 +138,6 @@ class HTTPController(GiottoController):
         else:
             lazy = None
             body = result['body']
-            encoding = result.get('encoding', 'UTF-8')
 
             if type(body) == tuple:
                 lazy = body
@@ -146,12 +145,10 @@ class HTTPController(GiottoController):
 
             if hasattr(body, 'read'):
                 body = body.read()
-                encoding = result['encoding']
 
             response = Response(
                 status=200,
                 body=body,
-                charset=encoding,
                 content_type=result['mimetype'],
             )
 
