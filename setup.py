@@ -2,8 +2,8 @@ from setuptools import setup
 
 setup(
     name='giotto',
-    version='0.10.0',
-    description='Python web development simplified.',
+    version='0.10.1',
+    description='Web development simplified. An MVC framework supporting Python 3.',
     long_description=open('README.rst').read(),
     author='Chris Priest',
     author_email='cp368202@ohiou.edu',
