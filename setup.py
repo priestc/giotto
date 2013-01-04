@@ -2,8 +2,8 @@ from setuptools import setup
 
 setup(
     name='giotto',
-    version='0.9.18',
-    description='Python web development simplified',
+    version='0.10.0',
+    description='Python web development simplified.',
     long_description=open('README.rst').read(),
     author='Chris Priest',
     author_email='cp368202@ohiou.edu',
@@ -20,6 +20,17 @@ setup(
     scripts=['bin/giotto'],
     include_package_data=True,
     license='LICENSE',
+    classifiers=[
+        'Development Status :: 5 - Production/Stable',
+        "Programming Language :: Python",
+        'Programming Language :: Python :: 2.7',
+        "Programming Language :: Python :: 3",
+        'Environment :: Web Environment',
+        'License :: OSI Approved :: BSD License',
+        'Topic :: Internet :: WWW/HTTP :: WSGI',
+        'Topic :: Software Development :: Libraries :: Application Frameworks',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+    ],
     install_requires=[
         'webob==1.2.3',
         'irc==5.0.1',
