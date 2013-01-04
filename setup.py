@@ -25,7 +25,7 @@ setup(
         'irc==5.0.1',
         'jinja2==2.6',
         'py-bcrypt==0.2',
-        'mimeparse==0.1.3',
+        'python-mimeparse==0.1.4',
         'sqlalchemy==0.7.9',
     ],
 )
