@@ -79,17 +79,6 @@ class User(config.Base):
     def __repr__(self):
         return "<User('%s', '%s')>" % (self.username, self.password)
 
-def is_authenticated(message):
-    """
-    Is this request coming from a user who is logged in? This is a meta function.
-    When adding this to a program, call it with the mesage you want to be displayed
-    when no user is found.
-    """
-    def inner(user=LOGGED_IN_USER):
-        if not user:
-            raise InvalidInput(message)
-        return {'user', user}
-    return inner
 
 def basic_register(username, password, password2):
     """
@@ -101,10 +90,11 @@ def basic_register(username, password, password2):
     user = User.create(username, password)
     return create_session(user)
 
-def create_session(user=LOGGED_IN_USER):
+def create_session(username, password):
     """
     Create a session for the user, and then return the key.
     """
+    user = User.get_user_by_password(username, password)
     if not user:
         raise InvalidInput('Username or password incorrect')
     session_key = random_string(15)

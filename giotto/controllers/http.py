@@ -7,8 +7,11 @@ from giotto.exceptions import NoViewMethod, InvalidInput, NotAuthorized, DataNot
 from giotto.controllers import GiottoController
 from giotto.control import Redirection
 from giotto.utils import render_error_page
-from werkzeug.wrappers import Request, Response
-from werkzeug.utils import redirect
+from webob import Request, Response
+from webob.exc import (
+    HTTPUnsupportedMediaType, HTTPMethodNotAllowed, HTTPTemporaryRedirect,
+    HTTPNotFound, HTTPForbidden
+)
 
 http_execution_snippet = """
 mock = '--model-mock' in sys.argv
@@ -71,19 +74,18 @@ class HTTPController(GiottoController):
     def get_raw_data(self):
         data = {}
         if self.request.method == 'GET':
-            data = self.request.args
+            data = self.request.GET
         elif self.request.method == 'POST':
-            data = self.request.form
+            data = self.request.POST
         return data
 
     def get_concrete_response(self):
         try:
             result = self.get_data_response()
         except NoViewMethod as exc:
-            return Response(
-                status=415,
-                response=render_error_page(415, exc),
-                mimetype="text/html"
+            return HTTPUnsupportedMediaType(
+                body=render_error_page(415, exc),
+                content_type="text/html"
             )
         except InvalidInput as exc:
             ## if the model raises a InvalidInput, retry the request as
@@ -92,23 +94,23 @@ class HTTPController(GiottoController):
             request.method = 'GET'
             c = HTTPController(request, self.manifest, self.model_mock, errors=exc)
             response = c.get_response()
-            response.status_code = 400
+            response.status_int = 400
             return response
         except NotAuthorized as exc:
-            return Response(
-                status=403,
-                response=render_error_page(403, exc),
-                mimetype="text/html"
+            return HTTPForbidden(
+                body=render_error_page(403, exc),
+                content_type="text/html"
             )
         except (DataNotFound, ProgramNotFound) as exc:
-            return Response(
-                status=404,
-                response=render_error_page(404, exc),
-                mimetype="text/html"
+            return HTTPNotFound(
+                body=render_error_page(404, exc),
+                content_type="text/html"
             )
 
+        #import debug
+
         if type(result['body']) == Redirection:
-            response = redirect(result['body'].path)
+            response = HTTPTemporaryRedirect(location=result['body'].path)
         else:
             lazy = None
             body = result['body']
@@ -116,10 +118,13 @@ class HTTPController(GiottoController):
                 lazy = body
                 body = ''
 
+            if type(body) == file:
+                body = body.read()
+
             response = Response(
                 status=200,
-                response=body,
-                mimetype=result['mimetype'],
+                body=body,
+                content_type=result['mimetype'],
             )
             response.lazy_data = lazy
 
@@ -149,8 +154,8 @@ def make_duplicate_request(request):
         method = 'GET'
         path = request.path
         headers = request.headers
-        args = request.args
-        form = request.form
+        GET = request.GET
+        POST = request.POST
         user = getattr(request, 'user', None)
         cookies = request.cookies
         is_xhr = request.is_xhr
@@ -184,8 +189,8 @@ def error_handler(app):
             sio.seek(0)
             response =  Response(
                 status=500,
-                response=render_error_page(500, exc, sio.read()),
-                mimetype="text/html"
+                body=render_error_page(500, exc, sio.read()),
+                content_type="text/html"
             )
             return response(environ, start_response)
 

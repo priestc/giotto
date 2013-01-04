@@ -22,6 +22,7 @@ setup(
     license='LICENSE',
     install_requires=[
         'werkzeug==0.8.3',
+        'webob=1.2.3',
         'irc==5.0.1',
         'jinja2==2.6',
         'py-bcrypt==0.2',

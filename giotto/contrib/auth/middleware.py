@@ -16,8 +16,8 @@ class AuthenticationMiddleware(GiottoInputMiddleware):
     def http(self, request):
         user = None
         session_key = request.cookies.get('giotto_session', None)
-        if not session_key and request.form:
-            session_key = request.form.get('auth_session', None)
+        if not session_key and request.POST:
+            session_key = request.POST.get('auth_session', None)
         if session_key:
             username = config.auth_session.get(session_key)
             user = config.session.query(User).filter_by(username=username).first()
@@ -117,8 +117,8 @@ class LogoutMiddleware(GiottoOutputMiddleware):
     ve valid again.
     """
     def http(self, request, response):
-        if request.method == 'POST' and 'auth_session' in request.form:
-            key = request.form['auth_session']
+        if request.method == 'POST' and 'auth_session' in request.POST:
+            key = request.POST['auth_session']
             session_key = config.auth_session.set(key, None, 1) # nuke session
         response.delete_cookie('giotto_session')
         return response

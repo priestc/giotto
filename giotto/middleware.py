@@ -11,5 +11,5 @@ class RenderLazytemplate(GiottoOutputMiddleware):
         engine, template, context = response.lazy_data
         if engine == 'jinja2':
             rendered = template.render(**context)
-        response.data = rendered
+        response.text = rendered
         return response
