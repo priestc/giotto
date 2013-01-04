@@ -194,3 +194,40 @@ def jsonify(obj):
         else:
             raise TypeError('Object of type %s with value of %s is not JSON serializable' % (type(obj), repr(obj)))
     return json.dumps(obj, default=handler)
+
+class FileIterable(object):
+    """
+    Taken from the webob docs.
+    """
+    def __init__(self, filename):
+        self.filename = filename
+    
+    def __iter__(self):
+        return FileIterator(self.filename)
+
+class FileIterator(object):
+    chunk_size = 4096
+    
+    def __init__(self, filename):
+        self.filename = filename
+        self.fileobj = open(self.filename, 'rb')
+    
+    def __iter__(self):
+       return self
+    
+    def next(self):
+        chunk = self.fileobj.read(self.chunk_size)
+        if not chunk:
+            raise StopIteration
+        return chunk
+    
+    __next__ = next # py3 compat
+
+
+
+
+
+
+
+
+

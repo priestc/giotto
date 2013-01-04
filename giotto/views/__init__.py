@@ -103,7 +103,7 @@ class GiottoView(object):
             data = {'body': data, 'mimetype': principle_mimetype}
         else:
             # result is a dict in for form {body: XX, mimetype: xx}
-            if not mimetype in data and target_mimetype == '*/*':
+            if not 'mimetype' in data and target_mimetype == '*/*':
                 data['mimetype'] = ''
 
             if not 'mimetype' in data:
