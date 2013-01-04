@@ -14,6 +14,12 @@ def blast_tables():
     """
     Drop all existing tables in the database, and then recreate them.
     """
+    try:
+        raw_input
+    except NameError:
+        # python 3
+        raw_input = input
+
     yn = raw_input("This will delete all data in your tables, are you sure? [yN]")
     if yn.lower() != 'y':
         return "Aborting"

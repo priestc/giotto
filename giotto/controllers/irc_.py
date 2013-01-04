@@ -103,7 +103,6 @@ class IRCRequest(object):
         self.private_message = self.msg_type == "privmsg"
         self.raw_message = event.arguments[0]
         self.program, self.args = self.get_program_and_args(self.raw_message,magic_token)
-        #print self.__repr__()
 
     def get_program_and_args(self, message, magic_token):
         if self.private_message == True:
@@ -129,7 +128,7 @@ class IrcBot(irc.bot.SingleServerIRCBot):
         if not config['nick']:
             raise SystemExit('Error: IRC controller needs to be configured with a nick')
 
-        print "Connecting to %s:%s as %s" % (config['host'],config['port'], config['nick'])
+        print("Connecting to %s:%s as %s" % (config['host'],config['port'], config['nick']))
 
         irc.bot.SingleServerIRCBot.__init__(
             self, 
@@ -141,7 +140,7 @@ class IrcBot(irc.bot.SingleServerIRCBot):
         channels = config['channels']
         if channels:
             self.channel = channels
-            print "Joining Channels: %s" % channels
+            print("Joining Channels: %s" % channels)
         self.config = config
   
     def on_nicknameinuse(self, connection, event):
