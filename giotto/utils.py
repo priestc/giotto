@@ -2,7 +2,6 @@ import argparse
 import string
 import random
 import json
-import StringIO
 import traceback
 import re
 import unicodedata

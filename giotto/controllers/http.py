@@ -1,7 +1,10 @@
 import copy
 import urllib
 import traceback
-import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 from giotto.exceptions import NoViewMethod, InvalidInput, NotAuthorized, DataNotFound, ProgramNotFound
 from giotto.controllers import GiottoController
@@ -34,14 +37,17 @@ def serve(ip, port, application, **kwargs):
     try:
         from werkzeug.serving import run_simple
         run_simple(ip, port, application, **kwargs)
+        return
     except ImportError:
-        from wsgiref.simple_server import make_server
-        server = make_server(ip, port, application)
-        print("Serving on %s:%s" % (ip, port))
-        try:
-            server.serve_forever()
-        except KeyboardInterrupt:
-            pass
+        pass
+
+    from wsgiref.simple_server import make_server
+    server = make_server(ip, port, application)
+    print("Serving on %s:%s" % (ip, port))
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        pass
 
 def make_url(invocation, args=[], kwargs={}):
     """
@@ -200,7 +206,7 @@ def error_handler(app):
         try:
             return app(environ, start_response)
         except Exception as exc:
-            sio = StringIO.StringIO()
+            sio = StringIO()
             traceback.print_exc(file=sio)
             sio.seek(0)
             response =  Response(

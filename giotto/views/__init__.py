@@ -28,7 +28,7 @@ class GiottoView(object):
         class_defined_renderers = [x for x in dir(self) if not x.startswith('__')]
         self._register_renderers(class_defined_renderers)
 
-        for format, function in kwargs.iteritems():
+        for format, function in kwargs.items():
             ## key word arguments can be passed into the constructor to
             ## override render methods from within the manifest.
             mime = super_accept_to_mimetype(format)

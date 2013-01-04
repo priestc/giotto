@@ -32,7 +32,7 @@ class AuthenticationMiddleware(GiottoInputMiddleware):
             user = config.auth_session.get(session_key)
 
         if not user:
-            print "Username:",
+            print("Username:")
             username = raw_input()
             password = getpass.getpass()
             user = User.get_user_by_password(username, password)
