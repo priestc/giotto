@@ -29,6 +29,9 @@ class Mock(object):
     def __str__(self):
         return ''
 
+    def __bool__(self):
+        return False
+
     def __nonzero__(self):
         return False
 
@@ -46,7 +49,7 @@ def parse_kwargs(kwargs):
         d[k].append(v)
 
     ret = {}
-    for k, v in d.iteritems():
+    for k, v in d.items():
         # replace single item lists with just the item.
         if len(v) == 1 and type(v) is list:
             ret[k] = v[0]
@@ -127,7 +130,7 @@ def pre_process_json(obj):
     """
     if type(obj) is dict:
         new_dict = {}
-        for key, value in obj.iteritems():
+        for key, value in obj.items():
             new_dict[key] = pre_process_json(value)
         return new_dict
 
@@ -170,9 +173,15 @@ def render_error_page(code, exc, traceback=''):
     )
 
 def slugify(s):
-    slug = unicodedata.normalize('NFKD', unicode(s))
+    try:
+        s = unicode(s)
+    except NameError:
+        # python 3
+        s = str(s)
+
+    slug = unicodedata.normalize('NFKD', s)
     slug = slug.encode('ascii', 'ignore').lower()
-    slug = re.sub(r'[^a-z0-9]+', '-', slug).strip('-')
+    slug = re.sub(r'[^a-z0-9]+', '-', str(slug)).strip('-')
     slug = re.sub(r'--+', '-', slug)
     return slug
 

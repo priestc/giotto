@@ -152,7 +152,6 @@ class HTTPController(GiottoController):
                 content_type=result['mimetype'],
             )
 
-
             response.lazy_data = lazy
 
         return response
