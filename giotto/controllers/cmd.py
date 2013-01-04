@@ -32,7 +32,7 @@ def make_cmd_invocation(invocation, args, kwargs):
         cmd += str(arg) + "/"
 
     rendered_kwargs = []
-    for k, v in kwargs.iteritems():
+    for k, v in kwargs.items():
         rendered_kwargs.append("--%s=%s" % (k,v))
     
     return ['./giotto-cmd', cmd] + rendered_kwargs
@@ -97,9 +97,9 @@ class CMDController(GiottoController):
             sys.stderr.write(line)
 
     def persist(self, persist, response):
-        print "persist\n================"
+        print("persist\n================")
         for key, value in persist.iteritems():
-            print "export %s=%s" % (key.upper(), value)
+            print("export %s=%s" % (key.upper(), value))
 
     def get_primitive(self, name):
         if name == 'LOGGED_IN_USER':

@@ -21,7 +21,8 @@ class GiottoController(object):
         self.manifest = manifest
         self.middleware_interrupt_exc = None
         self.middleware_control = None
-
+        self.display_data = 'Not calculated yet'
+        
         # the program that corresponds to this invocation
         invocation = self.get_invocation()
         name = self.get_controller_name()
@@ -75,6 +76,7 @@ class GiottoController(object):
         else:
             args, kwargs = self.program.get_model_args_kwargs()
             data = self.get_data_for_model(args, kwargs)
+            self.display_data = data # just for displaying in __repr__
 
             if self.program.cache and not self.errors:
                 key = self.get_cache_key(data)
@@ -138,7 +140,7 @@ class GiottoController(object):
     def __repr__(self):
         controller = self.get_controller_name()
         model = self.program.name
-        data = self.get_data()
+        data = self.display_data
         return "<%s %s - %s - %s>" % (  
             self.__class__.__name__, controller, model, data
         )

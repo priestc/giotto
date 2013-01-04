@@ -112,7 +112,8 @@ class ProgramManifest(object):
     """
     key_regex = r'^\w*$'
 
-    def __init__(self, manifest, backname=None):
+    def __init__(self, manifest, backname='root'):
+        self.backname = backname
         self.manifest = manifest
         # any sub manifests, convert to manifests objects
         for key, item in self.manifest.items():
