@@ -103,7 +103,7 @@ class GiottoController(object):
         """
         raw_data = self.get_raw_data()
         defaults = kwargs
-        values = args + kwargs.keys()
+        values = args + list(kwargs.keys())
 
         output = {}
         i = -1

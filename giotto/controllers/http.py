@@ -1,6 +1,10 @@
-import copy
-import urllib
 import traceback
+
+try:
+    from urllib.parse import urlencode
+except ImportError:
+    from urllib import urlencode
+
 try:
     from StringIO import StringIO
 except ImportError:
@@ -66,7 +70,7 @@ def make_url(invocation, args=[], kwargs={}):
 
     if kwargs:
         url = url[:-1]
-        url += "?" + urllib.urlencode(kwargs)
+        url += "?" + urlencode(kwargs)
     
     return url
 
@@ -153,7 +157,7 @@ class HTTPController(GiottoController):
         return response
 
     def persist(self, persist, response):
-        for key, value in persist.iteritems():
+        for key, value in persist.items():
             response.set_cookie(key, value)
         return response
 
