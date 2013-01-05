@@ -5,6 +5,7 @@ import json
 import traceback
 import re
 import unicodedata
+import six
 
 from collections import defaultdict
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
@@ -172,18 +173,20 @@ def render_error_page(code, exc, traceback=''):
         traceback=traceback
     )
 
-def slugify(s):
-    try:
-        s = unicode(s)
-    except NameError:
-        # python 3
-        s = str(s)
+def slugify(value):
+    """
+    Converts to lowercase, removes non-word characters (alphanumerics and
+    underscores) and converts spaces to hyphens. Also strips leading and
+    trailing whitespace.
+    """
+    if six.PY3:
+        value = str(value)
+    else:
+        value = unicode(value)
 
-    slug = unicodedata.normalize('NFKD', s)
-    slug = slug.encode('ascii', 'ignore').lower()
-    slug = re.sub(r'[^a-z0-9]+', '-', str(slug)).strip('-')
-    slug = re.sub(r'--+', '-', slug)
-    return slug
+    value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
+    value = re.sub('[^\w\s-]', '', value).strip().lower()
+    return re.sub('[-\s]+', '-', value)
 
 def jsonify(obj):
     def handler(obj):

@@ -33,6 +33,7 @@ setup(
     ],
     install_requires=[
         'webob==1.2.3',
+        'six==1.2.0',
         'irc==5.0.1',
         'jinja2==2.6',
         'py-bcrypt==0.2',

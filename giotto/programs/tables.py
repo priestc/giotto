@@ -1,3 +1,5 @@
+import six
+
 def make_tables():
     """
     Create all the tables for the models that have been added to the manifest.
@@ -14,13 +16,11 @@ def blast_tables():
     """
     Drop all existing tables in the database, and then recreate them.
     """
-    try:
-        raw_input
-    except NameError:
-        # python 3
-        raw_input = input
-
-    yn = raw_input("This will delete all data in your tables, are you sure? [yN]")
+    msg = "This will delete all data in your tables, are you sure? [yN]"
+    if six.PY3:
+        yn = input(msg)
+    else:
+        yn = raw_input(msg)
     if yn.lower() != 'y':
         return "Aborting"
     from giotto import config
