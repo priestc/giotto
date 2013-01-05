@@ -1,6 +1,6 @@
 import os
 
-def shell(shell):
+def shell(shell=''):
     from giotto import config
     
     if shell == "bpython" or shell == 'b':
