@@ -3,7 +3,6 @@ import socket
 import string 
 import os
 import traceback
-from werkzeug.serving import run_with_reloader
 
 try:
   import irc.bot
@@ -180,8 +179,6 @@ class IrcBot(irc.bot.SingleServerIRCBot):
                 for m in msg.split('\n'):
                     connection.privmsg(request.sent_to, m)
 
-
-#@run_with_reloader
 def listen(manifest, config, model_mock=False):
     """
     IRC listening process.
