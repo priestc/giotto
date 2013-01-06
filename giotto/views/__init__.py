@@ -129,7 +129,7 @@ class BasicView(GiottoView):
         out = []
         result = pre_process_json(result)
 
-        if not hasattr(result, 'iteritems'):
+        if not hasattr(result, 'items'):
             # result is a non-container
             header = "<tr><th>Value</th></tr>"
             if type(result) is list:
@@ -142,7 +142,7 @@ class BasicView(GiottoView):
         else:
             # object is a dict
             header = "<tr><th>Key</th><th>Value</th></tr>"
-            for key, value in result.iteritems():
+            for key, value in result.items():
                 v = htmlize(value)
                 row = "<tr><td>{0}</td><td>{1}</td></tr>".format(key, v)
                 out.append(row)
@@ -155,14 +155,14 @@ class BasicView(GiottoView):
     @renders('text/x-cmd', 'text/x-irc', 'text/plain')
     def generic_text(self, result, errors):
         out = []
-        if hasattr(result, 'iteritems'):
-            to_iterate = result.iteritems()
+        if hasattr(result, 'items'):
+            to_iterate = result.items()
         elif hasattr(result, 'lower'):
             return {'body': result, 'mimetype': "text/plain"}
         elif not result:
             to_iterate = []
         else:
-            to_iterate = result.__dict__.iteritems()
+            to_iterate = result.__dict__.items()
 
         for key, value in to_iterate:
             row = "{0} - {1}".format(key, value)
