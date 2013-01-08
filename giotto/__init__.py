@@ -1,4 +1,4 @@
-__version__ = '0.10.1'
+__version__ = '0.10.2'
 import giotto.controllers
 import giotto.views
 import giotto.keyvalue
