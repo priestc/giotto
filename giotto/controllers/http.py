@@ -110,7 +110,7 @@ class HTTPController(GiottoController):
             result = self.get_data_response()
         except NoViewMethod as exc:
             return HTTPUnsupportedMediaType(
-                body=render_error_page(415, exc),
+                body=render_error_page(415, exc, mimetype=self.mimetype),
                 content_type="text/html"
             )
         except InvalidInput as exc:
@@ -124,12 +124,12 @@ class HTTPController(GiottoController):
             return response
         except NotAuthorized as exc:
             return HTTPForbidden(
-                body=render_error_page(403, exc),
+                body=render_error_page(403, exc, mimetype=self.mimetype),
                 content_type="text/html"
             )
         except (DataNotFound, ProgramNotFound) as exc:
             return HTTPNotFound(
-                body=render_error_page(404, exc),
+                body=render_error_page(404, exc, mimetype=self.mimetype),
                 content_type="text/html"
             )
 
@@ -215,7 +215,7 @@ def error_handler(app):
             sio.seek(0)
             response =  Response(
                 status=500,
-                body=render_error_page(500, exc, sio.read()),
+                body=render_error_page(500, exc, traceback=sio.read()),
                 content_type="text/html"
             )
             return response(environ, start_response)

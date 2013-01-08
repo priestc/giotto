@@ -158,10 +158,17 @@ def pre_process_json(obj):
             return obj
 
 
-def render_error_page(code, exc, traceback=''):
+def render_error_page(code, exc, mimetype='text/html', traceback=''):
     """
     Render the error page
     """
+    if 'json' in mimetype:
+        return json.dumps({
+            'code': code,
+            'exception': exc.__class__.__name__,
+            'message': str(exc),
+        })
+
     et = giotto.config.error_template
     if not et:
         return "%s %s\n%s" % (code, str(exc), traceback)
