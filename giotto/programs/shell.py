@@ -1,21 +1,23 @@
 import os
+import giotto
 
 def shell(shell=''):
-    from giotto import config
     
     if shell == "bpython" or shell == 'b':
+        config = giotto._config
         import bpython
         bpython.embed()
         return
 
     elif shell == 'ipython' or shell == 'i':
+        config = giotto._config
         from IPython import embed
         embed()
         return
 
     else:
         import code
-        imported_objects = {'config': config}
+        imported_objects = {'config': giotto._config}
         try:  # Try activating rlcompleter, because it's handy.
             import readline
         except ImportError:

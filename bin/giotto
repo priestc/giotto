@@ -111,7 +111,8 @@ if subcommand == 'create':
 
     raise SystemExit()
 
-f = "%s/%s_controller.py" % (os.getcwd(), subcommand)
+f = "%s_controller.py" % subcommand
+print ["python"] + [f] + sys.argv[2:]
 process = subprocess.Popen([f] + sys.argv[2:])
 try:
     process.wait()

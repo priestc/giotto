@@ -1,6 +1,7 @@
 import inspect
 import json
 
+from giotto import get_config
 from giotto.programs import GiottoProgram
 from giotto.exceptions import (GiottoException, InvalidInput, ProgramNotFound,
     MockNotFound, ControlMiddlewareInterrupt, NotAuthorized)
@@ -13,10 +14,9 @@ class GiottoController(object):
     persist_data = None
 
     def __init__(self, request, manifest, model_mock=False, errors=None):
-        from giotto import config
         self.request = request
         self.model_mock = model_mock
-        self.cache = config.cache or DummyKeyValue()
+        self.cache = get_config('cache', DummyKeyValue())
         self.errors = errors
         self.manifest = manifest
         self.middleware_interrupt_exc = None
