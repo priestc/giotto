@@ -1,20 +1,17 @@
 #!/usr/bin/env python
 
-import argparse
 import sys
 import stat
 import subprocess
 import os
-from jinja2 import Template
-from giotto.demo import demo_application
 
 subcommand = sys.argv[1]
 
 if subcommand == 'suggest':
     sys.path.append(os.getcwd())
-    from giotto.utils import initialize_giotto
+    from giotto import initialize
     import config
-    initialize_giotto(config)
+    initialize(config)
     from manifest import manifest
     suggestions = manifest.get_suggestion(sys.argv[2])
     print " ".join(suggestions)
@@ -48,10 +45,10 @@ if subcommand == 'create':
     template_controller = '''\
     #!/usr/bin/env python
     # coding: utf-8
-
+    
     import argparse
     import sys
-    from giotto.utils import initialize_giotto
+    from giotto import initialize
 
     import config
     initialize_giotto(config)
@@ -68,6 +65,8 @@ if subcommand == 'create':
             view=BasicView
         )
     })'''
+
+    from giotto.demo import demo_application
 
     try:
         open('manifest.py', 'r')

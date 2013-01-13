@@ -6,7 +6,6 @@ from giotto.views import GiottoView, renders
 from giotto.utils import super_accept_to_mimetype
 from giotto.exceptions import DataNotFound
 
-
 class FileView(GiottoView):
     @renders('*/*')
     def any(self, result):

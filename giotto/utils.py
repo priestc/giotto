@@ -1,4 +1,3 @@
-import argparse
 import string
 import random
 import json
@@ -8,10 +7,6 @@ import unicodedata
 import six
 
 from collections import defaultdict
-from sqlalchemy.ext.declarative import declarative_base, declared_attr
-from sqlalchemy.orm import class_mapper, ColumnProperty
-
-import giotto
 
 class Mock(object):
     """
@@ -78,10 +73,6 @@ def super_accept_to_mimetype(ext):
     if ext == 'irc':
         return 'text/x-irc'
 
-
-def initialize_giotto(config):
-    setattr(giotto, 'config', config)
-
 def random_string(n):
     return ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(n))
 
@@ -90,6 +81,8 @@ def better_base():
     Return a better SQLAlchemy Base class, for making things a little easier to
     work with.
     """
+    from sqlalchemy.ext.declarative import declarative_base, declared_attr
+    from sqlalchemy.orm import class_mapper, ColumnProperty
     Base = declarative_base()
     class BetterBase(Base):
         __abstract__ = True
@@ -180,6 +173,8 @@ def render_error_page(code, exc, mimetype='text/html', traceback=''):
         traceback=traceback
     )
 
+to_remove = re.compile('[^\w\s-]')
+remove_dup = re.compile('[-\s]+')
 def slugify(value):
     """
     Converts to lowercase, removes non-word characters (alphanumerics and
@@ -192,8 +187,8 @@ def slugify(value):
         value = unicode(value)
 
     value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
-    value = re.sub('[^\w\s-]', '', value).strip().lower()
-    return re.sub('[-\s]+', '-', value)
+    value = to_remove.sub('', value).strip().lower()
+    return remove_dup.sub('-', value)
 
 def jsonify(obj):
     def handler(obj):
@@ -204,34 +199,6 @@ def jsonify(obj):
         else:
             raise TypeError('Object of type %s with value of %s is not JSON serializable' % (type(obj), repr(obj)))
     return json.dumps(obj, default=handler)
-
-class FileIterable(object):
-    """
-    Taken from the webob docs.
-    """
-    def __init__(self, filename):
-        self.filename = filename
-    
-    def __iter__(self):
-        return FileIterator(self.filename)
-
-class FileIterator(object):
-    chunk_size = 4096
-    
-    def __init__(self, filename):
-        self.filename = filename
-        self.fileobj = open(self.filename, 'rb')
-    
-    def __iter__(self):
-       return self
-    
-    def next(self):
-        chunk = self.fileobj.read(self.chunk_size)
-        if not chunk:
-            raise StopIteration
-        return chunk
-    
-    __next__ = next # py3 compat
 
 
 

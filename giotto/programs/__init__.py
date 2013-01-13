@@ -110,7 +110,6 @@ class ProgramManifest(object):
     giotto applications. All keys must be strings, and all values must be
     either GiottoPrograms or another ProgramManifest instance.
     """
-    key_regex = r'^\w*$'
 
     def __init__(self, manifest, backname='root'):
         self.backname = backname
@@ -123,8 +122,8 @@ class ProgramManifest(object):
             is_manifest = type_ == ProgramManifest
             is_list = type_ == list
 
-            if not re.match(self.key_regex, key):
-                raise ValueError("Invalid manifest key: %s" % key)
+            #if not self.key_regex:
+            #    raise ValueError("Invalid manifest key: %s" % key)
 
             if type_ is dict:
                 self.manifest[key] = ProgramManifest(item, backname=key)
@@ -274,25 +273,3 @@ class ProgramManifest(object):
                     'superformat_mime': super_accept_to_mimetype(superformat),
                     'args': args,
                 }
-
-from giotto.programs.shell import shell
-from giotto.programs.tables import make_tables, blast_tables
-from giotto.views import BasicView
-
-management_manifest = ProgramManifest({
-    'make_tables': GiottoProgram(
-        controllers=['cmd'],
-        model=[make_tables],
-        view=BasicView
-    ),
-    'blast_tables': GiottoProgram(
-        controllers=['cmd'],
-        model=[blast_tables],
-        view=BasicView,
-    ),
-    'shell': GiottoProgram(
-        controllers=['cmd'],
-        model=[shell],
-        view=BasicView,
-    ),
-})

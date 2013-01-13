@@ -4,6 +4,8 @@ import inspect
 
 from jinja2 import Template, DebugUndefined, Environment, PackageLoader
 from jinja2.exceptions import TemplateNotFound
+
+from giotto import get_config
 from giotto.exceptions import NoViewMethod
 from giotto.utils import Mock, htmlize, htmlize_list, pre_process_json, super_accept_to_mimetype, jsonify
 from giotto.control import GiottoControl
@@ -176,8 +178,7 @@ def jinja_template(template_name, name='data', mimetype="text/html"):
     Meta-renderer for rendering jinja templates
     """
     def jinja_renderer(result, errors):
-        from giotto import config
-        template = config.jinja2_env.get_template(template_name)
+        template = get_config('jinja2_env').get_template(template_name)
         context = {name: result or Mock(), 'errors': errors}
         rendered = template.render(**context)
         return {'body': rendered, 'mimetype': mimetype}
@@ -192,8 +193,7 @@ def partial_jinja_template(template_name, name='data', mimetype="text/html"):
     kept in the emplate intact.
     """
     def partial_jinja_renderer(result, errors):
-        from giotto import config
-        template = config.jinja2_env.get_template(template_name)
+        template = get_config('jinja2_env').get_template(template_name)
         old = template.environment.undefined
         template.environment.undefined = DebugUndefined
         context = {name: result or Mock(), 'errors': errors}
@@ -211,8 +211,7 @@ def lazy_jinja_template(template_name, name='data', mimetype='text/html'):
     middleware stread of any program that uses this renderer.
     """
     def lazy_jinja_renderer(result, errors):
-        from giotto import config
-        template = config.jinja2_env.get_template(template_name)
+        template = get_config('jinja2_env').get_template(template_name)
         context = {name: result or Mock(), 'errors': errors}
         data = ('jinja2', template, context)
         return {'body': data, 'mimetype': mimetype}
