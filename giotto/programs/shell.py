@@ -40,5 +40,3 @@ def shell(shell=''):
                 except NameError:
                     pass
         code.interact(local=imported_objects)
-
-    return

@@ -111,9 +111,8 @@ if subcommand == 'create':
 
     raise SystemExit()
 
-f = "%s_controller.py" % subcommand
-print ["python"] + [f] + sys.argv[2:]
-process = subprocess.Popen([f] + sys.argv[2:])
+command = ["python"] + ["%s_controller.py" % subcommand] + sys.argv[2:]
+process = subprocess.Popen(command)
 try:
     process.wait()
 except KeyboardInterrupt:
