@@ -138,6 +138,50 @@ class ProgramManifest(object):
     def __getitem__(self, key):
         return self.manifest[key]
 
+    def _get_suggestions(self, filter_word=None):
+        """
+        This only gets caled internally from the get_suggestion method.
+        """
+        keys = self.manifest.keys()
+        words = []
+        for key in keys:            
+            if isinstance(self.manifest[key], ProgramManifest):
+                # if this key is another manifest, append a slash to the 
+                # suggestion so the user knows theres more items under this key
+                words.append(key + '/')
+            else:
+                words.append(key)
+
+        if filter_word:
+            words = [x for x in words if x.startswith(filter_word)]
+
+        return words
+
+    def get_suggestion(self, front_path):
+        """
+        Returns suggestions for a path. Used in tab completion from the command
+        line.
+        """
+        if '/' in front_path:
+            # transverse the manifest, return the new manifest, then
+            # get those suggestions with the remaining word
+            splitted = front_path.split('/')
+            new_manifest = self.manifest
+            pre_path = ''
+            for item in splitted:
+                try:
+                    new_manifest = new_manifest[item]
+                except KeyError:
+                    partial_word = item
+                    break
+                else:
+                    pre_path += item + '/'
+
+            matches = new_manifest._get_suggestions(partial_word)
+            return [pre_path + match for match in matches]
+        else:
+            return self._get_suggestions(front_path or None)
+
     def get_program(self, program_name, controller_tag):
         """
         Find the program within this manifest. If key is found, and it contains

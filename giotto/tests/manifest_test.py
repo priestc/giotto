@@ -200,5 +200,37 @@ class TestInvalidManifest(unittest.TestCase):
         x = lambda: ProgramManifest({'xx': "not a program"})
         self.assertRaises(TypeError, x)
 
+
+class SuggestionTests(unittest.TestCase):
+    def __init__(self, *a, **k):
+        super(SuggestionTests, self).__init__(*a, **k)
+        self.manifest = ProgramManifest({
+            'first': ProgramManifest({
+                'second': ProgramManifest({
+                    'third': GiottoProgram(model='root', controllers=('get', )),
+                    'foo': GiottoProgram(model='three'),
+                }),
+                'bar': GiottoProgram(model='two', controllers=('get', )),
+            }),
+            'baz': GiottoProgram(model='one'),
+            'boop': ProgramManifest({
+                'fake': GiottoProgram()
+            })
+        })
+
+    def test_empty(self):
+        self.assertEquals({'first/', 'baz', 'boop/'}, set(self.manifest.get_suggestion('')))
+        self.assertEquals({'first/second/', 'first/bar'}, set(self.manifest.get_suggestion('first/')))
+
+    def test_fails(self):
+        self.assertEquals([], self.manifest.get_suggestion('wut'))
+        self.assertEquals([], self.manifest.get_suggestion('first/wut'))
+
+    def test_complete(self):
+        self.assertEquals(['first/'], self.manifest.get_suggestion('firs'))
+        self.assertEquals(['baz'], self.manifest.get_suggestion('ba'))
+        self.assertEquals(['first/second/'], self.manifest.get_suggestion('first/secon'))
+        self.assertEquals({'first/second/third', 'first/second/foo'}, set(self.manifest.get_suggestion('first/second/')))
+
 if __name__ == '__main__':
     unittest.main()
