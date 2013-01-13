@@ -13,7 +13,11 @@ if subcommand == 'suggest':
     import config
     initialize(config)
     from manifest import manifest
-    suggestions = manifest.get_suggestion(sys.argv[2])
+    if len(sys.argv) > 2:
+        item = sys.argv[2]
+    else:
+        item = ''
+    suggestions = manifest.get_suggestion(item)
     print " ".join(suggestions)
     raise SystemExit()
 

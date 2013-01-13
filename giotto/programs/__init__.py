@@ -104,6 +104,8 @@ class GiottoProgram(object):
             return {'body': '', 'mimetype': ''}
         return self.view.render(data, mimetype, errors)
 
+key_regex = re.compile(r'^\w*$')
+
 class ProgramManifest(object):
     """
     Represents a node in a larger manifest tree. Manifests are like URLS for
@@ -122,8 +124,8 @@ class ProgramManifest(object):
             is_manifest = type_ == ProgramManifest
             is_list = type_ == list
 
-            #if not self.key_regex:
-            #    raise ValueError("Invalid manifest key: %s" % key)
+            if not key_regex.match(key):
+                raise ValueError("Invalid manifest key: %s" % key)
 
             if type_ is dict:
                 self.manifest[key] = ProgramManifest(item, backname=key)
