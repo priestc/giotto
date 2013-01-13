@@ -1,109 +1,123 @@
 #!/usr/bin/env python
+
 import argparse
 import sys
 import stat
+import subprocess
 import os
 from jinja2 import Template
 from giotto.demo import demo_application
 
-parser = argparse.ArgumentParser(
-    description="""Giotto Project Creator. Use this utility to creat a new Giotto project,
-     or to add a new concrete controller to an existing project"""
-)
-parser.add_argument('--demo', action='store_true', help='Add the demo application')
-parser.add_argument('--http', action='store_true', help='Add the HTTP controller')
-parser.add_argument('--irc', action='store_true', help='Add the IRC controller')
-parser.add_argument('--cmd', action='store_true', help='Add the command line controller')
-args = parser.parse_args()
+subcommand = sys.argv[1]
 
-config_template = '''import os
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from giotto.utils import better_base
+if subcommand == 'suggest':
+    sys.path.append(os.getcwd())
+    from giotto.utils import initialize_giotto
+    import config
+    initialize_giotto(config)
+    from manifest import manifest
+    suggestions = manifest.get_suggestion(sys.argv[2])
+    print " ".join(suggestions)
+    raise SystemExit()
 
-Base = better_base()
+if subcommand == 'create':
+    controller = sys.argv[2]
 
-from sqlite3 import dbapi2 as sqlite
-engine = create_engine('sqlite+pysqlite:///file.db', module=sqlite)
+    config_template = '''import os
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+    from giotto.utils import better_base
 
-session = sessionmaker(bind=engine)()
-cache = None
-auth_session = None
+    Base = better_base()
 
-project_path = os.path.dirname(os.path.abspath(__file__))
+    from sqlite3 import dbapi2 as sqlite
+    engine = create_engine('sqlite+pysqlite:///file.db', module=sqlite)
 
-from jinja2 import Environment, FileSystemLoader
-jinja2_env = Environment(loader=FileSystemLoader(project_path))
+    session = sessionmaker(bind=engine)()
+    cache = None
+    auth_session = None
 
-debug = True
-error_template = None'''
+    project_path = os.path.dirname(os.path.abspath(__file__))
 
-template_controller = '''\
-#!/usr/bin/env python
-# coding: utf-8
+    from jinja2 import Environment, FileSystemLoader
+    jinja2_env = Environment(loader=FileSystemLoader(project_path))
 
-import argparse
-import sys
-from giotto.utils import initialize_giotto
+    debug = True
+    error_template = None'''
 
-import config
-initialize_giotto(config)
+    template_controller = '''\
+    #!/usr/bin/env python
+    # coding: utf-8
 
-from manifest import manifest
-'''
+    import argparse
+    import sys
+    from giotto.utils import initialize_giotto
 
-blank_application = '''from giotto.programs import GiottoProgram, ProgramManifest
-from giotto.views import BasicView
+    import config
+    initialize_giotto(config)
 
-manifest = ProgramManifest({
-    '': GiottoProgram(
-        model=[lambda: "hello world"],
-        view=BasicView
-    )
-})'''
+    from manifest import manifest
+    '''
 
+    blank_application = '''from giotto.programs import GiottoProgram, ProgramManifest
+    from giotto.views import BasicView
+
+    manifest = ProgramManifest({
+        '': GiottoProgram(
+            model=[lambda: "hello world"],
+            view=BasicView
+        )
+    })'''
+
+    try:
+        open('manifest.py', 'r')
+    except IOError:
+        # create a blank manifest file (if one doesn't already exist)
+        f = open('manifest.py', 'w')
+        if args.demo:
+            f.write(demo_application)
+        else:
+            f.write(blank_application)
+
+    try:
+        open('config.py', 'r')
+    except IOError:
+        # create a blank config file (if one doesn't already exist)
+        f = open('config.py', 'w')
+        f.write(config_template)
+
+    if controller == 'http':
+        from giotto.controllers.http import http_execution_snippet
+        filename = 'http_controller.py'
+        f = open(filename, 'w')
+        st = os.stat(filename)
+        f.write(template_controller + http_execution_snippet)
+        os.chmod(filename, st.st_mode | stat.S_IEXEC)
+
+    if controller == 'irc':
+        from giotto.controllers.irc_ import irc_execution_snippet
+        filename = 'irc_controller.py'
+        f = open(filename, 'w')
+        f.write(template_controller + irc_execution_snippet)
+        st = os.stat(filename)
+        os.chmod(filename, st.st_mode | stat.S_IEXEC)
+
+    if controller == 'cmd':
+        from giotto.controllers.cmd import cmd_execution_snippet
+        filename = 'cmd_controller.py'
+        f = open(filename, 'w')
+        f.write(template_controller + cmd_execution_snippet)
+        st = os.stat(filename)
+        os.chmod(filename, st.st_mode | stat.S_IEXEC)
+
+    raise SystemExit()
+
+f = "%s/%s_controller.py" % (os.getcwd(), subcommand)
+process = subprocess.Popen([f] + sys.argv[2:])
 try:
-    open('manifest.py', 'r')
-except IOError:
-    # create a blank manifest file (if one doesn't already exist)
-    f = open('manifest.py', 'w')
-    if args.demo:
-        f.write(demo_application)
-    else:
-        f.write(blank_application)
-
-try:
-    open('config.py', 'r')
-except IOError:
-    # create a blank config file (if one doesn't already exist)
-    f = open('config.py', 'w')
-    f.write(config_template)
-
-if args.http:
-    from giotto.controllers.http import http_execution_snippet
-    filename = 'http'
-    f = open(filename, 'w')
-    st = os.stat(filename)
-    f.write(template_controller + http_execution_snippet)
-    os.chmod(filename, st.st_mode | stat.S_IEXEC)
-
-if args.irc:
-    from giotto.controllers.irc_ import irc_execution_snippet
-    filename = 'irc'
-    f = open(filename, 'w')
-    f.write(template_controller + irc_execution_snippet)
-    st = os.stat(filename)
-    os.chmod(filename, st.st_mode | stat.S_IEXEC)
-
-if args.cmd:
-    from giotto.controllers.cmd import cmd_execution_snippet
-    filename = 'cmd'
-    f = open(filename, 'w')
-    f.write(template_controller + cmd_execution_snippet)
-    st = os.stat(filename)
-    os.chmod(filename, st.st_mode | stat.S_IEXEC)
-
-
+    process.wait()
+except KeyboardInterrupt:
+    pass
 
 
 
