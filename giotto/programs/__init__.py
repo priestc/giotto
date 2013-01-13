@@ -177,6 +177,8 @@ class ProgramManifest(object):
                 else:
                     pre_path += item + '/'
 
+            if isinstance(new_manifest, GiottoProgram):
+                return []
             matches = new_manifest._get_suggestions(partial_word)
             return [pre_path + match for match in matches]
         else:

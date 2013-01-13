@@ -10,4 +10,4 @@ _giotto()
         return 0
     fi
 }
-complete -F _giotto giotto
+complete -o nospace -F _giotto giotto

@@ -232,5 +232,8 @@ class SuggestionTests(unittest.TestCase):
         self.assertEquals(['first/second/'], self.manifest.get_suggestion('first/secon'))
         self.assertEquals({'first/second/third', 'first/second/foo'}, set(self.manifest.get_suggestion('first/second/')))
 
+    def test_invalid(self):
+        self.assertEquals([], self.manifest.get_suggestion('first/bar'))
+
 if __name__ == '__main__':
     unittest.main()
