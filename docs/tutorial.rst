@@ -26,12 +26,12 @@ and inside that directory, run this command::
 This will create a ``manifest.py`` file, which contains your program manifest.
 It will also create a series of "concrete controller files",
 which will act as a gateway between your application and the outside world.
-The concrete controller files will be called ``http`` and ``cmd``
+The concrete controller files will be called ``http_controller.py`` and ``cmd_controller.py``
 This utility will also add a ``config.py`` file,
 which will be where you add your database information (and other things).
 
 If you only want to interact with you application through the command line,
-then you could leave off the ``--http`` flag when calling ``giotto`` (and vice versa).
+then you could leave off the ``http`` flag when calling ``giotto`` (and vice versa).
 The option ``--demo`` tells giotto to include a simple "multiply" program to demonstrate how giotto works.
 
 Inside the ``manifest.py`` file, you will see the following::
@@ -103,7 +103,7 @@ All it does is take two numbers, and multiply them together.
 To see our example ``multiply`` program in action,
 start up the development server by running the following command::
 
-    $ http --run
+    $ giotto http --run
 
 This will run the development server (you must have werkzeug installed).
 Point your browser to: http://localhost:5000/multiply?x=4&y=8
@@ -140,7 +140,7 @@ to stop the dev server.
 
 Form the shell, run the following command::
 
-    $ cmd multiply x=4 y=8
+    $ giotto cmd multiply x=4 y=8
 
 The output should be exactly the same. It should say `4 * 8 == 32` with the `32`
 in red and the `4 * 8` in blue.
@@ -167,7 +167,7 @@ This object should be the same form as what the model returns::
 
 When you run the dev server include the ``--model-mock`` flag::
 
-    $ http --run --model-mock
+    $ giotto http --run --model-mock
 
 Now no matter what arguments you place in the url, the output will always be ``10 * 10 == 100``.
 If your model makes calls to the database or third party service,
