@@ -21,7 +21,7 @@ Install and create base project files::
 
     pip install giotto
     mkdir demo
-    giotto --http
+    giotto create http
 
 Now your project is initialized. Open the ``manifest.py`` and add the following::
 
@@ -56,22 +56,22 @@ set the ``view`` keyword argument to just ``BasicView()`` to use the generic vie
 
 Run the development server::
 
-    $ ./http --run
+    $ giotto http --run
 
 Point your browser to ``http://localhost:5000/multiply?x=3&y=3``.
 Additionaly, try ``http://localhost:5000/multiply.json?x=3&y=3``.
 You can also invoke your multiply program through the command line::
 
-    $ giotto --cmd
-    $ ./cmd multiply --x=4 --y=2
+    $ giotto create cmd
+    $ giotto cmd multiply --x=4 --y=2
 
 Also::
 
-    $ ./cmd multiply.html --x=4 --y=2
+    $ giotto cmd multiply.html --x=4 --y=2
 
 You can also use positional arguments::
 
-    $ ./cmd multiply/4/6
+    $ giotto cmd multiply/4/6
 
 Links:
 
