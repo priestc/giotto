@@ -21,7 +21,7 @@ Now create a new directory::
 and inside that directory, run this command::
 
     $ cd demo
-    $ giotto --http --cmd --demo
+    $ giotto create http cmd --demo
 
 This will create a ``manifest.py`` file, which contains your program manifest.
 It will also create a series of "concrete controller files",
