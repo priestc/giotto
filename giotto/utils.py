@@ -166,7 +166,7 @@ def render_error_page(code, exc, mimetype='text/html', traceback=''):
     et = get_config('error_template')
     if not et:
         return "%s %s\n%s" % (code, str(exc), traceback)
-    template = giotto.config.jinja2_env.get_template(et)
+    template = get_config('jinja2_env').get_template(et)
     return template.render(
         code=code,
         exception=exc.__class__.__name__,
