@@ -6,6 +6,7 @@ import re
 import unicodedata
 import six
 
+from giotto import get_config
 from collections import defaultdict
 
 class Mock(object):
@@ -162,7 +163,7 @@ def render_error_page(code, exc, mimetype='text/html', traceback=''):
             'message': str(exc),
         })
 
-    et = giotto.config.error_template
+    et = get_config('error_template')
     if not et:
         return "%s %s\n%s" % (code, str(exc), traceback)
     template = giotto.config.jinja2_env.get_template(et)
