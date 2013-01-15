@@ -1,10 +1,11 @@
+from __future__ import print_function
 import json
 import getpass
 
 from .models import User
 from giotto.exceptions import NotAuthorized
 from giotto.control import Redirection
-from giotto import config
+from giotto import get_config
 from giotto.middleware import GiottoOutputMiddleware, GiottoInputMiddleware
 
 class AuthenticationMiddleware(GiottoInputMiddleware):
@@ -19,8 +20,8 @@ class AuthenticationMiddleware(GiottoInputMiddleware):
         if not session_key and request.POST:
             session_key = request.POST.get('auth_session', None)
         if session_key:
-            username = config.auth_session.get(session_key)
-            user = config.session.query(User).filter_by(username=username).first()
+            username = get_config('auth_session').get(session_key)
+            user = get_config('session').query(User).filter_by(username=username).first()
 
         setattr(request, 'user', user)
         return request
@@ -29,7 +30,7 @@ class AuthenticationMiddleware(GiottoInputMiddleware):
         user = None
         session_key = request.enviornment.get('GIOTTO_SESSION', None)
         if session_key:
-            user = config.auth_session.get(session_key)
+            user = get_config('auth_session').get(session_key)
 
         if not user:
             print("Username:")
@@ -119,6 +120,6 @@ class LogoutMiddleware(GiottoOutputMiddleware):
     def http(self, request, response):
         if request.method == 'POST' and 'auth_session' in request.POST:
             key = request.POST['auth_session']
-            session_key = config.auth_session.set(key, None, 1) # nuke session
+            session_key = get_config('auth_session').set(key, None, 1) # nuke session
         response.delete_cookie('giotto_session')
         return response
