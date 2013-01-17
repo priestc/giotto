@@ -17,6 +17,7 @@ class GiottoController(object):
         self.request = request
         self.model_mock = model_mock
         self.cache = get_config('cache', DummyKeyValue())
+        print self.cache
         self.errors = errors
         self.manifest = manifest
         self.middleware_interrupt_exc = None

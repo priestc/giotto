@@ -1,4 +1,4 @@
-__version__ = '0.10.4'
+__version__ = '0.10.5'
 
 def initialize(config):
     import giotto
@@ -6,4 +6,4 @@ def initialize(config):
 
 def get_config(item, default=None):
     import giotto
-    return getattr(giotto._config, item, default)
+    return getattr(giotto._config, item, default) or default
