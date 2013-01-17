@@ -60,6 +60,7 @@ from manifest import manifest
 '''
 
     blank_application = '''from giotto.programs import GiottoProgram, ProgramManifest
+from giotto.programs.management import management_manifest
 from giotto.views import BasicView
 
 manifest = ProgramManifest({
@@ -67,6 +68,7 @@ manifest = ProgramManifest({
         model=[lambda: "hello world"],
         view=BasicView
     )
+    'mgt': management_manifest,
 })'''
 
     from giotto.demo import demo_application
