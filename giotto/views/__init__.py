@@ -68,8 +68,10 @@ class GiottoView(object):
         Render a model result into `mimetype` format.
         """
         available_mimetypes = self.render_map.keys()
-        target_mimetype = mimeparse.best_match(available_mimetypes, mimetype)
-        render_func = self.render_map.get(target_mimetype, None)
+        render_func = None
+        if available_mimetypes:
+            target_mimetype = mimeparse.best_match(available_mimetypes, mimetype)
+            render_func = self.render_map.get(target_mimetype, None)
 
         if not render_func:
             raise NoViewMethod("%s not supported for this program" % mimetype)
