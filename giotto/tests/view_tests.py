@@ -1,8 +1,9 @@
 import unittest
 from giotto.exceptions import NoViewMethod
 from giotto.views import GiottoView, BasicView, renders
+from giotto.control import Redirection
 
-class RendererTest(unittest.TestCase):
+class RendererTests(unittest.TestCase):
 
     giotto_view = GiottoView()
     basic_view = BasicView()
@@ -28,6 +29,17 @@ class RendererTest(unittest.TestCase):
         view = BasicView(html=lambda m: "inherited")
         result = view.render({}, 'text/html')
         self.assertEquals(result['body'], "inherited")
+
+    def test_redirection_lambda(self):
+        view = BasicView(html=lambda m: Redirection(m))
+        result = view.render('res', 'text/html')
+        self.assertEquals(type(result['body']), Redirection)
+        self.assertEquals(result['body'].path, 'res')
+
+    def test_redirection(self):
+        view = BasicView(html=Redirection('/'))
+        result = view.render({}, 'text/html')
+        self.assertEquals(type(result['body']), Redirection)
 
     def test_subclass_renderer(self):
         """

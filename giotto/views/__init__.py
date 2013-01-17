@@ -89,7 +89,7 @@ class GiottoView(object):
 
         if GiottoControl in render_func.__class__.mro():
             # redirection defined as view (not wrapped in lambda)
-            return {'body': render_func, 'persist': persist}
+            return {'body': render_func, 'persist': render_func.persist}
 
         if callable(self.persist):
             # persist (cookie data) can be either an object, or a callable)
