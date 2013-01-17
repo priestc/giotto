@@ -49,7 +49,16 @@ class GiottoView(object):
             func = getattr(self, method)
             mimetypes = getattr(func, 'mimetypes', [])
             for mimetype in mimetypes:
-                self.render_map[mimetype] = func
+                if mimetype not in self.render_map:
+                    self.render_map[mimetype] = func
+                else:
+                    # about to redefine an already defined renderer.
+                    # make sure this new render method is not on a base class.
+                    base_classes = self.__class__.mro()[1:]
+                    from_baseclass = any([x for x in base_classes if func.__name__ in dir(x)])
+                    if not from_baseclass:
+                        self.render_map[mimetype] = func
+
 
     def can_render(self, partial_mimetype):
         """
