@@ -7,7 +7,7 @@ class GiottoException(Exception):
     """
 
 class InvalidInput(GiottoException):
-    def __init__(self, message=None, **kwargs):
+    def __init__(self, message='', **kwargs):
         self.message = message
         for k, v in kwargs.items():
             setattr(self, k, {})
