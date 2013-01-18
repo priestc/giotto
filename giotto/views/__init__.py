@@ -169,12 +169,22 @@ class BasicView(GiottoView):
     def generic_text(self, result, errors):
         out = []
         if hasattr(result, 'items'):
+            #is a dict
             to_iterate = result.items()
         elif hasattr(result, 'lower'):
+            # is just a plain string
             return {'body': result, 'mimetype': "text/plain"}
         elif not result:
+            # is a Nonetype
             to_iterate = []
+        elif hasattr(result, 'append'):
+            # is a list
+            to_iterate = result
+        elif hasattr(result, 'todict'):
+            # is a model object
+            to_iterate = result.todict().items()
         else:
+            # generic object
             to_iterate = result.__dict__.items()
 
         for key, value in to_iterate:
