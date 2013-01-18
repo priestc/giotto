@@ -16,7 +16,7 @@ from giotto.control import Redirection
 from giotto.utils import render_error_page
 from webob import Request, Response
 from webob.exc import (
-    HTTPUnsupportedMediaType, HTTPMethodNotAllowed, HTTPTemporaryRedirect,
+    HTTPUnsupportedMediaType, HTTPMethodNotAllowed, HTTPFound,
     HTTPNotFound, HTTPForbidden
 )
 
@@ -134,7 +134,7 @@ class HTTPController(GiottoController):
             )
 
         if type(result['body']) == Redirection:
-            response = HTTPTemporaryRedirect(location=result['body'].path)
+            response = HTTPFound(location=result['body'].path)
         else:
             lazy = None
             body = result['body']

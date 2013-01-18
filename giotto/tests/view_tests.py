@@ -40,6 +40,7 @@ class RendererTests(unittest.TestCase):
         view = BasicView(html=Redirection('/'))
         result = view.render({}, 'text/html')
         self.assertEquals(type(result['body']), Redirection)
+        self.assertEquals(result['body'].path, '/')
 
     def test_subclass_renderer(self):
         """

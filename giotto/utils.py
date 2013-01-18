@@ -32,6 +32,9 @@ class Mock(object):
     def __nonzero__(self):
         return False
 
+    def __iter__(self):
+        return iter([])
+
 def parse_kwargs(kwargs):
     """
     Convert a list of kwargs into a dictionary. Duplicates of the same keyword
