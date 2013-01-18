@@ -123,13 +123,14 @@ class ProgramManifest(object):
             is_program = isinstance(item, GiottoProgram)
             is_manifest = type_ == ProgramManifest
             is_list = type_ == list
+            is_str = type_ == str
 
             if not key_regex.match(key):
                 raise ValueError("Invalid manifest key: %s" % key)
 
             if type_ is dict:
                 self.manifest[key] = ProgramManifest(item, backname=key)
-            elif not is_manifest and not is_program and not is_list:
+            elif not any([is_manifest, is_program, is_list, is_str]):
                 msg = "Manifest value must be either: a program, a list of programs, or another manifest"
                 raise TypeError(msg)
 
@@ -194,6 +195,8 @@ class ProgramManifest(object):
         result = self.manifest[program_name]
         if type(result) == ProgramManifest:
             return result
+        if type(result) is str:
+            return self.get_program(result, controller_tag)
         if type(result) is not list:
             result = [result]
         for program in result:

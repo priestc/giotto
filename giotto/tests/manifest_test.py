@@ -197,7 +197,7 @@ class TestInvalidManifest(unittest.TestCase):
         self.assertRaises(ValueError, x)
 
     def test_invalid_program_type(self):
-        x = lambda: ProgramManifest({'xx': "not a program"})
+        x = lambda: ProgramManifest({'xx': object("not a program")})
         self.assertRaises(TypeError, x)
 
 
@@ -234,6 +234,20 @@ class SuggestionTests(unittest.TestCase):
 
     def test_invalid(self):
         self.assertEquals([], self.manifest.get_suggestion('first/bar'))
+
+class StringRedirectTest(unittest.TestCase):
+    def __init__(self, *a, **k):
+        super(StringRedirectTest, self).__init__(*a, **k)
+        self.manifest = ProgramManifest({
+            '': 'first',
+            'first': GiottoProgram(model=['one']),
+            'baz': GiottoProgram(model=['two']),
+            'boop': GiottoProgram(model=["three"])
+        })
+
+    def test_basic_string_redirect(self):
+        parsed = self.manifest.parse_invocation('', 'get')
+        self.assertEquals(parsed['program'].model, ['one'])
 
 if __name__ == '__main__':
     unittest.main()
