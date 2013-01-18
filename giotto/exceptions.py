@@ -10,11 +10,19 @@ class InvalidInput(GiottoException):
     def __init__(self, message=None, **kwargs):
         self.message = message
         for k, v in kwargs.items():
-            setattr(self, k, v)
-            if not 'message' in v:
+            setattr(self, k, {})
+            if type(v) is dict:
+                if not 'message' in v:
+                    getattr(self, k)['message'] = ''
+                else:
+                    getattr(self, k)['message'] = v['message']
+                if not 'value' in v:
+                    getattr(self, k)['value'] = ''
+                else:
+                    getattr(self, k)['value'] = v['value']
+            else:
                 getattr(self, k)['message'] = ''
-            if not 'value' in v:
-                setattr(self, k)['value'] = ''
+                getattr(self, k)['value'] = v
 
     def __str__(self):
         return self.message
