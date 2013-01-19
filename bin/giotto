@@ -8,17 +8,22 @@ import os
 subcommand = sys.argv[1]
 
 if subcommand == 'suggest':
-    sys.path.append(os.getcwd())
-    from giotto import initialize
-    import config
-    initialize(config)
-    from manifest import manifest
-    if len(sys.argv) > 2:
-        item = sys.argv[2]
-    else:
-        item = ''
-    suggestions = manifest.get_suggestion(item)
-    print " ".join(suggestions)
+    try:
+        sys.path.append(os.getcwd())
+        from giotto import initialize
+        import config
+        initialize(config)
+        from manifest import manifest
+        if len(sys.argv) > 2:
+            item = sys.argv[2]
+        else:
+            item = ''
+
+        suggestions = manifest.get_suggestion(item)
+        print " ".join(suggestions)
+    except:
+        pass    
+
     raise SystemExit()
 
 if subcommand == 'create':
