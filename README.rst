@@ -77,12 +77,45 @@ You can also use positional arguments::
 
     $ giotto cmd multiply/4/6
 
+Through the web as well::
+
+    $ curl http://localhost:5000/multiply/234/12
+
+Giotto has a feature called "Model Mocking" which allows you to bypass the model.
+This is useful if your model is coupled to a database, which you don't want to run
+(for instance when you're a designer designing templates).
+
+Add a mock object to the program::
+
+    manifest = ProgramManifest({
+        'multiply': GiottoProgram(
+            model=[multiply, {'x': 4, 'y': 5, 'result': 20],
+            view=BasicView(
+                html=jinja_template('multiply.html'),
+            ),
+        ),
+    })
+
+When you run the server, add the ``--model-mock``
+option::
+
+    $ giotto http --run --model-mock
+
+Now, all requests will bypass the ``multiply`` function, nd will return the mock instead::
+
+    $ curl http://localhost:5000/multilt.json/12312/21323
+    {"x": 4, "y": 5, "result": 20}
+
+
 Links:
+======
 
 * To discuss Giotto, please visit the Google Group_
 * Read Giotto's documentation_.
 * Check out giottoblog_, a full featured blog application written with the Giotto framework.
+* Also, dylanshows_, another site written with Giotto.
 
 .. _Group: https://groups.google.com/forum/#!forum/giotto-framework/
 .. _giottoblog: https://github.com/priestc/giottoblog/
 .. _documentation: http://giotto.readthedocs.org/en/latest/index.html
+.. _dylanshows: https://github.com/priestc/dylan/
