@@ -186,4 +186,7 @@ def listen(manifest, config, model_mock=False):
     config['manifest'] = manifest
     config['model_mock'] = model_mock
     IRC = IrcBot(config)
-    IRC.start()
+    try:
+        IRC.start()
+    except KeyboardInterrupt:
+        pass
