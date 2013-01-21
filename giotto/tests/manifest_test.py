@@ -219,8 +219,8 @@ class SuggestionTests(unittest.TestCase):
         })
 
     def test_empty(self):
-        self.assertEquals({'first/', 'baz', 'boop/'}, set(self.manifest.get_suggestion('')))
-        self.assertEquals({'first/second/', 'first/bar'}, set(self.manifest.get_suggestion('first/')))
+        self.assertEquals(set(['first/', 'baz', 'boop/']), set(self.manifest.get_suggestion('')))
+        self.assertEquals(set(['first/second/', 'first/bar']), set(self.manifest.get_suggestion('first/')))
 
     def test_fails(self):
         self.assertEquals([], self.manifest.get_suggestion('wut'))
@@ -230,7 +230,7 @@ class SuggestionTests(unittest.TestCase):
         self.assertEquals(['first/'], self.manifest.get_suggestion('firs'))
         self.assertEquals(['baz'], self.manifest.get_suggestion('ba'))
         self.assertEquals(['first/second/'], self.manifest.get_suggestion('first/secon'))
-        self.assertEquals({'first/second/third', 'first/second/foo'}, set(self.manifest.get_suggestion('first/second/')))
+        self.assertEquals(set(['first/second/third', 'first/second/foo']), set(self.manifest.get_suggestion('first/second/')))
 
     def test_invalid(self):
         self.assertEquals([], self.manifest.get_suggestion('first/bar'))
