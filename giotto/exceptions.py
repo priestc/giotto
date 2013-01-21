@@ -16,6 +16,10 @@ class InvalidInput(GiottoException):
         return self.message
 
     def __setattr__(self, attr, value):
+        """
+        When setting values, make into a dictionary with 'message' and 'value'
+        keys.
+        """
         if attr == 'message':
             return super(InvalidInput, self).__setattr__(attr, value)
         if value is None:
@@ -25,10 +29,8 @@ class InvalidInput(GiottoException):
             return super(InvalidInput, self).__setattr__(attr, value)
         if not 'message' in value:
             value['message'] = ''
-            return super(InvalidInput, self).__setattr__(attr, value)
         if not 'value' in value:
             value['value'] = ''
-            return super(InvalidInput, self).__setattr__(attr, value)
 
         super(InvalidInput, self).__setattr__(attr, value)
 
