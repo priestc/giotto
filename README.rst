@@ -103,7 +103,7 @@ option::
 
 Now, all requests will bypass the ``multiply`` function, nd will return the mock instead::
 
-    $ curl http://localhost:5000/multilt.json/12312/21323
+    $ curl http://localhost:5000/multiply.json/12312/21323
     {"x": 4, "y": 5, "result": 20}
 
 
