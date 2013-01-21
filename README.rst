@@ -9,6 +9,7 @@ Giotto is a python web framework. It encourages a functional style where model, 
 Key Features of Giotto include:
 
 * Extremely terse code. A full featured blog application is under 300 lines of code (including templates)
+* Support for Python 3.3, 3.2, 2.7 and 2.6
 * Generic views, generic models and multiple pluggable controllers.
 * Free RESTful interface along with your normal "browser POST" CRUD site.
 * Functional CRUD patterns that do away with the need for django-style form objects.
