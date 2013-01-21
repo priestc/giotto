@@ -10,22 +10,27 @@ class InvalidInput(GiottoException):
     def __init__(self, message='', **kwargs):
         self.message = message
         for k, v in kwargs.items():
-            setattr(self, k, {})
-            if type(v) is dict:
-                if not 'message' in v:
-                    getattr(self, k)['message'] = ''
-                else:
-                    getattr(self, k)['message'] = v['message']
-                if not 'value' in v:
-                    getattr(self, k)['value'] = ''
-                else:
-                    getattr(self, k)['value'] = v['value']
-            else:
-                getattr(self, k)['message'] = ''
-                getattr(self, k)['value'] = v
+            setattr(self, k, v)
 
     def __str__(self):
         return self.message
+
+    def __setattr__(self, attr, value):
+        if attr == 'message':
+            return super(InvalidInput, self).__setattr__(attr, value)
+        if value is None:
+            return super(InvalidInput, self).__setattr__(attr, None)
+        if type(value) is not dict:
+            value = {'value': value, 'message': ''}
+            return super(InvalidInput, self).__setattr__(attr, value)
+        if not 'message' in value:
+            value['message'] = ''
+            return super(InvalidInput, self).__setattr__(attr, value)
+        if not 'value' in value:
+            value['value'] = ''
+            return super(InvalidInput, self).__setattr__(attr, value)
+
+        super(InvalidInput, self).__setattr__(attr, value)
 
     def __getitem__(self, item):
         # be permissive of attribute errors because jinja templates
