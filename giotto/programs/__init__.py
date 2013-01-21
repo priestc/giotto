@@ -2,7 +2,7 @@ import inspect
 import re
 import os
 
-from giotto.exceptions import ProgramNotFound, MockNotFound, ControlMiddlewareInterrupt
+from giotto.exceptions import ProgramNotFound, MockNotFound, ControlMiddlewareInterrupt, NoViewMethod
 from giotto.utils import super_accept_to_mimetype
 from giotto.control import GiottoControl
 from giotto.views import GiottoView
@@ -237,6 +237,9 @@ class ProgramManifest(object):
 
         parsed = self._parse(start_name, start_args, controller_tag)
         parsed['invocation'] = invocation
+        mime = super_accept_to_mimetype(parsed['superformat'])
+        parsed['superformat_mime'] = mime
+
         return parsed
 
     def _parse(self, raw_program_name, args, controller_tag):
@@ -275,6 +278,5 @@ class ProgramManifest(object):
                     'program': program,
                     'name': program_name,
                     'superformat': superformat,
-                    'superformat_mime': super_accept_to_mimetype(superformat),
                     'args': args,
                 }

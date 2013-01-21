@@ -1,6 +1,7 @@
 import unittest
 
 from giotto.programs import GiottoProgram
+from giotto.views import BasicView
 from giotto.exceptions import MockNotFound
 
 def model(x, y):
@@ -28,6 +29,24 @@ class ProgramTest(unittest.TestCase):
         """
         gp = GiottoProgram(model=[model, {'mock': True}])
         self.assertEquals({'mock': True}, gp.get_model_mock())
+
+
+class ArgspecTest(unittest.TestCase):
+    def test_get_args_kwargs(self):
+        def test(a, b, c="what"): pass
+        program = GiottoProgram(model=[test], view=BasicView())
+        ret = program.get_model_args_kwargs()
+        self.assertEquals((['a', 'b'], {'c': "what"}), ret)
+
+    def test_ignore_cls(self):
+        """
+        If first argument is nammed 'cls', ignore that argument (to allow
+        classmethods)
+        """
+        def test(cls, a, b, c="what"): pass
+        program = GiottoProgram(model=[test], view=BasicView())
+        ret = program.get_model_args_kwargs()
+        self.assertEquals((['a', 'b'], {'c': "what"}), ret)
 
 if __name__ == '__main__':
     unittest.main()

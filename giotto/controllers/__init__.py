@@ -34,6 +34,10 @@ class GiottoController(object):
         self.mimetype = parsed['superformat_mime'] or self.mimetype_override() or self.default_mimetype
 
     def get_response(self):
+        """
+        High level function for getting a response. This is what the concrete
+        controller should call. Returns a controller specific response.
+        """
         try:
             last_good_request, middleware_result = self.program.execute_input_middleware_stream(self.request, self)
         except GiottoException as exc:

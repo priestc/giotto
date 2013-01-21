@@ -76,6 +76,8 @@ def super_accept_to_mimetype(ext):
         return "text/css"
     if ext == 'irc':
         return 'text/x-irc'
+    if ext == 'xml':
+        return 'application/xml'
 
 def random_string(n):
     return ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(n))
