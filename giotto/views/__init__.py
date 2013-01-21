@@ -176,33 +176,39 @@ class BasicView(GiottoView):
         rendered = template.render({'header': h1, 'table_header': header, 'table_body': out})
         return {'body': rendered, 'mimetype': 'text/html'}
 
-    @renders('text/x-cmd', 'text/x-irc', 'text/plain')
+    @renders('text/plain', 'text/x-cmd', 'text/x-irc')
     def generic_text(self, result, errors):
         out = []
+        kv_iterate = None
+        single_iterate = []
         if hasattr(result, 'items'):
             #is a dict
-            to_iterate = result.items()
+            kv_iterate = result.items()
         elif hasattr(result, 'lower'):
             # is just a plain string
-            return {'body': result, 'mimetype': "text/plain"}
+            return result
         elif not result:
             # is a Nonetype
-            to_iterate = []
+            return ''
         elif hasattr(result, 'append'):
             # is a list
-            to_iterate = result
+            single_iterate = result
         elif hasattr(result, 'todict'):
             # is a model object
-            to_iterate = result.todict().items()
+            kv_iterate = result.todict().items()
         else:
             # generic object
-            to_iterate = result.__dict__.items()
+            kv_iterate = result.__dict__.items()
 
-        for key, value in to_iterate:
-            row = "{0} - {1}".format(key, value)
-            out.append(row)
+        if kv_iterate:
+            for key, value in kv_iterate:
+                row = "{0} - {1}".format(key, value)
+                out.append(row)
+        else:
+            for value in single_iterate:
+                out.append(self.generic_text(value, None))
 
-        return {'body': "\n".join(out), 'mimetype': "text/plain"}
+        return "\n".join(out)
 
 
 def jinja_template(template_name, name='data', mimetype="text/html"):

@@ -77,7 +77,7 @@ class TestGenericView(unittest.TestCase):
         assert '<html>' in result
         assert 'one' in result
 
-    def xtest_list_txt(self):
+    def test_list_txt(self):
         result = BasicView().render(['one', 'two'], 'text/plain')['body']
         assert 'two' in result
         assert 'one' in result
@@ -91,7 +91,7 @@ class TestGenericView(unittest.TestCase):
         result = BasicView().render({'one': 'two'}, 'text/plain')['body']
         assert 'one - two' in result
 
-    def xtest_objects_txt(self):
+    def test_objects_txt(self):
         blogs = [Blog(title="title", body="This blog body"), Blog(title="title2", body="blog body two")]
         result = BasicView().render(blogs, 'text/plain')['body']
         assert 'blog body two' in result
