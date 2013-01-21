@@ -1,3 +1,6 @@
+.. image:: https://travis-ci.org/priestc/giotto.png?branch=master
+   :target: https://travis-ci.org/priestc/giotto
+
 What is Giotto?
 ===============
 
