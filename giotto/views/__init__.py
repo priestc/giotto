@@ -80,7 +80,7 @@ class GiottoView(object):
         """
         Render a model result into `mimetype` format.
         """
-        available_mimetypes = self.render_map.keys()
+        available_mimetypes = [x for x in self.render_map.keys() if '/' in x]
         render_func = None
 
         if '/' not in mimetype:
