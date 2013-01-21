@@ -4,5 +4,5 @@ python:
   - "3.2"
   - "2.7"
   - "2.6"
-install: python setup install
+install: python setup.py install
 script: nosetests giotto/tests 
