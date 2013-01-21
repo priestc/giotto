@@ -33,11 +33,6 @@ class GiottoProgram(object):
         if not source:
             return [], {}
 
-        if hasattr(source, 'render'):
-            # if 'source' is a view object, try to get the render method,
-            # otherwise, just use the __call__ method.
-            source = source.render
-
         argspec = inspect.getargspec(source)
         kwargs = dict(zip(*[reversed(l) for l in (argspec.args, argspec.defaults or [])]))
         args = [x for x in argspec.args if x not in kwargs.keys()]

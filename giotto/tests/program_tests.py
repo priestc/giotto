@@ -17,16 +17,10 @@ class ProgramTest(unittest.TestCase):
         self.assertRaises(MockNotFound, lambda: gp.get_model_mock())
 
     def test_no_mock_needed(self):
-        """
-        The program raises MockNotFound when the program has no mock defined
-        """
         gp = GiottoProgram(model=[])
         self.assertEquals({}, gp.get_model_mock())
 
     def test_mock_found(self):
-        """
-        The program raises MockNotFound when the program has no mock defined
-        """
         gp = GiottoProgram(model=[model, {'mock': True}])
         self.assertEquals({'mock': True}, gp.get_model_mock())
 
@@ -38,6 +32,12 @@ class ArgspecTest(unittest.TestCase):
         ret = program.get_model_args_kwargs()
         self.assertEquals((['a', 'b'], {'c': "what"}), ret)
 
+    def test_empty(self):
+        def test(): pass
+        program = GiottoProgram(model=[test], view=BasicView())
+        ret = program.get_model_args_kwargs()
+        self.assertEquals(([], {}), ret)
+
     def test_ignore_cls(self):
         """
         If first argument is nammed 'cls', ignore that argument (to allow
@@ -47,6 +47,12 @@ class ArgspecTest(unittest.TestCase):
         program = GiottoProgram(model=[test], view=BasicView())
         ret = program.get_model_args_kwargs()
         self.assertEquals((['a', 'b'], {'c': "what"}), ret)
+
+    def test_no_model(self):
+        def test(cls, a, b, c="what"): pass
+        program = GiottoProgram(view=BasicView())
+        ret = program.get_model_args_kwargs()
+        self.assertEquals(([], {}), ret)
 
 if __name__ == '__main__':
     unittest.main()

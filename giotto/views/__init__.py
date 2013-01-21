@@ -26,15 +26,17 @@ class GiottoView(object):
 
     def __init__(self, persist=None, **kwargs):
         self.persist = persist
-        self.render_map = {}
+        self.render_map = {} # renderers by mimetype
+        self.reject_map = {} # renderers by name (no corresponding mimetype)
         class_defined_renderers = [x for x in dir(self) if not x.startswith('__')]
         self._register_renderers(class_defined_renderers)
 
         for format, function in kwargs.items():
             ## key word arguments can be passed into the constructor to
             ## override render methods from within the manifest.
+            ## set 'mimetypes' as if it were using the @renders decorator
             mime = super_accept_to_mimetype(format)
-            setattr(function, 'mimetypes', [mime])
+            setattr(function, 'mimetypes', [mime or format])
             setattr(self, format, function)
 
         # kwarg renderers kill any render methods that are defined by the class
@@ -49,6 +51,8 @@ class GiottoView(object):
             func = getattr(self, method)
             mimetypes = getattr(func, 'mimetypes', [])
             for mimetype in mimetypes:
+                if not '/' in mimetype:
+                    self.reject_map[mimetype] = func
                 if mimetype not in self.render_map:
                     self.render_map[mimetype] = func
                 else:
@@ -78,7 +82,14 @@ class GiottoView(object):
         """
         available_mimetypes = self.render_map.keys()
         render_func = None
-        if available_mimetypes:
+
+        if '/' not in mimetype:
+            # naked superformat (does not correspond to a mimetype)
+            render_func = self.reject_map.get(mimetype, None)
+            if not render_func:
+                raise NoViewMethod("Unknown Superformat: %s" % mimetype)
+
+        if not render_func and available_mimetypes:
             target_mimetype = mimeparse.best_match(available_mimetypes, mimetype)
             render_func = self.render_map.get(target_mimetype, None)
 

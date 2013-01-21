@@ -3,6 +3,14 @@ from giotto.exceptions import NoViewMethod
 from giotto.views import GiottoView, BasicView, renders
 from giotto.control import Redirection
 
+from giotto.utils import better_base
+from sqlalchemy import String, Column, Integer
+Base = better_base()
+class Blog(Base):
+    id = Column(Integer, primary_key=True)
+    title = Column(String)
+    body = Column(String)
+
 class RendererTests(unittest.TestCase):
 
     giotto_view = GiottoView()
@@ -62,6 +70,48 @@ class RendererTests(unittest.TestCase):
         for view in [InheritedBasicView2(), InheritedBasicView1()]:
             result = view.render({}, 'text/html')
             self.assertEquals(result['body'], "inherited")
+
+class TestGenericView(unittest.TestCase):
+    def test_list_html(self):
+        result = BasicView().render(['one', 'two'], 'text/html')['body']
+        assert '<html>' in result
+        assert 'one' in result
+
+    def xtest_list_txt(self):
+        result = BasicView().render(['one', 'two'], 'text/plain')['body']
+        assert 'two' in result
+        assert 'one' in result
+
+    def test_dict_html(self):
+        result = BasicView().render({'one': 'two'}, 'text/html')['body']
+        assert '<html>' in result
+        assert 'one' in result
+
+    def test_dict_txt(self):
+        result = BasicView().render({'one': 'two'}, 'text/plain')['body']
+        assert 'one - two' in result
+
+    def xtest_objects_txt(self):
+        blogs = [Blog(title="title", body="This blog body"), Blog(title="title2", body="blog body two")]
+        result = BasicView().render(blogs, 'text/plain')['body']
+        assert 'blog body two' in result
+        assert 'This blog body' in result
+
+    def test_objects(self):
+        blogs = [Blog(title="title", body="This blog body"), Blog(title="title2", body="blog body two")]
+        result = BasicView().render(blogs, 'text/html')['body']
+        assert 'blog body two' in result
+        assert 'This blog body' in result
+        assert '<!DOCTYPE html>' in result
+
+    def test_string(self):
+        result = BasicView().render("just a simple string", 'text/html')['body']
+        assert "just a simple string" in result
+
+    def test_nonetype(self):
+        result = BasicView().render(None, 'text/html')['body']
+        assert "None" in result
+
 
 if __name__ == '__main__':
     unittest.main()

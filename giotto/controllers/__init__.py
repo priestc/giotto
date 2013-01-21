@@ -31,7 +31,10 @@ class GiottoController(object):
         self.program = parsed['program']
         self.program.name = parsed['name']
         self.path_args = parsed['args']
-        self.mimetype = parsed['superformat_mime'] or self.mimetype_override() or self.default_mimetype
+        if parsed['superformat']:
+            self.mimetype = parsed['superformat_mime'] or parsed['superformat']
+        else:
+            self.mimetype = self.mimetype_override() or self.default_mimetype
 
     def get_response(self):
         """
