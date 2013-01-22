@@ -25,6 +25,7 @@ Install and create base project files::
 
     pip install giotto
     mkdir demo
+    cd demo
     giotto create http
 
 Now your project is initialized. Open the ``manifest.py`` and add the following::
@@ -89,7 +90,7 @@ Add a mock object to the program::
 
     manifest = ProgramManifest({
         'multiply': GiottoProgram(
-            model=[multiply, {'x': 4, 'y': 5, 'result': 20],
+            model=[multiply, {'x': 4, 'y': 5, 'result': 20}],
             view=BasicView(
                 html=jinja_template('multiply.html'),
             ),
