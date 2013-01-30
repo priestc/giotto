@@ -4,7 +4,7 @@
 What is Giotto?
 ===============
 
-Giotto is a python web framework. It encourages a functional style where model, view and controller code is strongly decoupled.
+Giotto is a python web framework. It encourages a functional style where model, view and controller code is strongly decoupled.     
 
 Key Features of Giotto include:
 
@@ -35,7 +35,7 @@ Now your project is initialized. Open the ``manifest.py`` and add the following:
 
     def multiply(x, y):
         x = int(x or 0)
-        y = int(y or y)
+        y = int(y or 0)
         return {'x': x, 'y': y, 'result': x * y}
 
     manifest = ProgramManifest({

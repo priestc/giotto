@@ -7,6 +7,10 @@ from giotto.utils import super_accept_to_mimetype
 from giotto.exceptions import DataNotFound
 
 class FileView(GiottoView):
+
+    def render(self, result, mimetype, errors):
+        return super(FileView, self).render(result, "*/*", errors)
+
     @renders('*/*')
     def any(self, result):
         return {'body': result[0], 'mimetype': result[1]}
