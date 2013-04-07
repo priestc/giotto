@@ -102,5 +102,7 @@ class CMDController(GiottoController):
             print("export %s=%s" % (key.upper(), value))
 
     def get_primitive(self, name):
-        if name == 'LOGGED_IN_USER':
+        if name == 'ALL_DATA':
+            return self.get_raw_data()
+        elif name == 'LOGGED_IN_USER':
             return getattr(self.request, 'user', None)
