@@ -87,10 +87,10 @@ def basic_register(username, password, password2):
     Register a user and session, and then return the session_key and user.
     """
     if password != password2:
-        raise InvalidInput(data={'password': {'message': "Passwords do not match"},
-                                 'username': {'value': username}})
+        raise InvalidInput(password={'message': "Passwords do not match"},
+                           username={'value': username})
     user = User.create(username, password)
-    return create_session(user)
+    return create_session(user.username, password)
 
 def create_session(username, password):
     """

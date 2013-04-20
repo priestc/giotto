@@ -18,7 +18,7 @@ def create_auth_manifest(*args):
             AuthProgram(
                 input_middleware=[NotAuthenticatedOrRedirect('/')],
                 view=BasicView(
-                    html=jinja_template('html/login.html'),
+                    html=jinja_template('login.html'),
                 ),
             ),
             AuthProgram(
@@ -41,7 +41,7 @@ def create_auth_manifest(*args):
             AuthProgram(
                 input_middleware=[NotAuthenticatedOrRedirect('/')],
                 view=BasicView(
-                    html=jinja_template('html/register.html'),
+                    html=jinja_template('register.html'),
                 ),
             ),
             AuthProgram(
