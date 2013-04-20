@@ -50,9 +50,7 @@ from jinja2 import Environment, FileSystemLoader
 jinja2_env = Environment(loader=FileSystemLoader(os.path.join(project_path, 'html')))
 
 debug = True
-error_template = None
-
-server_url = "http://localhost:9000"'''
+error_template = None'''
 
     template_controller = '''\
 #!/usr/bin/env python
