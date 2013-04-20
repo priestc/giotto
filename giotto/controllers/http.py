@@ -1,4 +1,5 @@
 import traceback
+import base64
 
 try:
     from urllib.parse import urlencode
@@ -162,6 +163,10 @@ class HTTPController(GiottoController):
         return response
 
     def get_primitive(self, primitive):
+        if primitive == 'USER':
+            auth = self.request.authorization[1]
+            userpass = base64.b64decode(auth)
+            return userpass.split(":")[0]
         if primitive == 'ALL_DATA':
             return self.get_raw_data()
         if primitive == 'LOGGED_IN_USER':
