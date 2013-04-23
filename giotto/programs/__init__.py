@@ -270,7 +270,7 @@ class ProgramManifest(object):
                         ret = program._parse('', args, controller_tag)
                         ret['name'] = program_name
                         return ret
-                    except:
+                    except ProgramNotFound:
                         raise ProgramNotFound('No root program for namespace, and no program match')
                 return program._parse(args[0], args[1:], controller_tag)
             else:
