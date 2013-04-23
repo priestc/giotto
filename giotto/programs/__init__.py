@@ -266,7 +266,12 @@ class ProgramManifest(object):
                 if program_name == '':
                     return program._parse('', args, controller_tag)
                 if not args:
-                    raise ProgramNotFound('No root program for namespace, and no program match')
+                    try:
+                        ret = program._parse('', args, controller_tag)
+                        ret['name'] = program_name
+                        return ret
+                    except:
+                        raise ProgramNotFound('No root program for namespace, and no program match')
                 return program._parse(args[0], args[1:], controller_tag)
             else:
                 return {

@@ -41,6 +41,8 @@ class GiottoController(object):
         High level function for getting a response. This is what the concrete
         controller should call. Returns a controller specific response.
         """
+        last_good_request = self.request
+        middleware_result = None
         try:
             last_good_request, middleware_result = self.program.execute_input_middleware_stream(self.request, self)
         except GiottoException as exc:

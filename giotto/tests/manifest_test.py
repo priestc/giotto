@@ -95,6 +95,13 @@ class ManifestTest(unittest.TestCase):
         self.assertEquals(parsed['name'], 'prog2')
         self.assertEquals(parsed['superformat'], 'html')
 
+    def test_long_and_empty(self):
+        parsed = self.manifest.parse_invocation('path1/path2/path3', 'get')
+        self.assertEquals(parsed['program'].model, "root")
+        self.assertEquals(parsed['args'], [])
+        self.assertEquals(parsed['name'], 'path3')
+        self.assertEquals(parsed['superformat'], None)
+
     def test_long_path(self):
         parsed = self.manifest.parse_invocation('path1/path2/path3/prog4/arg1/arg2', 'get')
         self.assertEquals(parsed['program'].model, "four")
