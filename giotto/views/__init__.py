@@ -8,7 +8,7 @@ from jinja2.exceptions import TemplateNotFound
 from giotto import get_config
 from giotto.exceptions import NoViewMethod
 from giotto.utils import Mock, htmlize, htmlize_list, pre_process_json, super_accept_to_mimetype, jsonify
-from giotto.control import GiottoControl
+from giotto.control import GiottoControl, Redirection
 
 def renders(*mimetypes):
     def decorator(func):
@@ -313,3 +313,28 @@ class ImageViewer(GiottoView):
                 <img src="/multiply?x=4&y=7">
             </body>
         </html>"""
+
+class URLFollower(BasicView):
+    """
+    For visualizing programs that return a url
+    """
+    @renders("text/html")
+    def text_html(self, data):
+        return Redirection(data)
+
+    def cmd(self, data):
+        # execute browser and give it the url
+        return ""
+
+class ForceJSONView(GiottoView):
+    """
+    All objects going through this View will be displayed as JSON no matter what.
+    """
+    @renders("*/*")
+    def renderer(self, data, errors):
+        return jsonify(data)
+
+class ForceTextView(GiottoView):
+    @renders("*/*")
+    def renderer(self, data, errors):
+        return self.generic_text(data)
