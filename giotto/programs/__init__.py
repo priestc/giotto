@@ -9,6 +9,8 @@ from giotto.views import GiottoView
 
 class GiottoProgram(object):
     name = None
+    description = None
+    tests = []
     pre_input_middleware = ()
     input_middleware = ()
     controllers = ()

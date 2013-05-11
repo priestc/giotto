@@ -40,12 +40,14 @@ def serve(ip, port, application, **kwargs):
     or the one that comes with python.
     """
     try:
+        # use werkzeug if its there
         from werkzeug.serving import run_simple
         run_simple(ip, port, application, **kwargs)
         return
     except ImportError:
         pass
 
+    # otherwise just use python's built in wsgi webserver
     from wsgiref.simple_server import make_server
     server = make_server(ip, port, application)
     print("Serving on %s:%s" % (ip, port))
@@ -104,6 +106,7 @@ class HTTPController(GiottoController):
             data = self.request.GET
         elif self.request.method == 'POST':
             data = self.request.POST
+
         return data
 
     def get_concrete_response(self):
@@ -164,9 +167,9 @@ class HTTPController(GiottoController):
 
     def get_primitive(self, primitive):
         if primitive == 'USER':
-            auth = self.request.authorization[1]
-            userpass = base64.b64decode(auth)
-            return userpass.split(":")[0]
+            auth = self.request.authorization and self.request.authorization[1]
+            userpass = (auth and base64.b64decode(auth)) or None
+            return (userpass and userpass.split(":")[0]) or None
         if primitive == 'ALL_DATA':
             return self.get_raw_data()
         if primitive == 'LOGGED_IN_USER':
