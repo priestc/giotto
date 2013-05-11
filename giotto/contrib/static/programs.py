@@ -1,6 +1,7 @@
 import os
 import mimetypes
 
+from giotto import get_config
 from giotto.programs import GiottoProgram
 from giotto.views import GiottoView, renders
 from giotto.utils import super_accept_to_mimetype
@@ -24,7 +25,7 @@ def StaticServe(base_path):
     Meta program for serving any file based on the path
     """
     def get_file(path):
-        fullpath = base_path + path
+        fullpath = get_config('project_path') + os.path.join(base_path, path)
         try:
             mime, encoding = mimetypes.guess_type(fullpath)
             return open(fullpath, 'rb'), mime or 'application/octet-stream'
@@ -44,7 +45,8 @@ def SingleStaticServe(file_path):
     """
     def get_file():
         mime, encoding = mimetypes.guess_type(file_path)
-        return open(file_path, 'rb'), mime or 'application/octet-stream'
+        fullpath = os.path.join(get_config('project_path'), file_path)
+        return open(fullpath, 'rb'), mime or 'application/octet-stream'
 
     class SingleStaticServe(GiottoProgram):
         controllers = ['http-get']
