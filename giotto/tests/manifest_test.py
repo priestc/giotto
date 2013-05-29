@@ -242,6 +242,52 @@ class SuggestionTests(unittest.TestCase):
     def test_invalid(self):
         self.assertEquals([], self.manifest.get_suggestion('first/bar'))
 
+class GetUrlsTest(unittest.TestCase):
+
+    def test_get_urls_simple(self):
+        manifest = ProgramManifest({
+            "flat": GiottoProgram(),
+            "base": ProgramManifest({
+                "prog1": GiottoProgram(),
+                "prog2": GiottoProgram(),
+            }),
+        })
+    
+        urls = sorted([
+            '/base/prog1', "/base/prog2", '/flat'
+        ])
+
+        self.assertEquals(manifest.get_urls(), urls)
+
+
+    def test_get_urls_nesting(self):
+        manifest = ProgramManifest({
+            "base1": ProgramManifest({
+                "prog1": GiottoProgram(),
+                "prog2": GiottoProgram(),
+            }),
+            "base2": ProgramManifest({
+                "prog3": GiottoProgram(),
+                "prog4": GiottoProgram(),
+            }),
+            "base3": ProgramManifest({
+                "mid": ProgramManifest({
+                    'another_mid': ProgramManifest({
+                        "prog5": GiottoProgram(),
+                        "prog6": GiottoProgram(),
+                    }),
+                }),
+            }),
+        })
+
+        urls = sorted([
+            '/base1/prog1', "/base1/prog2",
+            '/base2/prog3', "/base2/prog4",
+            '/base3/mid/another_mid/prog5', "/base3/mid/another_mid/prog6"
+        ])
+
+        self.assertEquals(manifest.get_urls(), urls)
+
 class StringRedirectTest(unittest.TestCase):
     def __init__(self, *a, **k):
         super(StringRedirectTest, self).__init__(*a, **k)
