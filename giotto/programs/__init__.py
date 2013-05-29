@@ -131,20 +131,29 @@ class ProgramManifest(object):
                 msg = "Manifest value must be either: a program, a list of programs, or another manifest"
                 raise TypeError(msg)
 
-    def get_urls(self, prefix_path=''):
+    def get_urls(self, controller_tags=None, prefix_path=''):
         """
         Return a list of all valid urls (minus args and kwargs, just the program paths)
         for this manifest
         """
         urls = []
         for key, value in self.manifest.items():
+            path = "%s/%s" % (prefix_path, key)
             if isinstance(value, GiottoProgram) or hasattr(value, 'lower'):
                 # is a program or string redirect, make into a url
-                url = prefix_path + "/" + key
-                urls.append(url)
+                if value == '':
+                    path = path[:-1]
+
+                if (not value.controllers) or (set(value.controllers) & set(controller_tags)):
+                    # only return url if controller tag matches, or no
+                    # controller tags defined for this program.
+                    urls.append(path)
+                else:
+                    # skip this url because it does not have the correct controller tag
+                    continue
+
             if isinstance(value, ProgramManifest):
-                path = prefix_path + "/" + key
-                urls = urls + value.get_urls(path)
+                urls = urls + value.get_urls(controller_tags=controller_tags, prefix_path=path)
         return sorted(urls)
 
     def __repr__(self):

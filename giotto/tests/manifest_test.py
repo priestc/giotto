@@ -273,7 +273,7 @@ class GetUrlsTest(unittest.TestCase):
             "base3": ProgramManifest({
                 "mid": ProgramManifest({
                     'another_mid': ProgramManifest({
-                        "prog5": GiottoProgram(),
+                        "prog5": GiottoProgram(controllers=['irc']),
                         "prog6": GiottoProgram(),
                     }),
                 }),
@@ -281,12 +281,12 @@ class GetUrlsTest(unittest.TestCase):
         })
 
         urls = sorted([
-            '/base1/prog1', "/base1/prog2",
-            '/base2/prog3', "/base2/prog4",
-            '/base3/mid/another_mid/prog5', "/base3/mid/another_mid/prog6"
+            "/base1/prog1", "/base1/prog2",
+            "/base2/prog3", "/base2/prog4",
+            "/base3/mid/another_mid/prog6"
         ])
 
-        self.assertEquals(manifest.get_urls(), urls)
+        self.assertEquals(manifest.get_urls(controller_tags=['http-get', 'http-post']), urls)
 
 class StringRedirectTest(unittest.TestCase):
     def __init__(self, *a, **k):
