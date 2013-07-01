@@ -109,6 +109,12 @@ class ProgramManifest(object):
     giotto applications. All keys must be strings, and all values must be
     either GiottoPrograms or another ProgramManifest instance.
     """
+    
+    def __repr__(self):
+        return "<Manifest %s (%s nodes)>" % (self.backname, len(self.manifest))
+
+    def __getitem__(self, key):
+        return self.manifest[key]
 
     def __init__(self, manifest, backname='root'):
         self.backname = backname
@@ -134,33 +140,44 @@ class ProgramManifest(object):
     def get_urls(self, controller_tags=None, prefix_path=''):
         """
         Return a list of all valid urls (minus args and kwargs, just the program paths)
-        for this manifest
+        for this manifest. If a single program has two urls, both will be returned.
         """
-        urls = []
+        tag_match = lambda program: set(program.controllers) & set(controller_tags)
+        urls = set()
         for key, value in self.manifest.items():
+
             path = "%s/%s" % (prefix_path, key)
-            if isinstance(value, GiottoProgram) or hasattr(value, 'lower'):
-                # is a program or string redirect, make into a url
-                if value == '':
-                    path = path[:-1]
 
-                if (not value.controllers) or (set(value.controllers) & set(controller_tags)):
-                    # only return url if controller tag matches, or no
-                    # controller tags defined for this program.
-                    urls.append(path)
-                else:
-                    # skip this url because it does not have the correct controller tag
-                    continue
+            if path.endswith('/') and prefix_path:
+                path = path[:-1]
 
-            if isinstance(value, ProgramManifest):
-                urls = urls + value.get_urls(controller_tags=controller_tags, prefix_path=path)
-        return sorted(urls)
+            if hasattr(value, 'lower'):
+                # is a string redirect
+                urls.add(path)
 
-    def __repr__(self):
-        return "<Manifest %s (%s nodes)>" % (self.backname, len(self.manifest))
+            elif hasattr(value, 'append'):
+                # is a list, only append this url is the list contains a
+                # program that implements this controller.
+                for program in value:
+                    if tag_match(program):
+                        urls.add(path)
 
-    def __getitem__(self, key):
-        return self.manifest[key]
+            elif isinstance(value, ProgramManifest):
+                # is manifest
+                pp = '' if path == '/' else path # for 'stacked' root programs.
+                new_urls = value.get_urls(controller_tags=controller_tags, prefix_path=pp)
+                urls.update(new_urls)
+
+            elif (not value.controllers) or (not controller_tags) or tag_match(value):
+                # only return url if controller tag matches, or no
+                # controller tags defined for this program.
+                urls.add(path)
+
+            else:
+                # skip this url because it does not have the correct controller tag
+                continue
+
+        return urls
 
     def _get_suggestions(self, filter_word=None):
         """
@@ -208,22 +225,57 @@ class ProgramManifest(object):
         else:
             return self._get_suggestions(front_path or None)
 
-    def get_program(self, program_name, controller_tag):
+    def get_program(self, program_path):
         """
         Find the program within this manifest. If key is found, and it contains
         a list, iterate over the list and return the program that matches
-        the controller tag. 
+        the controller tag. NOTICE: program_path must have a leading slash.
         """
-        result = self.manifest[program_name]
-        if type(result) == ProgramManifest:
-            return result
-        if type(result) is str:
-            return self.get_program(result, controller_tag)
-        if type(result) is not list:
-            result = [result]
-        for program in result:
-            if controller_tag in program.controllers:
-                return program
+        if not program_path or program_path[0] != '/':
+            raise ValueError("program_path must be a full path with leading slash")
+
+        items = program_path[1:].split('/')
+        result = self
+        for item in items:
+            result = result[item]
+
+        if hasattr(result, "lower"):
+            return self.get_program(result)
+
+        if type(result) is ProgramManifest:
+            return result.get_program('/')
+
+        return result
+
+    def parse_invocation(self, invocation, controller_tag):
+        """
+        Given an invocation string, determine which part is the path, the program,
+        and the args.
+        """
+        if invocation.endswith('/'):
+            invocation = invocation[:-1]
+        if invocation == '':
+            invocation = '/'
+        
+        all_programs = self.get_urls(controller_tags=[controller_tag])
+        #print all_programs, invocation
+
+        matching_path = None
+        for program_path in all_programs:
+            if invocation.startswith(program_path):
+                matching_path = program_path
+
+        if not matching_path:
+            raise ProgramNotFound("Can't find %s" % invocation)
+
+        program_name = invocation.split('/')[-1]
+        path = "/".join(program_path.split('/')[:-1])
+        args_fragment = invocation[len(program_path):]
+        args = args_fragment.split("/") if '/' in args_fragment else []
+        result = self.get_program(program_path)
+
+        if '.' in program_name:
+            import debug
 
         # we looped through all programs and found no match, maybe one program
         # has no explicitly defined controller tag? If so return that.
@@ -236,74 +288,11 @@ class ProgramManifest(object):
         msg = "Program '%s' does not allow '%s' controller" % (program_name, controller_tag)
         raise ProgramNotFound(msg)
 
-    def extract_superformat(self, name):
-        """
-        In comes the program name, out comes the superformat (html, json, xml, etc)
-        and the new program name with superstring removed.
-        """
-        if '.' in name:
-            splitted = name.split('.')
-            return (splitted[0], splitted[1])
-        else:
-            return (name, None)
-
-    def parse_invocation(self, invocation, controller_tag):
-        if invocation.endswith('/'):
-            invocation = invocation[:-1]
-        if invocation.startswith('/'):
-            invocation = invocation[1:]
-
-        splitted_path = invocation.split('/')
-        start_name = splitted_path[0]
-        start_args = splitted_path[1:]
-
-        parsed = self._parse(start_name, start_args, controller_tag)
-        parsed['invocation'] = invocation
-        mime = super_accept_to_mimetype(parsed['superformat'])
-        parsed['superformat_mime'] = mime
-
-        return parsed
-
-    def _parse(self, raw_program_name, args, controller_tag):
-        """
-        Recursive function to transversing nested manifests.
-        raw_program_name == program with superformat intact
-        """
-        program_name, superformat = self.extract_superformat(raw_program_name)
-        try:
-            program = self.get_program(program_name, controller_tag)
-        except KeyError:
-            # program name is not in keys, drop down to root...
-            if '' in self.manifest:
-                result = self.get_program('', controller_tag)
-                if type(result) == ProgramManifest:
-                    return result._parse(raw_program_name, args, controller_tag)
-                else:
-                    return {
-                        'program': result,
-                        'name': '',
-                        'superformat': superformat,
-                        'superformat_mime': None,
-                        'args': [program_name] + args,
-                    }
-            else:
-                raise ProgramNotFound("Program '%s' Does Not Exist" % program_name)
-        else:
-            if type(program) == ProgramManifest:
-                if program_name == '':
-                    return program._parse('', args, controller_tag)
-                if not args:
-                    try:
-                        ret = program._parse('', args, controller_tag)
-                        ret['name'] = program_name
-                        return ret
-                    except ProgramNotFound:
-                        raise ProgramNotFound('No root program for namespace, and no program match')
-                return program._parse(args[0], args[1:], controller_tag)
-            else:
-                return {
-                    'program': program,
-                    'name': program_name,
-                    'superformat': superformat,
-                    'args': args,
-                }
+        return {
+            'program': program,
+            'program_name': program_name,
+            'superformat': superformat,
+            'args': args,
+            'path': path,
+            'invocation': invocation,
+        }
