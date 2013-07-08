@@ -304,7 +304,7 @@ class ProgramManifest(object):
         
         result = self.get_program(matching_path)
 
-        ret = {
+        return {
             'program': result,
             'program_name': program_name,
             'superformat': superformat,
@@ -312,4 +312,3 @@ class ProgramManifest(object):
             'path': path,
             'invocation': invocation,
         }
-        return ret

@@ -75,12 +75,12 @@ class StackedRootTest(unittest.TestCase):
         self.assertEquals(parsed, correct)
 
     def test_parse_invocation_root_arg(self):
-        parsed = self.manifest.parse_invocation('/sub/another/fart', 'http-get')
+        parsed = self.manifest.parse_invocation('/sub/another/aaaa', 'http-get')
         correct = {
-            'args': ['fart'],
+            'args': ['aaaa'],
             'program': blank,
             'superformat': None,
-            'invocation': '/sub/another/fart',
+            'invocation': '/sub/another/aaaa',
             'path': '/sub/',
             'program_name': 'another'
         }
@@ -98,6 +98,18 @@ class StackedRootTest(unittest.TestCase):
         }
         self.assertEquals(parsed, correct)
 
+
+    def test_parse_invocation_superformat_with_args(self):
+        parsed = self.manifest.parse_invocation('/sub/another/both.html/aaaa/bbbbbb', 'http-get')
+        correct = {
+            'args': ['aaaa', 'bbbbbb'],
+            'program': both,
+            'superformat': 'html',
+            'invocation': '/sub/another/both.html/aaaa/bbbbbb',
+            'path': '/sub/another/',
+            'program_name': 'both'
+        }
+        self.assertEquals(parsed, correct)
 
 if __name__ == '__main__':
     unittest.main()
