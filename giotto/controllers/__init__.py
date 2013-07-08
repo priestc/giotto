@@ -26,7 +26,7 @@ class GiottoController(object):
         # the program that corresponds to this invocation
         invocation = self.get_invocation()
         name = self.get_controller_name()
-        parsed = self.manifest.parse_invocation(invocation, name)
+        parsed = self.manifest.parse_invocation(invocation, controller_tag=name)
 
         self.program = parsed['program']
         self.program.name = parsed['program_name']

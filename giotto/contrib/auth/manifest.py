@@ -52,12 +52,14 @@ def create_auth_manifest(**kwargs):
         ),
         'register': [
             AuthProgram(
+                name="register (form)",
                 input_middleware=[NotAuthenticatedOrRedirect('/')],
                 view=BasicView(
                     html=jinja_template('register.html'),
                 ),
             ),
             AuthProgram(
+                name="register (post)",
                 controllers=['http-post'],
                 model=[register],
                 view=BasicView(

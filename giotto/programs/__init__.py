@@ -160,6 +160,7 @@ class ProgramManifest(object):
         """
         tag_match = lambda program: set(program.controllers) & set(controllers or [])
         urls = set()
+
         for key, value in self.manifest.items():
 
             path = "%s/%s" % (prefix_path, key)
@@ -171,13 +172,6 @@ class ProgramManifest(object):
                 # is a string redirect
                 urls.add(path)
 
-            elif hasattr(value, 'append'):
-                # is a list, only append this url is the list contains a
-                # program that implements this controller.
-                for program in value:
-                    if tag_match(program):
-                        urls.add(path)
-
             elif isinstance(value, ProgramManifest):
                 # is manifest
                 pp = '' if path == '/' else path # for 'stacked' root programs.
@@ -185,17 +179,18 @@ class ProgramManifest(object):
                 urls.update(new_urls)
 
             elif isinstance(value, GiottoProgram):
-                if not value.controllers or not controllers:
-                    # no controllers defined on program. Always add.
-                    # or no tags defined for this get_urls call. Always add.
-                    urls.add(path)
-                elif tag_match(value):
-                    urls.add(path)
-                else:
-                    continue
+                # make a list so we can iterate through it in the next `if` block
+                value = [value]
 
-            else:
-                raise Exception("Invalid Manifest (this should never happen)")
+            if hasattr(value, 'append'):
+                # defined is multiple programs, get the one for this controller tag.
+                for program in value:
+                    if not program.controllers or not controllers:
+                        # no controllers defined on program. Always add.
+                        # or no tags defined for this get_urls call. Always add.
+                        urls.add(path)
+                    elif tag_match(program):
+                        urls.add(path)
 
         return urls
 
@@ -245,7 +240,7 @@ class ProgramManifest(object):
         else:
             return self._get_suggestions(front_path or None)
 
-    def get_program(self, program_path):
+    def get_program(self, program_path, controller=None):
         """
         Find the program within this manifest. If key is found, and it contains
         a list, iterate over the list and return the program that matches
@@ -263,8 +258,17 @@ class ProgramManifest(object):
             # string redirect
             return self.get_program(result)
 
-        if type(result) is ProgramManifest:
+        elif type(result) is ProgramManifest:
             return result.get_program('/')
+
+        elif hasattr(result, 'append'):
+            for program in result:
+                if not program.controllers or not controller:
+                    # no controllers defined on program. Always add.
+                    # or no tags defined for this get_urls call. Always add.
+                    return program
+                elif controller in program.controllers:
+                    return program
 
         return result
 
@@ -302,12 +306,13 @@ class ProgramManifest(object):
         else:
             xargs = args_fragment.split("/")[1:] if '/' in args_fragment else []
         
-        result = self.get_program(matching_path)
+        result = self.get_program(matching_path, controller=controller_tag)
 
         return {
             'program': result,
             'program_name': program_name,
             'superformat': superformat,
+            'superformat_mime': super_accept_to_mimetype(superformat),
             'args': xargs,
             'path': path,
             'invocation': invocation,

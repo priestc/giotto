@@ -8,6 +8,8 @@ from sqlalchemy import Column, String
 
 both = GiottoProgram(name='both', controllers=['irc', 'http-get'])
 blank = GiottoProgram(name='optional_blank')
+double_get = GiottoProgram(name="getter", controllers=['http-get'])
+double_post = GiottoProgram(name="poster", controllers=['http-post'])
 
 class StackedRootTest(unittest.TestCase):
     def setUp(self):
@@ -27,7 +29,8 @@ class StackedRootTest(unittest.TestCase):
                     'http_only': GiottoProgram(name='http_only', controllers=['http-get']),
                     'irc_only': GiottoProgram(name='irc_only', controllers=['irc']),
                     'both': both
-                }
+                },
+                'double': [double_get, double_post]
             },
             'string_redirect': '/redirect',
             'redirect': GiottoProgram(name='redirect'),
@@ -37,11 +40,11 @@ class StackedRootTest(unittest.TestCase):
             '/', '/deep',
             '/sub/another/irc_only', '/sub/another/http_only', '/sub/another/both',
             '/sub/prog', '/sub/another', '/sub/another/prog2', '/sub/another/prog3',
-            '/redirect', '/string_redirect',
+            '/redirect', '/string_redirect', '/sub/double'
         ])
 
         self.irc_only_urls = set(['/sub/another/irc_only'])
-        self.http_only_urls = set(['/sub/another/http_only'])
+        self.http_only_urls = set(['/sub/another/http_only', '/sub/double'])
 
     def test_get_all_urls(self):
         self.assertEquals(self.manifest.get_urls(), self.all_urls)
@@ -68,6 +71,7 @@ class StackedRootTest(unittest.TestCase):
             'args': [],
             'program': both,
             'superformat': None,
+            'superformat_mime': None,
             'invocation': '/sub/another/both',
             'path': '/sub/another/',
             'program_name': 'both'
@@ -80,6 +84,7 @@ class StackedRootTest(unittest.TestCase):
             'args': ['aaaa'],
             'program': blank,
             'superformat': None,
+            'superformat_mime': None,
             'invocation': '/sub/another/aaaa',
             'path': '/sub/',
             'program_name': 'another'
@@ -92,6 +97,7 @@ class StackedRootTest(unittest.TestCase):
             'args': [],
             'program': both,
             'superformat': 'html',
+            'superformat_mime': 'text/html',
             'invocation': '/sub/another/both.html',
             'path': '/sub/another/',
             'program_name': 'both'
@@ -105,11 +111,26 @@ class StackedRootTest(unittest.TestCase):
             'args': ['aaaa', 'bbbbbb'],
             'program': both,
             'superformat': 'html',
+            'superformat_mime': 'text/html',
             'invocation': '/sub/another/both.html/aaaa/bbbbbb',
             'path': '/sub/another/',
             'program_name': 'both'
         }
         self.assertEquals(parsed, correct)
+
+    def test_parse_invocation_double_controller(self):
+        for controller_tag, program in [['http-get', double_get], ['http-post', double_post]]:
+            parsed = self.manifest.parse_invocation('/sub/double', controller_tag)
+            correct = {
+                'args': [],
+                'program': program,
+                'superformat': None,
+                'superformat_mime': None,
+                'invocation': '/sub/double',
+                'path': '/sub/',
+                'program_name': 'double'
+            }
+            self.assertEquals(parsed, correct)
 
 if __name__ == '__main__':
     unittest.main()
