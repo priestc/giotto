@@ -29,12 +29,20 @@ def create_auth_manifest(**kwargs):
     return ProgramManifest({
         'login': [
             AuthProgram(
+                """
+                Prints out the HTML form for logging in.
+                """,
+                name="Login (form)",
                 input_middleware=[NotAuthenticatedOrRedirect('/')],
                 view=BasicView(
                     html=jinja_template('login.html'),
                 ),
             ),
             AuthProgram(
+                """
+                Matches up the username/password against the database, and adds the auth cookies.
+                """,
+                name="Login (post)",
                 input_middleware=[NotAuthenticatedOrDie],
                 controllers=['http-post', 'cmd'],
                 model=[create_session, {'username': 'mock_user', 'session_key': 'XXXXXXXXXXXXXXX'}],
@@ -45,6 +53,10 @@ def create_auth_manifest(**kwargs):
             ),
         ],
         'logout': AuthProgram(
+            """
+            Send the user here to log them out. Removes their cookies and deletes the auth session.
+            """,
+            name="Logout",
             view=BasicView(
                 html=Redirection('/'),
             ),
@@ -52,14 +64,21 @@ def create_auth_manifest(**kwargs):
         ),
         'register': [
             AuthProgram(
-                name="register (form)",
+                """
+                This program returns the HTML page with the form for registering a new account.
+                HTTP-get only.
+                """,
+                name="Register (form)",
                 input_middleware=[NotAuthenticatedOrRedirect('/')],
                 view=BasicView(
                     html=jinja_template('register.html'),
                 ),
             ),
             AuthProgram(
-                name="register (post)",
+                """
+                When you POST the register form, this program handles creating the new user, then redirecting you to '/'
+                """,
+                name="Register (post)",
                 controllers=['http-post'],
                 model=[register],
                 view=BasicView(

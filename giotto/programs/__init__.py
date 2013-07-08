@@ -27,7 +27,8 @@ class GiottoProgram(object):
     def __repr__(self):
         return "<GiottoProgram: %s>" % (self.name or self.model.__doc__)
 
-    def __init__(self, **kwargs):
+    def __init__(self, description=None, **kwargs):
+        self.description = description
         for k, v in kwargs.items():
             if k not in self.valid_args:
                 raise ValueError(
@@ -262,13 +263,19 @@ class ProgramManifest(object):
             return result.get_program('/')
 
         elif hasattr(result, 'append'):
+            matching_blank = []
             for program in result:
+                if controller in program.controllers:
+                    return program
+            
                 if not program.controllers or not controller:
-                    # no controllers defined on program. Always add.
-                    # or no tags defined for this get_urls call. Always add.
-                    return program
-                elif controller in program.controllers:
-                    return program
+                    # no exact matching controllers for this program.
+                    # Use the first controller with no
+                    matching_blank.append(program)
+            if matching_blank:
+                return matching_blank[0]
+            else:
+                raise ProgramNotFound("No matcning program for %s controller" % controller)
 
         return result
 
