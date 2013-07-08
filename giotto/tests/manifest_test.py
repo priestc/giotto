@@ -40,8 +40,8 @@ class StackedRootTest(unittest.TestCase):
             '/redirect', '/string_redirect',
         ])
 
-        self.irc_only_urls = {'/sub/another/irc_only'}
-        self.http_only_urls = {'/sub/another/http_only'}
+        self.irc_only_urls = set(['/sub/another/irc_only'])
+        self.http_only_urls = set(['/sub/another/http_only'])
 
     def test_get_all_urls(self):
         self.assertEquals(self.manifest.get_urls(), self.all_urls)
