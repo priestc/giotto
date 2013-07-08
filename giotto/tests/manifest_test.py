@@ -21,8 +21,9 @@ class StackedRootTest(unittest.TestCase):
                     '': GiottoProgram(model='optional_blank'),
                     'prog2': GiottoProgram(model='prog2'),
                     'prog3': GiottoProgram(model='prog3'),
-                    'http_only': GiottoProgram(model='http_only', controller_tags=['http-get']),
-                    'irc_only': GiottoProgram(model='irc_only', controller_tag=['irc'])
+                    'http_only': GiottoProgram(model='http_only', controllers=['http-get']),
+                    'irc_only': GiottoProgram(model='irc_only', controllers=['irc']),
+                    'both': GiottoProgram(model='both', controllers=['irc', 'http-get'])
                 }
             },
             'string_redirect': '/redirect',
@@ -31,7 +32,7 @@ class StackedRootTest(unittest.TestCase):
 
         self.all_urls = {
             '/', '/deep',
-            '/sub/another/irc_only', '/sub/another/http_only',
+            '/sub/another/irc_only', '/sub/another/http_only', '/sub/another/both',
             '/sub/prog', '/sub/another', '/sub/another/prog2', '/sub/another/prog3',
             '/redirect', '/string_redirect',
         }
@@ -47,11 +48,12 @@ class StackedRootTest(unittest.TestCase):
         When a controller tag is added to the call to get_urls, the returned set
         of urls should be filtered by the controler tag defined in the manifest.
         """
-        irc_urls = self.all_urls - self.http_only_urls
-        self.assertEquals(self.manifest.get_urls(controller_tags=['irc']), irc_urls)
+        irc_urls = sorted(list(self.all_urls - self.http_only_urls))
+        generated = sorted(list(self.manifest.get_urls(controllers=['irc'])))
+        self.assertEquals(generated, irc_urls)
 
         http_urls = self.all_urls - self.irc_only_urls
-        #self.assertEquals(self.manifest.get_urls(controller_tags=['http-get']), http_urls)
+        self.assertEquals(self.manifest.get_urls(controllers=['http-get']), http_urls)
 
     def test_get_program(self):
         model = self.manifest.get_program('/').model

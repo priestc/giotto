@@ -19,8 +19,21 @@ class GiottoProgram(object):
     view = None
     output_middleware = ()
 
+    valid_args = [
+        'name', 'description', 'tests', 'pre_input_middleware', 'controllers',
+        'input_middleware', 'cache', 'model', 'view', 'output_middleware'
+    ]
+
     def __init__(self, **kwargs):
-        self.__dict__ = kwargs
+        for k, v in kwargs.items():
+            if k not in self.valid_args:
+                raise ValueError(
+                    "Invalid GiottoProgram argument: %s, choices are %s" %
+                    (k, ", ".join(self.valid_args))
+                )
+            else:
+                setattr(self, k, v)
+
         if hasattr(self.view, 'mro') and GiottoView in self.view.mro():
             # instantiate all views that are defined as a class.
             self.view = self.view()
@@ -137,12 +150,12 @@ class ProgramManifest(object):
                 msg = "Manifest value must be either: a program, a list of programs, or another manifest"
                 raise TypeError(msg)
 
-    def get_urls(self, controller_tags=None, prefix_path=''):
+    def get_urls(self, controllers=None, prefix_path=''):
         """
         Return a list of all valid urls (minus args and kwargs, just the program paths)
         for this manifest. If a single program has two urls, both will be returned.
         """
-        tag_match = lambda program: set(program.controllers) & set(controller_tags)
+        tag_match = lambda program: set(program.controllers) & set(controllers or [])
         urls = set()
         for key, value in self.manifest.items():
 
@@ -165,17 +178,23 @@ class ProgramManifest(object):
             elif isinstance(value, ProgramManifest):
                 # is manifest
                 pp = '' if path == '/' else path # for 'stacked' root programs.
-                new_urls = value.get_urls(controller_tags=controller_tags, prefix_path=pp)
+                new_urls = value.get_urls(controllers=controllers, prefix_path=pp)
                 urls.update(new_urls)
 
-            elif (not value.controllers) or (not controller_tags) or tag_match(value):
-                # only return url if controller tag matches, or no
-                # controller tags defined for this program.
-                urls.add(path)
+            elif isinstance(value, GiottoProgram):
+                if not value.controllers or not controllers:
+                    # no controllers defined on program. Always add.
+                    # or no tags defined for this get_urls call. Always add.
+                    urls.add(path)
+                elif tag_match(value):
+                    #import debug
+                    urls.add(path)
+                else:
+                    #import debug
+                    continue
 
             else:
-                # skip this url because it does not have the correct controller tag
-                continue
+                raise Exception("Invalid Manifest")
 
         return urls
 
