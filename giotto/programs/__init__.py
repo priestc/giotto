@@ -24,6 +24,9 @@ class GiottoProgram(object):
         'input_middleware', 'cache', 'model', 'view', 'output_middleware'
     ]
 
+    def __repr__(self):
+        return "<GiottoProgram: %s>" % (self.name or self.model.__doc__)
+
     def __init__(self, **kwargs):
         for k, v in kwargs.items():
             if k not in self.valid_args:
@@ -187,14 +190,12 @@ class ProgramManifest(object):
                     # or no tags defined for this get_urls call. Always add.
                     urls.add(path)
                 elif tag_match(value):
-                    #import debug
                     urls.add(path)
                 else:
-                    #import debug
                     continue
 
             else:
-                raise Exception("Invalid Manifest")
+                raise Exception("Invalid Manifest (this should never happen)")
 
         return urls
 
@@ -259,6 +260,7 @@ class ProgramManifest(object):
             result = result[item]
 
         if hasattr(result, "lower"):
+            # string redirect
             return self.get_program(result)
 
         if type(result) is ProgramManifest:
@@ -273,45 +275,43 @@ class ProgramManifest(object):
         """
         if invocation.endswith('/'):
             invocation = invocation[:-1]
+        if not invocation.startswith('/'):
+            invocation = '/' + invocation
         if invocation == '':
             invocation = '/'
         
-        all_programs = self.get_urls(controller_tags=[controller_tag])
+        all_programs = self.get_urls(controllers=[controller_tag])
         #print all_programs, invocation
 
         matching_path = None
-        for program_path in all_programs:
+        for program_path in sorted(all_programs):
             if invocation.startswith(program_path):
                 matching_path = program_path
 
         if not matching_path:
             raise ProgramNotFound("Can't find %s" % invocation)
 
-        program_name = invocation.split('/')[-1]
-        path = "/".join(program_path.split('/')[:-1])
+        program_name = matching_path.split('/')[-1]
+        path = "/".join(matching_path.split('/')[:-1]) + '/'
         args_fragment = invocation[len(program_path):]
         args = args_fragment.split("/") if '/' in args_fragment else []
-        result = self.get_program(program_path)
+        result = self.get_program(matching_path)
 
         if '.' in program_name:
-            import debug
-
-        # we looped through all programs and found no match, maybe one program
-        # has no explicitly defined controller tag? If so return that.
-        for program in result:
-            if not program.controllers or '*' in program.controllers:
-                return program
+            raise NotImplementedError("Supeformat not done yet")
 
         # we found the key, and looped through all programs, but the controller
         # tag could not be found.
-        msg = "Program '%s' does not allow '%s' controller" % (program_name, controller_tag)
-        raise ProgramNotFound(msg)
+        #msg = "Program '%s' does not allow '%s' controller" % (program_name, controller_tag)
+        #raise ProgramNotFound(msg)
 
-        return {
-            'program': program,
+        ret = {
+            'program': result,
             'program_name': program_name,
-            'superformat': superformat,
+            'superformat': None,
             'args': args,
             'path': path,
             'invocation': invocation,
         }
+        print ret
+        return ret

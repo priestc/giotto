@@ -30,12 +30,12 @@ class StackedRootTest(unittest.TestCase):
             'redirect': GiottoProgram(model='redirect'),
         })
 
-        self.all_urls = {
+        self.all_urls = set([
             '/', '/deep',
             '/sub/another/irc_only', '/sub/another/http_only', '/sub/another/both',
             '/sub/prog', '/sub/another', '/sub/another/prog2', '/sub/another/prog3',
             '/redirect', '/string_redirect',
-        }
+        )]
 
         self.irc_only_urls = {'/sub/another/irc_only'}
         self.http_only_urls = {'/sub/another/http_only'}
@@ -58,6 +58,10 @@ class StackedRootTest(unittest.TestCase):
     def test_get_program(self):
         model = self.manifest.get_program('/').model
         self.assertEquals(model, 'root')
+
+    def test_parse_invocation(self):
+        parsed = self.manifest.parse_invocation('/sub/another/both', 'http-get')
+        self.assertEquals(parsed, 'sds')
 
 if __name__ == '__main__':
     unittest.main()

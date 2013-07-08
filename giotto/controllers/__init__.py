@@ -29,7 +29,7 @@ class GiottoController(object):
         parsed = self.manifest.parse_invocation(invocation, name)
 
         self.program = parsed['program']
-        self.program.name = parsed['name']
+        self.program.name = parsed['program_name']
         self.path_args = parsed['args']
         if parsed['superformat']:
             self.mimetype = parsed['superformat_mime'] or parsed['superformat']
