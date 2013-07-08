@@ -281,7 +281,6 @@ class ProgramManifest(object):
             invocation = '/'
         
         all_programs = self.get_urls(controllers=[controller_tag])
-        #print all_programs, invocation
 
         matching_path = None
         for program_path in sorted(all_programs):
@@ -293,17 +292,12 @@ class ProgramManifest(object):
 
         program_name = matching_path.split('/')[-1]
         path = "/".join(matching_path.split('/')[:-1]) + '/'
-        args_fragment = invocation[len(program_path):]
-        args = args_fragment.split("/") if '/' in args_fragment else []
+        args_fragment = invocation[len(matching_path):]
+        args = args_fragment.split("/")[1:] if '/' in args_fragment else []
         result = self.get_program(matching_path)
 
         if '.' in program_name:
-            raise NotImplementedError("Supeformat not done yet")
-
-        # we found the key, and looped through all programs, but the controller
-        # tag could not be found.
-        #msg = "Program '%s' does not allow '%s' controller" % (program_name, controller_tag)
-        #raise ProgramNotFound(msg)
+            raise NotImplementedError("Superformat not done yet")
 
         ret = {
             'program': result,
@@ -313,5 +307,4 @@ class ProgramManifest(object):
             'path': path,
             'invocation': invocation,
         }
-        print ret
         return ret
