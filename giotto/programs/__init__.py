@@ -279,7 +279,7 @@ class ProgramManifest(object):
             invocation = '/' + invocation
         if invocation == '':
             invocation = '/'
-        
+
         all_programs = self.get_urls(controllers=[controller_tag])
 
         matching_path = None
@@ -293,17 +293,22 @@ class ProgramManifest(object):
         program_name = matching_path.split('/')[-1]
         path = "/".join(matching_path.split('/')[:-1]) + '/'
         args_fragment = invocation[len(matching_path):]
-        args = args_fragment.split("/")[1:] if '/' in args_fragment else []
-        result = self.get_program(matching_path)
 
-        if '.' in program_name:
-            raise NotImplementedError("Superformat not done yet")
+        superformat = None
+        if args_fragment.startswith('.'):
+            # args_fragment will be something like ".html/arg1/arg2" or just ".html"
+            superformat = args_fragment.split('/')[0][1:]
+            xargs = args_fragment.split('/')[1:]
+        else:
+            xargs = args_fragment.split("/")[1:] if '/' in args_fragment else []
+        
+        result = self.get_program(matching_path)
 
         ret = {
             'program': result,
             'program_name': program_name,
-            'superformat': None,
-            'args': args,
+            'superformat': superformat,
+            'args': xargs,
             'path': path,
             'invocation': invocation,
         }

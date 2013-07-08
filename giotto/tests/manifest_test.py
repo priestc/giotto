@@ -86,15 +86,15 @@ class StackedRootTest(unittest.TestCase):
         }
         self.assertEquals(parsed, correct)
 
-    def xtest_parse_invocation_superformat(self):
+    def test_parse_invocation_superformat(self):
         parsed = self.manifest.parse_invocation('/sub/another/both.html', 'http-get')
         correct = {
-            'args': ['fart'],
-            'program': blank,
+            'args': [],
+            'program': both,
             'superformat': 'html',
-            'invocation': '/sub/another/fart',
-            'path': '/sub/',
-            'program_name': 'another'
+            'invocation': '/sub/another/both.html',
+            'path': '/sub/another/',
+            'program_name': 'both'
         }
         self.assertEquals(parsed, correct)
 
