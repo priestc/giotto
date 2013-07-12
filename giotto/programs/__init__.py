@@ -293,10 +293,16 @@ class ProgramManifest(object):
 
         all_programs = self.get_urls(controllers=[controller_tag])
 
-        matching_path = None
+        matching_paths = set()
         for program_path in sorted(all_programs):
             if invocation.startswith(program_path):
-                matching_path = program_path
+                matching_paths.add(program_path)
+
+        longest = ""
+        for path in matching_paths:
+            longest = path if len(path) > len(longest) else longest
+
+        matching_path = longest
 
         if not matching_path:
             raise ProgramNotFound("Can't find %s" % invocation)
