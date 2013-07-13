@@ -94,7 +94,7 @@ class NegotiationTest(unittest.TestCase):
 		"""
 		Exception is raised when too many data arguments are passed into a program.
 		"""
-		request = make_request("/raw.json/raw/arg/to/program")
+		request = make_request("/raw.json/raw/arg/to_some/program")
 		c = HTTPController(request, self.manifest)
 		data = c.get_data_response()
-		self.assertEquals(json.loads(data['body']), "raw/arg/to/program3")
+		self.assertEquals(json.loads(data['body']), "raw/arg/to_some/program3")
