@@ -128,7 +128,7 @@ class GiottoController(object):
 
             # the 'default' value that may be defined in the model.
             # this variable might be a string or int or might even be a primitive object.
-            default_defined_in_model = defaults.get(field, None)
+            default_defined_in_model = defaults.get(field, NotImplemented)
 
             # the value in kwarg arguments such as --values and GET params
             from_data_kwargs = kwargs_from_invocation.get(field, None)
@@ -145,6 +145,8 @@ class GiottoController(object):
                 value_to_use = from_data_kwargs
             elif not raw and args_from_invocation:
                 value_to_use = args_from_invocation.pop()
+            elif default_defined_in_model is not NotImplemented:
+                value_to_use = default_defined_in_model
             else:
                 raise Exception("Data Missing For Program. Missing: %s" % field)
             
