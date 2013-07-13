@@ -29,17 +29,11 @@ if subcommand == 'suggest':
 if subcommand == 'create':
     controllers = sys.argv[2:]
     config_template = '''import os
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 from giotto.utils import better_base
 from giotto.keyvalue import LocMemKeyValue
 
 Base = better_base()
 
-from sqlite3 import dbapi2 as sqlite
-engine = create_engine('sqlite+pysqlite:///file.db', module=sqlite)
-
-session = sessionmaker(bind=engine)()
 cache = None
 auth_session = LocMemKeyValue()
 auth_session_expire = 3600 * 24 * 7
@@ -52,6 +46,18 @@ jinja2_env = Environment(loader=FileSystemLoader(os.path.join(project_path, 'htm
 debug = True
 error_template = None'''
 
+    machine_template = """
+db_type = 'sqlite3'
+db_name = 'sqlite.db'
+
+#db_type = 'postgres' # or 'mysql'
+#db_name = 'my_project'
+#db_port = 5433
+#db_host = 'localhost'
+#db_username = 'postgres'
+#db_password = 'password'
+"""
+
     template_controller = '''\
 #!/usr/bin/env python
 # coding: utf-8
@@ -61,12 +67,18 @@ import sys
 from giotto import initialize
 
 try:
-    import secrets
+    from . import secrets
 except ImportError:
     secrets = None
     print("Warning: no secret.py found.")
 
-import config, machine
+try:
+    from . import machine
+except ImportError:
+    machine = None
+    print("Warning: no machine.py found.")
+
+import config
 initialize(config, secrets, machine)
 
 from manifest import manifest
