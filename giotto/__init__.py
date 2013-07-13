@@ -1,5 +1,7 @@
 __version__ = '0.11.0'
 
+import os
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from jinja2 import Environment, FileSystemLoader
@@ -26,7 +28,7 @@ def initialize(config=None, secrets=None, machine=None):
     if db_engine:
         # no engine directly added through config.
         # build from other settings
-        etype = get_config("db_type")
+        etype = get_config("db_engine")
         if etype == "sqlite3":
             try:
                 from sqlite3 import dbapi2 as sqlite
@@ -35,7 +37,7 @@ def initialize(config=None, secrets=None, machine=None):
 
             db_name = get_config("db_name", "sqlite3.db")
             db_engine = create_engine('sqlite+pysqlite:///%s' % db_name, module=sqlite)
-        if etype == "postgresql":
+        elif etype == "postgresql":
             db_name = get_config("db_name", "giotto")
             port = get_config("db_port", 5433)
             host = get_config("db_port", "localhost")
@@ -81,13 +83,14 @@ def get_config(item, default=None):
     return getattr(giotto._config, item, default) or default
 
 def switchout_keyvalue(engine):
+    from giotto.keyvalue import *
     if engine == 'dummy':
-        return giotto.keyvalue.DummyKeyValue
+        return DummyKeyValue
     if engine == 'locmem':
-        return giotto.keyvalue.LocMemKeyValue
+        return LocMemKeyValue
     if engine == 'database':
-        return giotto.keyvalue.DatabaseKeyValue
+        return DatabaseKeyValue
     if engine == 'memcached':
-        return giotto.keyvalue.MemcacheKeyValue
+        return MemcacheKeyValue
     if engine == 'redis':
         return giotto.keyvalue.RedisKeyValue()

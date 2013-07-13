@@ -39,13 +39,18 @@ auth_session_expire = 3600 * 24 * 7
 error_template = None'''
 
     machine_template = """
+# Put settings in this file that will change depending on the
+# machine, such as database hosts and external resource paths.
+# One of these files exist for each enviornment this app will run in.
+
+debug = True
 cache_engine = 'dummy' # or 'redis', 'locmem', 'database'
 auth_engine = 'database' # or any other `keyvalue` object.
 
 db_engine = 'sqlite3'
 db_name = 'sqlite.db'
 
-#db_type = 'postgres' # or 'mysql'
+#db_engine = 'postgres' # or 'mysql'
 #db_name = 'my_project'
 #db_port = 5433
 #db_host = 'localhost'
@@ -62,13 +67,13 @@ import sys
 from giotto import initialize
 
 try:
-    from . import secrets
+    import secrets
 except ImportError:
     secrets = None
     print("Warning: no secret.py found.")
 
 try:
-    from . import machine
+    import machine
 except ImportError:
     machine = None
     print("Warning: no machine.py found.")
@@ -108,7 +113,7 @@ manifest = ProgramManifest({
     except IOError:
         # create a blank config file (if one doesn't already exist)
         f = open('machine.py', 'w')
-        f.write("# Put settings in this file that will change depending on the machine.")
+        f.write(machine_template)
 
     try:
         open('secrets.py', 'r')

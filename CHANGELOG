@@ -4,3 +4,4 @@
 * Also completely re-write Manifests tests to be 1/3 the linecount, with the same coverage.
 * Because of the large change listed above, there may be some regressions. Please report these as you see them.
 * Upgraded SQLAlchemy to 0.8.2
+* Completely reworked how the config works. Now there are three configs: `secrets`, `config` and `machine`
