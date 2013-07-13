@@ -28,6 +28,7 @@ class GiottoController(object):
         name = self.get_controller_name()
         parsed = self.manifest.parse_invocation(invocation, controller_tag=name)
 
+        self.raw_args = parsed['raw_args']
         self.program = parsed['program']
         self.program.name = parsed['program_name']
         self.path_args = parsed['args']
@@ -112,6 +113,7 @@ class GiottoController(object):
         In other words, this function does the 'data negotiation' between the
         controller and the model.
         """
+        import debug
         raw_data = self.get_raw_data()
         defaults = kwargs
         values = args + list(kwargs.keys())
@@ -144,7 +146,7 @@ class GiottoController(object):
         """
         Persist this data between the user and the server.
         """
-        raise NotImplementedError
+        raise NotImplementedError("This controller does not support persistance")
 
     def __repr__(self):
         controller = self.get_controller_name()

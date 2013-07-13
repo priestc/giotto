@@ -60,8 +60,14 @@ import argparse
 import sys
 from giotto import initialize
 
-import config
-initialize(config)
+try:
+    import secrets
+except ImportError:
+    secrets = None
+    print("Warning: no secret.py found.")
+
+import config, machine
+initialize(config, secrets, machine)
 
 from manifest import manifest
 '''
@@ -89,6 +95,21 @@ manifest = ProgramManifest({
             f.write(demo_application)
         else:
             f.write(blank_application)
+
+    try:
+        open('machine.py', 'r')
+    except IOError:
+        # create a blank config file (if one doesn't already exist)
+        f = open('machine.py', 'w')
+        f.write("# Put settings in this file that will change depending on the machine.")
+
+    try:
+        open('secrets.py', 'r')
+    except IOError:
+        # create a blank config file (if one doesn't already exist)
+        f = open('secrets.py', 'w')
+        f.write("""# Put setting sin this file that are secret (such as API keys).
+# Remember to exclude this file from source control.""")
 
     try:
         open('config.py', 'r')

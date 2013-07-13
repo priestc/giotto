@@ -6,6 +6,7 @@ from giotto.programs import GiottoProgram
 from giotto.views import GiottoView, renders
 from giotto.utils import super_accept_to_mimetype
 from giotto.exceptions import DataNotFound
+from giotto.primitives import RAW_ARGS
 
 class FileView(GiottoView):
 
@@ -24,7 +25,8 @@ def StaticServe(base_path):
     """
     Meta program for serving any file based on the path
     """
-    def get_file(path):
+    def get_file(path=RAW_ARGS):
+        #import debug
         fullpath = get_config('project_path') + os.path.join(base_path, path)
         try:
             mime, encoding = mimetypes.guess_type(fullpath)

@@ -174,8 +174,8 @@ class HTTPController(GiottoController):
             return self.get_raw_data()
         if primitive == 'LOGGED_IN_USER':
             return self.request.user
-        if primitive == 'ALL_PROGRAMS':
-            return self.manifest.get_all_programs()
+        if primitive == 'RAW_ARGS':
+            return '/'.join(self.path_args)
 
 
 def make_duplicate_request(request):

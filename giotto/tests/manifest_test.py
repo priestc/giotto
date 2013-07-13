@@ -72,6 +72,7 @@ class StackedRootTest(unittest.TestCase):
             'program': both,
             'superformat': None,
             'superformat_mime': None,
+            'raw_args': '',
             'invocation': '/sub/another/both',
             'path': '/sub/another/',
             'program_name': 'both'
@@ -82,6 +83,7 @@ class StackedRootTest(unittest.TestCase):
         parsed = self.manifest.parse_invocation('/sub/another/aaaa', 'http-get')
         correct = {
             'args': ['aaaa'],
+            'raw_args': 'aaaa',
             'program': blank,
             'superformat': None,
             'superformat_mime': None,
@@ -95,6 +97,7 @@ class StackedRootTest(unittest.TestCase):
         parsed = self.manifest.parse_invocation('/sub/another/both.html', 'http-get')
         correct = {
             'args': [],
+            'raw_args': '',
             'program': both,
             'superformat': 'html',
             'superformat_mime': 'text/html',
@@ -109,6 +112,7 @@ class StackedRootTest(unittest.TestCase):
         parsed = self.manifest.parse_invocation('/sub/another/both.html/aaaa/bbbbbb', 'http-get')
         correct = {
             'args': ['aaaa', 'bbbbbb'],
+            'raw_args': 'aaaa/bbbbbb',
             'program': both,
             'superformat': 'html',
             'superformat_mime': 'text/html',
@@ -123,6 +127,7 @@ class StackedRootTest(unittest.TestCase):
             parsed = self.manifest.parse_invocation('/sub/double', controller_tag)
             correct = {
                 'args': [],
+                'raw_args': '',
                 'program': program,
                 'superformat': None,
                 'superformat_mime': None,
@@ -133,7 +138,8 @@ class StackedRootTest(unittest.TestCase):
             self.assertEquals(parsed, correct)
 
     def xtest_parse_invocation_invalid(self):
-        #print self.manifest.parse_invocation('/sub/double', 'irc')
+        print self.manifest.parse_invocation('/sub/double', 'irc')
+        print self.manifest.get_urls('irc')
         self.assertRaises(
             ProgramNotFound, 
             lambda: self.manifest.parse_invocation('/sub/double', 'irc')

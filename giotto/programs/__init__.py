@@ -304,6 +304,11 @@ class ProgramManifest(object):
 
         matching_path = longest
 
+        #if matching_path == '/' and self.manifest[''].model:
+        #    program = self.manifest[''].model
+
+        program = self.get_program(matching_path, controller=controller_tag)
+
         if not matching_path:
             raise ProgramNotFound("Can't find %s" % invocation)
 
@@ -315,18 +320,19 @@ class ProgramManifest(object):
         if args_fragment.startswith('.'):
             # args_fragment will be something like ".html/arg1/arg2" or just ".html"
             superformat = args_fragment.split('/')[0][1:]
-            xargs = args_fragment.split('/')[1:]
+            args = args_fragment.split('/')[1:]
+            args_fragment = '/'.join(args)
         else:
-            xargs = args_fragment.split("/")[1:] if '/' in args_fragment else []
-        
-        result = self.get_program(matching_path, controller=controller_tag)
+            args = args_fragment.split("/")[1:] if args_fragment else []
+            args_fragment = args_fragment[1:] # remove leading slash
 
         return {
-            'program': result,
+            'program': program,
             'program_name': program_name,
             'superformat': superformat,
             'superformat_mime': super_accept_to_mimetype(superformat),
-            'args': xargs,
+            'args': args,
+            'raw_args': args_fragment,
             'path': path,
             'invocation': invocation,
         }
