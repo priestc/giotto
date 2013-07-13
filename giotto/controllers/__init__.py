@@ -137,6 +137,9 @@ class GiottoController(object):
             value_to_use = None
 
             if default_defined_in_model == RAW_INVOCATION_ARGS:
+                # flag that the RAW_INVOCATION_ARGS primitive has been invoked
+                # used later to suppress errors for unused program args
+                # when this primitive is invoked, all positional args are invalid. 
                 raw = True
 
             if type(default_defined_in_model) == GiottoPrimitive:

@@ -25,10 +25,7 @@ def StaticServe(base_path):
     """
     Meta program for serving any file based on the path
     """
-    def get_file(*args):
-        if path != "jsqrcode/decoder.js":
-            raise TypeError(path)
-
+    def get_file(path=RAW_INVOCATION_ARGS):
         fullpath = get_config('project_path') + os.path.join(base_path, path)
         try:
             mime, encoding = mimetypes.guess_type(fullpath)
@@ -45,7 +42,7 @@ def StaticServe(base_path):
 
 def SingleStaticServe(file_path):
     """
-    Meta program for serving a single file. Useful for favicon.ico
+    Meta program for serving a single file. Useful for favicon.ico and robots.txt
     """
     def get_file():
         mime, encoding = mimetypes.guess_type(file_path)
