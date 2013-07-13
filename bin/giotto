@@ -30,12 +30,10 @@ if subcommand == 'create':
     controllers = sys.argv[2:]
     config_template = '''import os
 from giotto.utils import better_base
-from giotto.keyvalue import LocMemKeyValue
 
 Base = better_base()
 
-cache = None
-auth_session = LocMemKeyValue()
+auth_session = 'locmem'
 auth_session_expire = 3600 * 24 * 7
 
 project_path = os.path.dirname(os.path.abspath(__file__))
@@ -43,11 +41,12 @@ project_path = os.path.dirname(os.path.abspath(__file__))
 from jinja2 import Environment, FileSystemLoader
 jinja2_env = Environment(loader=FileSystemLoader(os.path.join(project_path, 'html')))
 
-debug = True
 error_template = None'''
 
     machine_template = """
-db_type = 'sqlite3'
+cache_engine = 'dummy' # or 'redis', 'locmem', 'database'
+
+db_engine = 'sqlite3'
 db_name = 'sqlite.db'
 
 #db_type = 'postgres' # or 'mysql'
