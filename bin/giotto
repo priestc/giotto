@@ -38,14 +38,15 @@ jinja2_template_dir = 'html'
 auth_session_expire = 3600 * 24 * 7
 error_template = None'''
 
-    machine_template = """
-# Put settings in this file that will change depending on the
+    machine_template = """# Put settings in this file that will change depending on the
 # machine, such as database hosts and external resource paths.
 # One of these files exist for each enviornment this app will run in.
 
 debug = True
 cache_engine = 'dummy' # or 'redis', 'locmem', 'database'
-auth_engine = 'database' # or any other `keyvalue` object.
+cache_host = 'localhost'
+
+auth_engine = 'database' # or a `keyvalue` object.
 
 db_engine = 'sqlite3'
 db_name = 'sqlite.db'

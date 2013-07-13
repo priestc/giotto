@@ -6,7 +6,7 @@ Getting Started with Giotto
 
 First, install giotto::
 
-    $ pip install giotto
+    $ pip install giotto==0.11.0
 
 .. note::
     Giotto is very actively under development, The version on pypi is most definitely stale.
@@ -27,8 +27,8 @@ This will create a ``manifest.py`` file, which contains your program manifest.
 It will also create a series of "concrete controller files",
 which will act as a gateway between your application and the outside world.
 The concrete controller files will be called ``http_controller.py`` and ``cmd_controller.py``
-This utility will also add a ``config.py`` file,
-which will be where you add your database information (and other things).
+This utility will also add a ``config.py``, ``secrets.py`` and ``machine.py`` file,
+which will be where you add database connection information (and other things).
 
 If you only want to interact with you application through the command line,
 then you could leave off the ``http`` flag when calling ``giotto`` (and vice versa).
@@ -200,11 +200,18 @@ Also, add a pause to the model method::
 This will simulate a heavy calculating model.
 You also need to have either Redis or Memcache installed and running.
 Configure the cache by setting the following to the ``cache``
-variable in the config file::
+variable in the ``machine.py`` file::
 
-    from giotto.cache import CacheWithMemcache
-    cache = CacheWithMemcache(host='localhost')
+    cache_engine = 'memcache'
+    cache_host = 'localhost'
 
-To use the redis cache, change the class to ``CacheWithRedis``.
+To use the redis cache, change the engine to ``redis``.
 Now when you load a page, it will take 5 seconds for the first render,
 and subsequent renders will be served from cache.
+
+
+----------------
+Now You're Done!
+----------------
+
+Thats it in a nutshell. To learn more, read around the docs, and build things!
