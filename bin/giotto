@@ -33,18 +33,14 @@ from giotto.utils import better_base
 
 Base = better_base()
 
-auth_session = 'locmem'
-auth_session_expire = 3600 * 24 * 7
-
 project_path = os.path.dirname(os.path.abspath(__file__))
-
-from jinja2 import Environment, FileSystemLoader
-jinja2_env = Environment(loader=FileSystemLoader(os.path.join(project_path, 'html')))
-
+jinja2_template_dir = 'html'
+auth_session_expire = 3600 * 24 * 7
 error_template = None'''
 
     machine_template = """
 cache_engine = 'dummy' # or 'redis', 'locmem', 'database'
+auth_engine = 'database' # or any other `keyvalue` object.
 
 db_engine = 'sqlite3'
 db_name = 'sqlite.db'

@@ -2,6 +2,7 @@ __version__ = '0.11.0'
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from jinja2 import Environment, FileSystemLoader
 
 def initialize(config=None, secrets=None, machine=None):
     """
@@ -22,7 +23,7 @@ def initialize(config=None, secrets=None, machine=None):
             setattr(giotto._config, item, s_value)
 
     db_engine = get_config("db_engine", None)
-    if not db_engine:
+    if db_engine:
         # no engine directly added through config.
         # build from other settings
         etype = get_config("db_type")
@@ -62,6 +63,15 @@ def initialize(config=None, secrets=None, machine=None):
         # session engine was passed in as string, exchange for engine object.
         e = switchout_keyvalue(cache_engine)
         setattr(giotto._config, "cache_engine", e)
+
+    td = get_config('jinja2_template_dir', None)
+    if td:
+        pp = get_config('project_path')
+        e = Environment(loader=FileSystemLoader(os.path.join(pp, 'html')))
+        setattr(giotto._config, "jinja2_env", e)
+
+    
+    
 
 def get_config(item, default=None):
     """
