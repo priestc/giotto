@@ -83,14 +83,14 @@ def get_config(item, default=None):
     return getattr(giotto._config, item, default) or default
 
 def switchout_keyvalue(engine):
-    from giotto.keyvalue import *
+    from giotto import keyvalue
     if engine == 'dummy':
-        return DummyKeyValue
+        return keyvalue.DummyKeyValue
     if engine == 'locmem':
-        return LocMemKeyValue
+        return keyvalue.LocMemKeyValue
     if engine == 'database':
-        return DatabaseKeyValue
+        return keyvalue.DatabaseKeyValue
     if engine == 'memcached':
-        return MemcacheKeyValue
+        return keyvalue.MemcacheKeyValue
     if engine == 'redis':
-        return giotto.keyvalue.RedisKeyValue()
+        return keyvalue.RedisKeyValue()

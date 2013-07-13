@@ -120,7 +120,7 @@ manifest = ProgramManifest({
     except IOError:
         # create a blank config file (if one doesn't already exist)
         f = open('secrets.py', 'w')
-        f.write("""# Put setting sin this file that are secret (such as API keys).
+        f.write("""# Put settings in this file that are secret (such as API keys).
 # Remember to exclude this file from source control.""")
 
     try:
