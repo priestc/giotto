@@ -138,8 +138,8 @@ class StackedRootTest(unittest.TestCase):
             self.assertEquals(parsed, correct)
 
     def xtest_parse_invocation_invalid(self):
-        print self.manifest.parse_invocation('/sub/double', 'irc')
-        print self.manifest.get_urls('irc')
+        #print self.manifest.parse_invocation('/sub/double', 'irc')
+        #print self.manifest.get_urls('irc')
         self.assertRaises(
             ProgramNotFound, 
             lambda: self.manifest.parse_invocation('/sub/double', 'irc')
