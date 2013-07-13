@@ -174,8 +174,10 @@ class HTTPController(GiottoController):
             return self.get_raw_data()
         if primitive == 'LOGGED_IN_USER':
             return self.request.user
-        if primitive == 'RAW_ARGS':
+        if primitive == 'RAW_INVOCATION_ARGS':
             return '/'.join(self.path_args)
+
+        raise Exception("Primitive not supported")
 
 
 def make_duplicate_request(request):

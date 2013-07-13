@@ -4,7 +4,7 @@ from giotto.programs import GiottoProgram
 from giotto.views import BasicView
 from giotto.exceptions import MockNotFound
 
-def model(x, y):
+def simple(x, y):
     return None
 
 class ProgramTest(unittest.TestCase):
@@ -13,7 +13,7 @@ class ProgramTest(unittest.TestCase):
         """
         The program raises MockNotFound when the program has no mock defined
         """
-        gp = GiottoProgram(model=[model])
+        gp = GiottoProgram(model=[simple])
         self.assertRaises(MockNotFound, lambda: gp.get_model_mock())
 
     def test_no_mock_needed(self):
@@ -21,7 +21,7 @@ class ProgramTest(unittest.TestCase):
         self.assertEquals({}, gp.get_model_mock())
 
     def test_mock_found(self):
-        gp = GiottoProgram(model=[model, {'mock': True}])
+        gp = GiottoProgram(model=[simple, {'mock': True}])
         self.assertEquals({'mock': True}, gp.get_model_mock())
 
 

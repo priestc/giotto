@@ -5,7 +5,7 @@ from giotto import get_config
 from giotto.programs import GiottoProgram
 from giotto.exceptions import (GiottoException, InvalidInput, ProgramNotFound,
     MockNotFound, ControlMiddlewareInterrupt, NotAuthorized)
-from giotto.primitives import GiottoPrimitive
+from giotto.primitives import GiottoPrimitive, RAW_INVOCATION_ARGS
 from giotto.keyvalue import DummyKeyValue
 from giotto.control import GiottoControl
 
@@ -113,32 +113,45 @@ class GiottoController(object):
         In other words, this function does the 'data negotiation' between the
         controller and the model.
         """
-        import debug
-        raw_data = self.get_raw_data()
+        kwargs_from_invocation = self.get_raw_data()
+        args_from_invocation = self.path_args
+
         defaults = kwargs
         values = args + list(kwargs.keys())
 
         output = {}
-        i = -1
-        for i, value in enumerate(values):
-            if value in defaults:
-                may_be_primitive = defaults[value]
-                if isinstance(may_be_primitive, GiottoPrimitive):
-                    output[value] = self.get_primitive(may_be_primitive.name)
-                    continue # don't let user input override primitives.
-                else:
-                    output[value] = may_be_primitive
 
-            if i + 1 <= len(self.path_args):
-                output[value] = self.path_args[i]
-            if value in raw_data:
-                output[value] = raw_data[value]
+        raw = False
+        for i, field in enumerate(values):
+            ## going through each bit of data that the model needs
+            ## `value` here is the name of each needed var.
 
-        if len(self.path_args) > i + 1:
-            raise ProgramNotFound("Too many positional arguments for program: '%s'" % self.program.name)
+            # the 'default' value that may be defined in the model.
+            # this variable might be a string or int or might even be a primitive object.
+            default_defined_in_model = defaults.get(field, None)
 
-        if not len(output) == len(values):
-            raise ProgramNotFound("Not enough data for program '%s'" % self.program.name)
+            # the value in kwarg arguments such as --values and GET params
+            from_data_kwargs = kwargs_from_invocation.get(field, None)
+
+            # The value that will end up being used.
+            value_to_use = None
+
+            if default_defined_in_model == RAW_INVOCATION_ARGS:
+                raw = True
+
+            if type(default_defined_in_model) == GiottoPrimitive:
+                value_to_use = self.get_primitive(default_defined_in_model.name)
+            elif from_data_kwargs:
+                value_to_use = from_data_kwargs
+            elif not raw and args_from_invocation:
+                value_to_use = args_from_invocation.pop()
+            else:
+                raise Exception("Data Missing For Program. Missing: %s" % field)
+            
+            output[field] = value_to_use
+
+        if args_from_invocation and not raw:
+            raise Exception("Too many argumets to program: %s" % args_from_invocation)
 
         return output
 
