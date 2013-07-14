@@ -12,6 +12,9 @@ REQUIRES = [
 ]
 
 if sys.version_info == (2, 6):
+    print("XXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+    print("XXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+    print("XXXXXXXXXXXXXXXXXXXXXXXXXXXX")
     REQUIRES.append('ordereddict')
 
 setup(
