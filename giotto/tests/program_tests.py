@@ -1,5 +1,8 @@
 import unittest
-from collections import OrderedDict
+try:
+    from collections import OrderedDict
+except ImportError:
+    from ordereddict import OrderedDict # python2.6
 
 from giotto.programs import GiottoProgram
 from giotto.views import BasicView
