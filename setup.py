@@ -1,4 +1,5 @@
 from setuptools import setup
+import sys
 
 REQUIRES = [
     'webob==1.2.3',
