@@ -58,7 +58,7 @@ class ArgspecTest(unittest.TestCase):
         def test(a=1, b=2, c=3, d=4): pass
         program = GiottoProgram(model=[test], view=BasicView())
         a, kw = program.get_model_args_kwargs()
-        self.assertEquals(kw.keys(), ['a', 'b', 'c', 'd'])
+        self.assertEquals(list(kw.keys()), ['a', 'b', 'c', 'd'])
 
 if __name__ == '__main__':
     unittest.main()
