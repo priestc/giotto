@@ -1,5 +1,18 @@
 from setuptools import setup
 
+REQUIRES = [
+    'webob==1.2.3',
+    'six==1.2.0',
+    'irc==5.0.1',
+    'jinja2==2.6',
+    'py-bcrypt==0.2',
+    'python-mimeparse==0.1.4',
+    'sqlalchemy==0.8.2',
+]
+
+if sys.version_info <= (2, 6):
+    REQUIRES.append('ordereddict')
+
 setup(
     name='giotto',
     version='0.11.0',
@@ -31,13 +44,5 @@ setup(
         'Topic :: Software Development :: Libraries :: Application Frameworks',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
-    install_requires=[
-        'webob==1.2.3',
-        'six==1.2.0',
-        'irc==5.0.1',
-        'jinja2==2.6',
-        'py-bcrypt==0.2',
-        'python-mimeparse==0.1.4',
-        'sqlalchemy==0.8.2',
-    ],
+    install_requires=REQUIRES,
 )
