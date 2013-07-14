@@ -1,5 +1,9 @@
 import inspect
-from collections import OrderedDict
+try:
+    from collections import OrderedDict
+except ImportError:
+    from ordereddict import OrderedDict # python2.6
+
 import re
 import os
 
