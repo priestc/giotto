@@ -1,3 +1,4 @@
+from collections import deque
 import inspect
 import json
 
@@ -114,7 +115,7 @@ class GiottoController(object):
         controller and the model.
         """
         kwargs_from_invocation = self.get_raw_data()
-        args_from_invocation = self.path_args
+        args_from_invocation = deque(self.path_args)
 
         defaults = kwargs
         values = args + list(kwargs.keys())
@@ -128,8 +129,10 @@ class GiottoController(object):
 
             # the 'default' value that may be defined in the model.
             # this variable might be a string or int or might even be a primitive object.
+            # NotImplemented here is used as to preserve if a default value is None.
+            # it is used here as a sort of MetaNone.
             default_defined_in_model = defaults.get(field, NotImplemented)
-
+            
             # the value in kwarg arguments such as --values and GET params
             from_data_kwargs = kwargs_from_invocation.get(field, None)
 
@@ -147,7 +150,7 @@ class GiottoController(object):
             elif from_data_kwargs:
                 value_to_use = from_data_kwargs
             elif not raw and args_from_invocation:
-                value_to_use = args_from_invocation.pop()
+                value_to_use = args_from_invocation.popleft()
             elif default_defined_in_model is not NotImplemented:
                 value_to_use = default_defined_in_model
             else:

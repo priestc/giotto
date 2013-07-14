@@ -1,4 +1,5 @@
 import unittest
+from collections import OrderedDict
 
 from giotto.programs import GiottoProgram
 from giotto.views import BasicView
@@ -49,10 +50,15 @@ class ArgspecTest(unittest.TestCase):
         self.assertEquals((['a', 'b'], {'c': "what"}), ret)
 
     def test_no_model(self):
-        def test(cls, a, b, c="what"): pass
         program = GiottoProgram(view=BasicView())
         ret = program.get_model_args_kwargs()
         self.assertEquals(([], {}), ret)
+
+    def test_preserve_order(self):
+        def test(a=1, b=2, c=3, d=4): pass
+        program = GiottoProgram(model=[test], view=BasicView())
+        a, kw = program.get_model_args_kwargs()
+        self.assertEquals(kw.keys(), ['a', 'b', 'c', 'd'])
 
 if __name__ == '__main__':
     unittest.main()
