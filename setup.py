@@ -11,7 +11,7 @@ REQUIRES = [
     'sqlalchemy==0.8.2',
 ]
 
-if sys.version_info <= (2, 6):
+if sys.version_info == (2, 6):
     REQUIRES.append('ordereddict')
 
 setup(
