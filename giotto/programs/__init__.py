@@ -54,11 +54,10 @@ class GiottoProgram(object):
             return [], {}
 
         argspec = inspect.getargspec(source)
-        kwargs = OrderedDict(
-            reversed(zip(
-                *[reversed(l) for l in (argspec.args, argspec.defaults or [])]
-            ))
-        )
+        
+        kk = zip(*[reversed(l) for l in (argspec.args, argspec.defaults or [])])
+        kk.reverse()
+        kwargs = OrderedDict(kk)
         args = [x for x in argspec.args if x not in kwargs.keys()]
         if args and args[0] == 'cls':
             args = args[1:]
