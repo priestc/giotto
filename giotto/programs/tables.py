@@ -24,6 +24,6 @@ def blast_tables():
         yn = raw_input(msg)
     if yn.lower() != 'y':
         return "Aborting"
-    get_config('Base').metadata.drop_all(get_config('engine'))
+    get_config('Base').metadata.drop_all(get_config('db_engine'))
     print("blasting away all tables...")
     return make_tables()
