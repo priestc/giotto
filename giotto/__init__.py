@@ -50,7 +50,6 @@ def initialize(config=None, secrets=None, machine=None):
         else:
             raise TypeError("Engine not supported: %s" % etype)
     
-    if db_engine:
         setattr(giotto._config, "db_engine", db_engine)
         setattr(giotto._config, "db_session", sessionmaker(bind=db_engine)())
 

@@ -5,7 +5,7 @@ def make_tables():
     """
     Create all the tables for the models that have been added to the manifest.
     """
-    engine = get_config('engine')
+    engine = get_config('db_engine')
     Base = get_config('Base')
     Base.metadata.create_all(engine)
     print('Creating tables...')
