@@ -71,7 +71,7 @@ try:
     import secrets
 except ImportError:
     secrets = None
-    print("Warning: no secret.py found.")
+    print("Warning: no secrets.py found.")
 
 try:
     import machine

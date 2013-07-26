@@ -72,9 +72,6 @@ def initialize(config=None, secrets=None, machine=None):
         e = Environment(loader=FileSystemLoader(os.path.join(pp, 'html')))
         setattr(giotto._config, "jinja2_env", e)
 
-    
-    
-
 def get_config(item, default=None):
     """
     Use this function to get values from the config object.
