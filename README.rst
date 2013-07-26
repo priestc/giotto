@@ -1,3 +1,6 @@
+.. image:: https://pypip.in/v/giotto/badge.png
+    :target: https://pypi.python.org/pypi/giotto
+    
 .. image:: https://travis-ci.org/priestc/giotto.png?branch=master
    :target: https://travis-ci.org/priestc/giotto
 
