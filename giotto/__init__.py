@@ -40,7 +40,7 @@ def initialize(config=None, secrets=None, machine=None):
         elif etype == "postgresql":
             db_name = get_config("db_name", "giotto")
             port = get_config("db_port", 5433)
-            host = get_config("db_port", "localhost")
+            host = get_config("db_host", "localhost")
             username = get_config("db_username", "postgres")
             password = get_config("db_password", "")
             e = 'postgresql://%s:%s@%s:%s/%s' % (
@@ -62,7 +62,8 @@ def initialize(config=None, secrets=None, machine=None):
     cache_engine = get_config("cache_engine", None)
     if hasattr(cache_engine, 'lower'):
         # session engine was passed in as string, exchange for engine object.
-        e = switchout_keyvalue(cache_engine)
+        class_ = switchout_keyvalue(cache_engine)
+        e = class_(host=get_config("cache_host", "localhost"))
         setattr(giotto._config, "cache_engine", e)
 
     td = get_config('jinja2_template_dir', None)
@@ -92,4 +93,4 @@ def switchout_keyvalue(engine):
     if engine == 'memcached':
         return keyvalue.MemcacheKeyValue
     if engine == 'redis':
-        return keyvalue.RedisKeyValue()
+        return keyvalue.RedisKeyValue
