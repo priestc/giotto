@@ -16,22 +16,51 @@ def make_request(path):
 	return r
 
 def no_defaults(x, y):
+	"No defaults: x, y"
 	return int(x) * int(y)
 
 def defaults(x=4, y=2):
+	"defaults: x=4, y=2"
 	return int(x) * int(y)
 
 def primitive(x=LOGGED_IN_USER):
+	"primitive"
 	return int(x) * int(y)
 
 def raw(path=RAW_INVOCATION_ARGS, another=3):
+	"raw"
 	return path + str(another)
 
 def none(x=None, y=None):
+	"none"
 	return "%s %s" % (x, y)
 
 def order(a='a', b='b', c='c', d='d', e='e', f='f', g='g'):
+	"order"
 	return [a, b, c, d, e, f, g]
+
+class FoldingBaseArgTest(unittest.TestCase):
+	def setUp(self):
+		initialize()
+		self.manifest = ProgramManifest({
+			'': GiottoProgram(
+				model=[none],
+				view=BasicView()
+			),
+			'named': GiottoProgram(
+				model=[defaults],
+				view=BasicView()
+			),
+		})
+
+	def test_404(self):
+		"""
+		Verify that an incorrect name invokes as a 404 instead of
+		being passed into the root program.
+		"""
+		request = make_request("/invalid")
+		cx = HTTPController(request, self.manifest)
+		self.assertRaises(Exception, cx.get_data_response)
 
 class NegotiationTest(unittest.TestCase):
 

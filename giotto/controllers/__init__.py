@@ -161,7 +161,6 @@ class GiottoController(object):
         if args_from_invocation and not raw:
             raise Exception("Too many argumets to program: %s" % args_from_invocation)
 
-        import debug
         return output
 
     def persist(self, values):
