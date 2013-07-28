@@ -30,14 +30,14 @@ class GiottoProgram(object):
     ]
 
     def __repr__(self):
-        return "<GiottoProgram: %s>" % (self.name or self.get_model().__name__ or "(No Model)")
+        return "<GiottoProgram: %s>" % self.name
 
     def __init__(self, description=None, **kwargs):
         self.description = description
         for k, v in kwargs.items():
             if k not in self.valid_args:
                 raise ValueError(
-                    "Invalid GiottoProgram argument: %s, choices are %s" %
+                    "Invalid GiottoProgram argument: '%s'. Choices are: %s" %
                     (k, ", ".join(self.valid_args))
                 )
             else:
@@ -46,6 +46,9 @@ class GiottoProgram(object):
         if hasattr(self.view, 'mro') and GiottoView in self.view.mro():
             # instantiate all views that are defined as a class.
             self.view = self.view()
+
+        m = self.get_model()
+        self.name = (m and m.__name__) or kwargs.get('name') or None
 
     def get_model_args_kwargs(self):
         """
