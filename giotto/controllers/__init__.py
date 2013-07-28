@@ -125,7 +125,7 @@ class GiottoController(object):
         raw = False
         for i, field in enumerate(values):
             ## going through each bit of data that the model needs
-            ## `value` here is the name of each needed var.
+            ## `field` here is the name of each needed var.
 
             # the 'default' value that may be defined in the model.
             # this variable might be a string or int or might even be a primitive object.
@@ -161,6 +161,7 @@ class GiottoController(object):
         if args_from_invocation and not raw:
             raise Exception("Too many argumets to program: %s" % args_from_invocation)
 
+        import debug
         return output
 
     def persist(self, values):

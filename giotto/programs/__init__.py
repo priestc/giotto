@@ -30,7 +30,7 @@ class GiottoProgram(object):
     ]
 
     def __repr__(self):
-        return "<GiottoProgram: %s>" % (self.name or self.model.__doc__)
+        return "<GiottoProgram: %s>" % (self.name or self.get_model().__doc__ or "(No Description)")
 
     def __init__(self, description=None, **kwargs):
         self.description = description
