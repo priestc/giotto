@@ -317,10 +317,6 @@ class ProgramManifest(object):
 
         program = self.get_program(matching_path, controller=controller_tag)
 
-        # the only matching path is the root.
-        # if the args don't match up, then this invocation is invalid.
-        potential_invalid_root_parse = longest == '/'
-
         if not matching_path:
             raise ProgramNotFound("Can't find %s" % invocation)
 
@@ -336,7 +332,7 @@ class ProgramManifest(object):
             args_fragment = '/'.join(args)
         else:
             args = args_fragment.split("/")[1:] if args_fragment else []
-            args_fragment = args_fragment[1:] # remove leading slash
+            args_fragment = args_fragment[1:] if (args_fragment and args_fragment[0] =='/') else args_fragment
 
         return {
             'program': program,
@@ -347,5 +343,4 @@ class ProgramManifest(object):
             'raw_args': args_fragment,
             'path': path,
             'invocation': invocation,
-            #'potential_invalid_root_parse': potential_invalid_root_parse,
         }
