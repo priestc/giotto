@@ -5,7 +5,7 @@ import json
 from giotto import get_config
 from giotto.programs import GiottoProgram
 from giotto.exceptions import (GiottoException, InvalidInput, ProgramNotFound,
-    MockNotFound, ControlMiddlewareInterrupt, NotAuthorized)
+    MockNotFound, ControlMiddlewareInterrupt, NotAuthorized, InvalidInvocation)
 from giotto.primitives import GiottoPrimitive, RAW_INVOCATION_ARGS
 from giotto.keyvalue import DummyKeyValue
 from giotto.control import GiottoControl
@@ -154,12 +154,15 @@ class GiottoController(object):
             elif default_defined_in_model is not NotImplemented:
                 value_to_use = default_defined_in_model
             else:
-                raise Exception("Data Missing For Program. Missing: %s" % field)
+                raise InvalidInvocation("Data Missing For Program. Missing: %s" % field)
             
             output[field] = value_to_use
 
         if args_from_invocation and not raw:
-            raise Exception("Too many argumets to program: %s" % args_from_invocation)
+            msg = "Too many arguments. Program `%s` takes %s arguments, %s given" % (
+                self.program.name, len(args) + len(kwargs), len(args_from_invocation)
+            )
+            raise InvalidInvocation(msg)
 
         return output
 

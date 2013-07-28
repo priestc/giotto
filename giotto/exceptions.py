@@ -40,7 +40,7 @@ class InvalidInput(GiottoException):
         if not item in self.__dict__:
             return Mock()
 
-class InvalidProgram(GiottoException):
+class InvalidInvocation(GiottoException):
     pass
 
 class ProgramNotFound(GiottoException):

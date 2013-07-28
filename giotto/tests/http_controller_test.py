@@ -4,7 +4,7 @@ import json
 from giotto import initialize
 from giotto.controllers.http import HTTPController
 from giotto.programs import GiottoProgram, ProgramManifest
-from giotto.exceptions import ProgramNotFound
+from giotto.exceptions import ProgramNotFound, InvalidInvocation
 from giotto.primitives import LOGGED_IN_USER, RAW_INVOCATION_ARGS
 from giotto.views import BasicView
 
@@ -51,6 +51,10 @@ class FoldingBaseArgTest(unittest.TestCase):
 				model=[defaults],
 				view=BasicView()
 			),
+			"another": {
+				'': GiottoProgram(name='another root'),
+				'name': GiottoProgram(name='another name', view=BasicView())
+			}
 		})
 
 	def test_404(self):
@@ -60,7 +64,16 @@ class FoldingBaseArgTest(unittest.TestCase):
 		"""
 		request = make_request("/invalid")
 		cx = HTTPController(request, self.manifest)
-		self.assertRaises(Exception, cx.get_data_response)
+		self.assertRaises(ProgramNotFound, cx.get_data_response)
+
+	def test_nested_404(self):
+		"""
+		Verify that an incorrect name invokes as a 404 instead of
+		being passed into the root program.
+		"""
+		request = make_request("/another/invalid")
+		cx = HTTPController(request, self.manifest)
+		self.assertRaises(ProgramNotFound, cx.get_data_response)
 
 class NegotiationTest(unittest.TestCase):
 

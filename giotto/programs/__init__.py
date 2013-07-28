@@ -48,7 +48,7 @@ class GiottoProgram(object):
             self.view = self.view()
 
         m = self.get_model()
-        self.name = (m and m.__name__) or kwargs.get('name') or None
+        self.name = (m and m.__name__) or kwargs.get('name')
 
     def get_model_args_kwargs(self):
         """
@@ -315,10 +315,11 @@ class ProgramManifest(object):
 
         matching_path = longest
 
-        #if matching_path == '/' and self.manifest[''].model:
-        #    program = self.manifest[''].model
-
         program = self.get_program(matching_path, controller=controller_tag)
+
+        # the only matching path is the root.
+        # if the args don't match up, then this invocation is invalid.
+        potential_invalid_root_parse = longest == '/'
 
         if not matching_path:
             raise ProgramNotFound("Can't find %s" % invocation)
@@ -346,4 +347,5 @@ class ProgramManifest(object):
             'raw_args': args_fragment,
             'path': path,
             'invocation': invocation,
+            #'potential_invalid_root_parse': potential_invalid_root_parse,
         }
