@@ -1,4 +1,4 @@
-demo_application = '''from giotto.programs import Program, ProgramManifest
+demo_application = '''from giotto.programs import Program, Manifest
 from giotto.views import BasicView, renders
 
 class ColoredMultiplyView(BasicView):
@@ -45,7 +45,7 @@ class ColoredMultiplyView(BasicView):
 def multiply(x, y):
     return {'x': int(x), 'y': int(y), 'product': int(x) * int(y)}
 
-manifest = ProgramManifest({
+manifest = Manifest({
     'multiply': Program(
         controllers = ('http-get', 'cmd', 'irc'),
         model=[multiply, {'x': 3, 'y': 3, 'product': 9}],

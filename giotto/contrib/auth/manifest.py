@@ -1,5 +1,5 @@
 from giotto import get_config
-from giotto.programs import Program, ProgramManifest
+from giotto.programs import Program, Manifest
 from giotto.views import GiottoView, BasicView, jinja_template
 from giotto.control import Redirection
 
@@ -26,7 +26,7 @@ def create_auth_manifest(**kwargs):
             callback(user)
         return result
 
-    return ProgramManifest({
+    return Manifest({
         'login': [
             AuthProgram(
                 """

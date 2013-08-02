@@ -9,7 +9,7 @@ Just add the ``ServeStatic`` program to your manifest::
 
     from giotto.contrib.static.programs import StaticServe
 
-    manifest = ProgramManifest({
+    manifest = Manifest({
         'static': StaticServe('/var/www/static_files')
     })
 
@@ -23,7 +23,7 @@ SingleStaticServe
 -----------------
 This program is useful to place a single file onto the manifest::
 
-    manifest = ProgramManifest({
+    manifest = Manifest({
         'static': StaticServe('/var/www/static_files'),
         'favicon': StaticServe('/var/www/static_files/favicon.ico'),
     })

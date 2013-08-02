@@ -41,9 +41,9 @@ Creating tables
 ---------------
 Add the manageent manifest to your project::
 
-    from giotto.programs import management_manifest, ProgramManifest
+    from giotto.programs import management_manifest, Manifest
 
-    manifest = ProgramManifest({
+    manifest = Manifest({
         'mgt': management_manifest
     })
 

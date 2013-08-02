@@ -71,7 +71,7 @@ To enable cache for a program, add a value (in seconds) to the ``cache`` attribu
     def square(x):
         return {'x': x * x}
 
-    manifest = ProgramManifest({
+    manifest = Manifest({
         'squared': Program(
             controllers=('http-get', 'cmd'),
             model=[square],

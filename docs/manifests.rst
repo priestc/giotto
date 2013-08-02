@@ -8,10 +8,10 @@ Manifests are objects that keep track of all the programs that make up your appl
 Think of them as urlconfs in django.
 An example Manifests looks like this::
 
-    from giotto.programs import ProgramManifest
+    from giotto.programs import Manifest
     from myapp.models import homepage, signup, auth_manifest
     
-    manifest = ProgramManifest({
+    manifest = Manifest({
         '': RootProgram(
             model=[homepage],
             view=BasicView,

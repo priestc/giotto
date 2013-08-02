@@ -80,7 +80,7 @@ Inside the ``manifest.py`` file, you will see the following::
     def multiply(x, y):
         return {'x': int(x), 'y': int(y), 'product': int(x) * int(y)}
 
-    manifest = ProgramManifest({
+    manifest = Manifest({
         'multiply': Program(
             controllers = ('http-get', 'cmd', 'irc'),
             model=[multiply, {'x': 3, 'y': 3, 'product': 9}],
@@ -157,7 +157,7 @@ On the Program object, add a ``model_mock`` object to the list along with the mo
 A model mock is an object that gets returned in lieu of executing the model function.
 This object should be the same form as what the model returns::
 
-    manifest = ProgramManifest({
+    manifest = Manifest({
         'multiply': Program(
             controllers=('http-get', 'cmd', 'irc'),
             model=[multiply, {'x': 10, 'y': 10, 'product': 100}],
@@ -181,7 +181,7 @@ Cache
 
 Add a ``cache`` attribute to the program::
 
-    manifest = ProgramManifest({
+    manifest = Manifest({
         'multiply': Program(
             controllers = ('http-get', 'cmd', 'irc'),
             model=[multiply, {'x': 10, 'y': 10, 'product': 100}],

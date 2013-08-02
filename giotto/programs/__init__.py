@@ -135,7 +135,7 @@ class Manifest(object):
     """
     Represents a node in a larger manifest tree. Manifests are like URLS for
     giotto applications. All keys must be strings, and all values must be
-    either Programs or another ProgramManifest instance.
+    either Programs or another Manifest instance.
     """
     
     def __repr__(self):
@@ -152,7 +152,7 @@ class Manifest(object):
             type_ = type(item)
 
             is_program = isinstance(item, Program)
-            is_manifest = type_ == ProgramManifest
+            is_manifest = type_ == Manifest
             is_list = type_ == list
             is_str = type_ == str
 
@@ -160,7 +160,7 @@ class Manifest(object):
                 raise ValueError("Invalid manifest key: %s" % key)
 
             if type_ is dict:
-                self.manifest[key] = ProgramManifest(item, backname=key)
+                self.manifest[key] = Manifest(item, backname=key)
             elif not any([is_manifest, is_program, is_list, is_str]):
                 msg = "Manifest value must be either: a program, a list of programs, or another manifest"
                 raise TypeError(msg)
@@ -184,7 +184,7 @@ class Manifest(object):
                 # is a string redirect
                 urls.add(path)
 
-            elif isinstance(value, ProgramManifest):
+            elif isinstance(value, Manifest):
                 # is manifest
                 pp = '' if path == '/' else path # for 'stacked' root programs.
                 new_urls = value.get_urls(controllers=controllers, prefix_path=pp)
@@ -213,7 +213,7 @@ class Manifest(object):
         keys = self.manifest.keys()
         words = []
         for key in keys:            
-            if isinstance(self.manifest[key], ProgramManifest):
+            if isinstance(self.manifest[key], Manifest):
                 # if this key is another manifest, append a slash to the 
                 # suggestion so the user knows theres more items under this key
                 words.append(key + '/')
@@ -270,7 +270,7 @@ class Manifest(object):
             # string redirect
             return self.get_program(result)
 
-        elif type(result) is ProgramManifest:
+        elif type(result) is Manifest:
             return result.get_program('/')
 
         elif hasattr(result, 'append'):

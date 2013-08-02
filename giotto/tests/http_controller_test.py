@@ -3,7 +3,7 @@ import json
 
 from giotto import initialize
 from giotto.controllers.http import HTTPController
-from giotto.programs import Program, ProgramManifest
+from giotto.programs import Program, Manifest
 from giotto.exceptions import ProgramNotFound, InvalidInvocation
 from giotto.primitives import LOGGED_IN_USER, RAW_INVOCATION_ARGS
 from giotto.views import BasicView
@@ -42,7 +42,7 @@ def order(a='a', b='b', c='c', d='d', e='e', f='f', g='g'):
 class FoldingBaseArgTest(unittest.TestCase):
 	def setUp(self):
 		initialize()
-		self.manifest = ProgramManifest({
+		self.manifest = Manifest({
 			'': Program(
 				model=[none],
 				view=BasicView()
@@ -79,7 +79,7 @@ class NegotiationTest(unittest.TestCase):
 
 	def setUp(self):
 		initialize()
-		self.manifest = ProgramManifest({
+		self.manifest = Manifest({
 			'no_defaults': Program(
 				model=[no_defaults],
 				view=BasicView()

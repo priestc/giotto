@@ -1,6 +1,6 @@
 import unittest
 
-from giotto.programs import ProgramManifest, Program
+from giotto.programs import Manifest, Program
 from giotto.exceptions import ProgramNotFound
 
 from sqlalchemy.ext.declarative import declarative_base
@@ -13,9 +13,9 @@ double_post = Program(name="poster", controllers=['http-post'])
 
 class StackedRootTest(unittest.TestCase):
     def setUp(self):
-        self.manifest = ProgramManifest({
-            '': ProgramManifest({
-                '': ProgramManifest({
+        self.manifest = Manifest({
+            '': Manifest({
+                '': Manifest({
                     '': Program(name='root'),
                     'deep': Program(name="deep")
                 }),
