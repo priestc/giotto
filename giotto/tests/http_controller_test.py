@@ -3,7 +3,7 @@ import json
 
 from giotto import initialize
 from giotto.controllers.http import HTTPController
-from giotto.programs import GiottoProgram, ProgramManifest
+from giotto.programs import Program, ProgramManifest
 from giotto.exceptions import ProgramNotFound, InvalidInvocation
 from giotto.primitives import LOGGED_IN_USER, RAW_INVOCATION_ARGS
 from giotto.views import BasicView
@@ -43,17 +43,17 @@ class FoldingBaseArgTest(unittest.TestCase):
 	def setUp(self):
 		initialize()
 		self.manifest = ProgramManifest({
-			'': GiottoProgram(
+			'': Program(
 				model=[none],
 				view=BasicView()
 			),
-			'named': GiottoProgram(
+			'named': Program(
 				model=[defaults],
 				view=BasicView()
 			),
 			"another": {
-				'': GiottoProgram(name='another root'),
-				'name': GiottoProgram(name='another name', view=BasicView())
+				'': Program(name='another root'),
+				'name': Program(name='another name', view=BasicView())
 			}
 		})
 
@@ -80,27 +80,27 @@ class NegotiationTest(unittest.TestCase):
 	def setUp(self):
 		initialize()
 		self.manifest = ProgramManifest({
-			'no_defaults': GiottoProgram(
+			'no_defaults': Program(
 				model=[no_defaults],
 				view=BasicView()
 			),
-			'defaults': GiottoProgram(
+			'defaults': Program(
 				model=[defaults],
 				view=BasicView()
 			),
-			'primitives': GiottoProgram(
+			'primitives': Program(
 				model=[primitive],
 				view=BasicView()
 			),
-			'raw': GiottoProgram(
+			'raw': Program(
 				model=[raw],
 				view=BasicView()
 			),
-			'none': GiottoProgram(
+			'none': Program(
 				model=[none],
 				view=BasicView
 			),
-			'order': GiottoProgram(
+			'order': Program(
 				model=[order],
 				view=BasicView
 			)

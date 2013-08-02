@@ -23,7 +23,7 @@ An example Manifests looks like this::
             SignupProgram(
                 view=JingaTemplateView('signup.html')
             ),
-            GiottoProgram(
+            Program(
                 controllers=['http-post'],
                 model=[signup]
                 view=Redirection('/'),
@@ -35,7 +35,7 @@ When this application is served to the outside world through a controller,
 this manifest tells the controller which programs are to be available.
 
 Manifests must contain only strings in the keys,
-and only ``GiottoProgram`` instances or lists of ``GiottoProgram`` instances as the values.
+and only ``Program`` instances or lists of ``Program`` instances as the values.
 The strings may contain any characters except for periods (``.``).
 
 If you want to restrict a program to a certain controller,
@@ -43,10 +43,10 @@ include the controller in the ``controllers`` argument of the program::
 
     {
         'signup': [
-            GiottoProgram(
+            Program(
                 view=JingaTemplateView('signup.html')
             ),
-            GiottoProgram(
+            Program(
                 controllers=['http-post'],
                 model=[signup]
                 view=Redirection('/'),

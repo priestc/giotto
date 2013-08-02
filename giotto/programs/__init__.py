@@ -12,7 +12,7 @@ from giotto.utils import super_accept_to_mimetype
 from giotto.control import GiottoControl
 from giotto.views import GiottoView
 
-class GiottoProgram(object):
+class Program(object):
     name = None
     description = None
     tests = []
@@ -30,14 +30,14 @@ class GiottoProgram(object):
     ]
 
     def __repr__(self):
-        return "<GiottoProgram: %s>" % self.name
+        return "<Program: %s>" % self.name
 
     def __init__(self, description=None, **kwargs):
         self.description = description
         for k, v in kwargs.items():
             if k not in self.valid_args:
                 raise ValueError(
-                    "Invalid GiottoProgram argument: '%s'. Choices are: %s" %
+                    "Invalid Program argument: '%s'. Choices are: %s" %
                     (k, ", ".join(self.valid_args))
                 )
             else:
@@ -131,11 +131,11 @@ class GiottoProgram(object):
 
 key_regex = re.compile(r'^\w*$')
 
-class ProgramManifest(object):
+class Manifest(object):
     """
     Represents a node in a larger manifest tree. Manifests are like URLS for
     giotto applications. All keys must be strings, and all values must be
-    either GiottoPrograms or another ProgramManifest instance.
+    either Programs or another ProgramManifest instance.
     """
     
     def __repr__(self):
@@ -151,7 +151,7 @@ class ProgramManifest(object):
         for key, item in self.manifest.items():
             type_ = type(item)
 
-            is_program = isinstance(item, GiottoProgram)
+            is_program = isinstance(item, Program)
             is_manifest = type_ == ProgramManifest
             is_list = type_ == list
             is_str = type_ == str
@@ -190,7 +190,7 @@ class ProgramManifest(object):
                 new_urls = value.get_urls(controllers=controllers, prefix_path=pp)
                 urls.update(new_urls)
 
-            elif isinstance(value, GiottoProgram):
+            elif isinstance(value, Program):
                 # make a list so we can iterate through it in the next `if` block
                 value = [value]
 
@@ -245,7 +245,7 @@ class ProgramManifest(object):
                 else:
                     pre_path += item + '/'
 
-            if isinstance(new_manifest, GiottoProgram):
+            if isinstance(new_manifest, Program):
                 return []
             matches = new_manifest._get_suggestions(partial_word)
             return [pre_path + match for match in matches]

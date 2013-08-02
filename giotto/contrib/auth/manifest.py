@@ -1,5 +1,5 @@
 from giotto import get_config
-from giotto.programs import GiottoProgram, ProgramManifest
+from giotto.programs import Program, ProgramManifest
 from giotto.views import GiottoView, BasicView, jinja_template
 from giotto.control import Redirection
 
@@ -11,7 +11,7 @@ def create_auth_manifest(**kwargs):
     Creates a basic authentication manifest for logging in, logging out and
     registering new accounts.
     """
-    class AuthProgram(GiottoProgram):
+    class AuthProgram(Program):
         pre_input_middleware = [AuthenticationMiddleware]
 
     def register(username, password, password2):

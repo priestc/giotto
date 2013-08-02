@@ -41,17 +41,17 @@ To set up a login page, add the following to your project's manifest::
     from giotto.contrib.auth.models import is_authenticated
     from giotto.contrib.auth.middleware import SetAuthenticationCookies
     from giotto.control import Redirection
-    from giotto.programs import GiottoProgram
+    from giotto.programs import Program
     from giotto.views import JinjaTemplateView
 
     {
         'login': [
-            GiottoProgram(
+            Program(
                 input_middleware=[AuthenticationMiddleware, NotAuthenticatedOrRedirect('/')],
                 controllers=('http-get',),
                 view=JinjaTemplateView('login.html'),
             ),
-            GiottoProgram(
+            Program(
                 controllers=('http-post',),
                 input_middleware=[AuthenticationMiddleware],
                 model=[is_authenticated("Invalid username or password")],
@@ -100,16 +100,16 @@ To add a registration page to your application, add the following to your manife
     from giotto.contrib.auth.models import basic_register
     from giotto.contrib.auth.middleware import SetAuthenticationCookies
     from giotto.control import Redirection
-    from giotto.programs import GiottoProgram
+    from giotto.programs import Program
     from giotto.views import JinjaTemplateView
 
     {
         'register': [
-            GiottoProgram(
+            Program(
                 controllers=('http-get',),
                 view=JinjaTemplateView('register.html'),
             ),
-            GiottoProgram(
+            Program(
                 controllers=('http-post',),
                 model=[basic_register],
                 view=Redirection('/'),
@@ -150,12 +150,12 @@ Logout Page
 
 Adding a logout program is very simple, just add this to your project's manifest::
 
-    from giotto.programs import GiottoProgram
+    from giotto.programs import Program
     from giotto.control import Redirection
     from giotto.contrib.auth.middleware import LogoutMiddleware
 
     {
-        'logout': GiottoProgram(
+        'logout': Program(
             view=Redirection('/'),
             output_middleware=[LogoutMiddleware],
         ),
@@ -170,15 +170,15 @@ To access the currently logged in user from within a model function,
 add the ``LOGGED_IN_USER`` primitive to your model function's arguments::
 
     from giotto.primitives import LOGGED_IN_USER
-    from giotto.programs import GiottoProgram, ProgramManifest
+    from giotto.programs import Program, Manifest
     from giotto.contrib.auth.middleware import AuthenticationMiddleware
     from giotto.views import BasicView
 
     def show_logged_in_user(user=LOGGED_IN_USER):
         return {'user': user}
 
-    manifest = ProgramManifest({
-        'show_logged_in': GiottoProgram(
+    manifest = Manifest({
+        'show_logged_in': Program(
             input_middleware=[AuthenticationMiddleware],
             model=[show_logged_in_user],
             view=BasicView,
@@ -188,19 +188,19 @@ add the ``LOGGED_IN_USER`` primitive to your model function's arguments::
 The controller knows how to extract ``LOGGED_IN_USER`` from the incoming request.
 This primitive can only be used if the ``AuthenticationMiddleware`` is added to the input middleware stream.
 All programs that wish to take advantage of the authentication system need to have ``AuthenticationMiddleware`` added.
-It may be convenient to create a subclass of ``GiottoProgram`` with ``AuthenticationMiddleware`` baked in::
+It may be convenient to create a subclass of ``Program`` with ``AuthenticationMiddleware`` baked in::
 
-    from giotto.programs import GiottoProgram, ProgramManifest
+    from giotto.programs import Program, Manifest
     from giotto.contrib.auth.middleware import AuthenticationMiddleware
     from giotto.views import BasicView
 
-    class AuthProgram(GiottoProgram):
+    class AuthProgram(Program):
         input_middleware=[AuthenticationMiddleware]
 
     def show_logged_in_user(user=LOGGED_IN_USER):
         return {'user': user}
 
-     manifest = ProgramManifest({
+     manifest = Manifest({
         'show_logged_in': AuthProgram(
             model=[show_logged_in_user],
             view=BasicView,
@@ -215,11 +215,11 @@ AuthenticatedOrRedirect and NotAuthenticatedOrRedirect
 These middleware classes, if added to the input middleware stream,
 will redirect the request to another program (via 302 redirect) depending on authentication status::
 
-    from giotto.programs import GiottoProgram
+    from giotto.programs import Program
     from giotto.contrib.auth.middleware import AuthenticationMiddleware, NotAuthenticatedOrRedirect
     from giotto.views import JinjaTemplateView
 
-    GiottoProgram(
+    Program(
         input_middleware=[AuthenticationMiddleware, NotAuthenticatedOrRedirect('/')],
         controllers=('http-get',),
         view=JinjaTemplateView('login.html'),
@@ -233,12 +233,12 @@ AuthenticatedOrDie
 
 This middleware class will return a 403 (error page) if the request is not authenticated::
 
-    from giotto.programs import GiottoProgram
+    from giotto.programs import Program
     from giotto.contrib.auth.middleware import AuthenticationMiddleware, AuthenticatedOrDie
     from giotto.views import JinjaTemplateView
 
     {
-        'new': GiottoProgram(
+        'new': Program(
             input_middleware=[AuthenticationMiddleware, AuthenticatedOrDie],
             view=JinjaTemplateView('new_blog.html'),
             controllers=('http-get',),

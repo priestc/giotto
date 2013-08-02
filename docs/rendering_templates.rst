@@ -18,11 +18,11 @@ Rendering Templates
 Giotto comes with support for rendering jinja template out of the box.
 To render a template with a program, add the ``jinja_template`` renderer function to your view class::
 
-    from giotto.programs import GiottoProgram, ProgramManifest
+    from giotto.programs import Program, ProgramManifest
     from giotto.views import BasicView, jinja_template
 
     manifest = ProgramManifest({
-        'test': GiottoProgram(
+        'test': Program(
             model=[lambda x,y : {'x': x, 'y':y, 'result': int(x) * int(y)],
             view=BasicView(
                 html=jinja_template('mytemplate.html'),

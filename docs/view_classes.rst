@@ -83,8 +83,8 @@ Overriding Renderers
 
 In the manifest file, you can override a renderer by passing in the renderer function as a keyword argument to the view class::
 
-    manifest = ProgramManifest({
-        'multiply': GiottoProgram(
+    manifest = Manifest({
+        'multiply': Program(
             model=[multiply],
             view=BasicView(
                 html=lambda m: str(m)

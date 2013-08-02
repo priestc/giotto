@@ -1,39 +1,39 @@
 import unittest
 
-from giotto.programs import ProgramManifest, GiottoProgram
+from giotto.programs import ProgramManifest, Program
 from giotto.exceptions import ProgramNotFound
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, String
 
-both = GiottoProgram(name='both', controllers=['irc', 'http-get'])
-blank = GiottoProgram(name='optional_blank')
-double_get = GiottoProgram(name="getter", controllers=['http-get'])
-double_post = GiottoProgram(name="poster", controllers=['http-post'])
+both = Program(name='both', controllers=['irc', 'http-get'])
+blank = Program(name='optional_blank')
+double_get = Program(name="getter", controllers=['http-get'])
+double_post = Program(name="poster", controllers=['http-post'])
 
 class StackedRootTest(unittest.TestCase):
     def setUp(self):
         self.manifest = ProgramManifest({
             '': ProgramManifest({
                 '': ProgramManifest({
-                    '': GiottoProgram(name='root'),
-                    'deep': GiottoProgram(name="deep")
+                    '': Program(name='root'),
+                    'deep': Program(name="deep")
                 }),
             }),
             'sub': {
-                'prog': GiottoProgram(name="prog"),
+                'prog': Program(name="prog"),
                 'another': {
                     '': blank,
-                    'prog2': GiottoProgram(name='prog2'),
-                    'prog3': GiottoProgram(name='prog3'),
-                    'http_only': GiottoProgram(name='http_only', controllers=['http-get']),
-                    'irc_only': GiottoProgram(name='irc_only', controllers=['irc']),
+                    'prog2': Program(name='prog2'),
+                    'prog3': Program(name='prog3'),
+                    'http_only': Program(name='http_only', controllers=['http-get']),
+                    'irc_only': Program(name='irc_only', controllers=['irc']),
                     'both': both
                 },
                 'double': [double_get, double_post]
             },
             'string_redirect': '/redirect',
-            'redirect': GiottoProgram(name='redirect'),
+            'redirect': Program(name='redirect'),
         })
 
         self.all_urls = set([

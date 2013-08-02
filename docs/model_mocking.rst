@@ -12,7 +12,7 @@ but not so good with setting up databases and writing code.
 Model mocking allows an application to be ran in an environment where the database does not need to be ran.
 The model part of a program is completely ignored, and the mock object is returned instead::
 
-    from giotto.programs import GiottoProgram
+    from giotto.programs import Program
     from giotto.views import BasicView
     import psycopg2
 
@@ -26,8 +26,7 @@ The model part of a program is completely ignored, and the mock object is return
         result = cur.fetchone()
         return {'x': x, 'square': result[0]}
 
-    class Square(GiottoProgram):
-        name = 'square'
+    class Square(Program):
         controllers = ('http-get', 'cmd')
         model = [square, {'x': 12, 'square': 144}]
         view = BasicView

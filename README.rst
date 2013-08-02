@@ -33,7 +33,7 @@ Install and create base project files::
 
 Now your project is initialized. Open the ``manifest.py`` and add the following::
 
-    from giotto.programs import ProgramManifest, GiottoProgram
+    from giotto.programs import Manifest, Program
     from giotto.views import jinja_template, BasicView
 
     def multiply(x, y):
@@ -41,8 +41,8 @@ Now your project is initialized. Open the ``manifest.py`` and add the following:
         y = int(y or 0)
         return {'x': x, 'y': y, 'result': x * y}
 
-    manifest = ProgramManifest({
-        'multiply': GiottoProgram(
+    manifest = Manifest({
+        'multiply': Program(
             model=[multiply],
             view=BasicView(
                 html=jinja_template('multiply.html'),
@@ -91,8 +91,8 @@ This is useful if your model is coupled to a database, which you don't want to r
 
 Add a mock object to the program::
 
-    manifest = ProgramManifest({
-        'multiply': GiottoProgram(
+    manifest = Manifest({
+        'multiply': Program(
             model=[multiply, {'x': 4, 'y': 5, 'result': 20}],
             view=BasicView(
                 html=jinja_template('multiply.html'),

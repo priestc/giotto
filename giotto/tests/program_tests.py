@@ -4,7 +4,7 @@ try:
 except ImportError:
     from ordereddict import OrderedDict # python2.6
 
-from giotto.programs import GiottoProgram
+from giotto.programs import Program
 from giotto.views import BasicView
 from giotto.exceptions import MockNotFound
 
@@ -17,28 +17,28 @@ class ProgramTest(unittest.TestCase):
         """
         The program raises MockNotFound when the program has no mock defined
         """
-        gp = GiottoProgram(model=[simple])
+        gp = Program(model=[simple])
         self.assertRaises(MockNotFound, lambda: gp.get_model_mock())
 
     def test_no_mock_needed(self):
-        gp = GiottoProgram(model=[])
+        gp = Program(model=[])
         self.assertEquals({}, gp.get_model_mock())
 
     def test_mock_found(self):
-        gp = GiottoProgram(model=[simple, {'mock': True}])
+        gp = Program(model=[simple, {'mock': True}])
         self.assertEquals({'mock': True}, gp.get_model_mock())
 
 
 class ArgspecTest(unittest.TestCase):
     def test_get_args_kwargs(self):
         def test(a, b, c="what"): pass
-        program = GiottoProgram(model=[test], view=BasicView())
+        program = Program(model=[test], view=BasicView())
         ret = program.get_model_args_kwargs()
         self.assertEquals((['a', 'b'], {'c': "what"}), ret)
 
     def test_empty(self):
         def test(): pass
-        program = GiottoProgram(model=[test], view=BasicView())
+        program = Program(model=[test], view=BasicView())
         ret = program.get_model_args_kwargs()
         self.assertEquals(([], {}), ret)
 
@@ -48,18 +48,18 @@ class ArgspecTest(unittest.TestCase):
         classmethods)
         """
         def test(cls, a, b, c="what"): pass
-        program = GiottoProgram(model=[test], view=BasicView())
+        program = Program(model=[test], view=BasicView())
         ret = program.get_model_args_kwargs()
         self.assertEquals((['a', 'b'], {'c': "what"}), ret)
 
     def test_no_model(self):
-        program = GiottoProgram(view=BasicView())
+        program = Program(view=BasicView())
         ret = program.get_model_args_kwargs()
         self.assertEquals(([], {}), ret)
 
     def test_preserve_order(self):
         def test(a=1, b=2, c=3, d=4): pass
-        program = GiottoProgram(model=[test], view=BasicView())
+        program = Program(model=[test], view=BasicView())
         a, kw = program.get_model_args_kwargs()
         self.assertEquals(list(kw.keys()), ['a', 'b', 'c', 'd'])
 

@@ -2,7 +2,7 @@ import os
 import mimetypes
 
 from giotto import get_config
-from giotto.programs import GiottoProgram
+from giotto.programs import Program
 from giotto.views import GiottoView, renders
 from giotto.utils import super_accept_to_mimetype
 from giotto.exceptions import DataNotFound
@@ -33,7 +33,7 @@ def StaticServe(base_path):
         except IOError:
             raise DataNotFound("File does not exist")
 
-    class StaticServe(GiottoProgram):
+    class StaticServe(Program):
         controllers = ['http-get']
         model = [get_file]
         view = FileView()
@@ -49,7 +49,7 @@ def SingleStaticServe(file_path):
         fullpath = os.path.join(get_config('project_path'), file_path)
         return open(fullpath, 'rb'), mime or 'application/octet-stream'
 
-    class SingleStaticServe(GiottoProgram):
+    class SingleStaticServe(Program):
         controllers = ['http-get']
         model = [get_file]
         view = FileView()

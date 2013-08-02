@@ -81,7 +81,7 @@ Inside the ``manifest.py`` file, you will see the following::
         return {'x': int(x), 'y': int(y), 'product': int(x) * int(y)}
 
     manifest = ProgramManifest({
-        'multiply': GiottoProgram(
+        'multiply': Program(
             controllers = ('http-get', 'cmd', 'irc'),
             model=[multiply, {'x': 3, 'y': 3, 'product': 9}],
             view=ColoredMultiplyView
@@ -153,12 +153,12 @@ and the data moves between the user and the computer through the command lone, i
 Using Mocks
 -----------
 
-On the GiottoProgram object, add a ``model_mock`` object to the list along with the model.
+On the Program object, add a ``model_mock`` object to the list along with the model.
 A model mock is an object that gets returned in lieu of executing the model function.
 This object should be the same form as what the model returns::
 
     manifest = ProgramManifest({
-        'multiply': GiottoProgram(
+        'multiply': Program(
             controllers=('http-get', 'cmd', 'irc'),
             model=[multiply, {'x': 10, 'y': 10, 'product': 100}],
             view=ColoredMultiplyView,
@@ -182,7 +182,7 @@ Cache
 Add a ``cache`` attribute to the program::
 
     manifest = ProgramManifest({
-        'multiply': GiottoProgram(
+        'multiply': Program(
             controllers = ('http-get', 'cmd', 'irc'),
             model=[multiply, {'x': 10, 'y': 10, 'product': 100}],
             cache=3600,

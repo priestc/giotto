@@ -3,7 +3,7 @@ import inspect
 import json
 
 from giotto import get_config
-from giotto.programs import GiottoProgram
+
 from giotto.exceptions import (GiottoException, InvalidInput, ProgramNotFound,
     MockNotFound, ControlMiddlewareInterrupt, NotAuthorized, InvalidInvocation)
 from giotto.primitives import GiottoPrimitive, RAW_INVOCATION_ARGS

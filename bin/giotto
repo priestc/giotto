@@ -85,12 +85,12 @@ initialize(config, secrets, machine)
 from manifest import manifest
 '''
 
-    blank_application = '''from giotto.programs import GiottoProgram, ProgramManifest
+    blank_application = '''from giotto.programs import Program, Manifest
 from giotto.programs.management import management_manifest
 from giotto.views import BasicView
 
-manifest = ProgramManifest({
-    '': GiottoProgram(
+manifest = Manifest({
+    '': Program(
         model=[lambda: "Welcome to Giotto!"],
         view=BasicView
     ),

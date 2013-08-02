@@ -4,7 +4,7 @@ unittest = T()
 setattr(unittest, 'TestCase', object)
 ## all tests in this module are disabled until I get a chance to fix all these tests
 
-from giotto.programs import GiottoProgram
+from giotto.programs import Program
 
 class InOne(object):
     def test(self, request):
@@ -36,11 +36,11 @@ class OutThree(object):
         response['three'] = False
         return response
 
-class ExampleProgram(GiottoProgram):
+class ExampleProgram(Program):
     input_middleware = [InOne, InTwo, InThree]
     output_middleware = [OutOne, OutTwo, OutThree]
 
-class NoMiddlewareProgram(GiottoProgram):
+class NoMiddlewareProgram(Program):
     pass
 
 class MiddlewareTest(unittest.TestCase):
