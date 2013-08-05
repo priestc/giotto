@@ -21,6 +21,9 @@ class GiottoKeyValue(object):
     Baseclass for all KeyValue object. This exists to demonstrate the API for
     KeyValue subclasses.
     """
+    def __init__(*a, **k):
+        return
+    
     def set(self, key, obj):
         raise NotImplementedError
 
