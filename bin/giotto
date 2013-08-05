@@ -51,9 +51,9 @@ auth_engine = 'database' # or a `keyvalue` object.
 db_engine = 'sqlite3'
 db_name = 'sqlite.db'
 
-#db_engine = 'postgres' # or 'mysql'
+#db_engine = 'postgresql' # or 'mysql'
 #db_name = 'my_project'
-#db_port = 5433
+#db_port = 5434
 #db_host = 'localhost'
 #db_username = 'postgres'
 #db_password = 'password'
