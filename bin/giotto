@@ -20,7 +20,7 @@ if subcommand == 'suggest':
             item = ''
 
         suggestions = manifest.get_suggestion(item)
-        print " ".join(suggestions)
+        print(" ".join(suggestions))
     except:
         pass    
 
