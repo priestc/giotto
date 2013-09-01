@@ -12,6 +12,7 @@ try:
 except ImportError:
     from io import StringIO
 
+from giotto import get_config
 from giotto.exceptions import NoViewMethod, InvalidInput, NotAuthorized, DataNotFound, ProgramNotFound
 from giotto.controllers import GiottoController
 from giotto.control import Redirection
@@ -24,12 +25,12 @@ from webob.exc import (
 
 http_execution_snippet = """
 mock = '--model-mock' in sys.argv
-from giotto.controllers.http import make_app, error_handler, serve
+from giotto.controllers.http import make_app, fancy_error_template_middleware, serve
 
 application = make_app(manifest, model_mock=mock)
 
-if not config.debug:
-    application = error_handler(application)
+if not get_config('debug'):
+    application = fancy_error_template_middleware(application)
 
 if '--run' in sys.argv:
     serve('127.0.0.1', 5000, application, ssl=None, use_debugger=True, use_reloader=True)
@@ -217,7 +218,7 @@ def make_app(manifest, model_mock=False, cache=None):
     return application
 
 
-def error_handler(app):
+def fancy_error_template_middleware(app):
     """
     WGSI middleware for catching errors and rendering the error page.
     """
