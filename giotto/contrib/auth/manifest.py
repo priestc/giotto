@@ -21,7 +21,7 @@ def create_auth_manifest(**kwargs):
         result = basic_register(username, password, password2)
         callback = kwargs.pop('post_register_callback', None)
         if callback:
-            session = get_config('session')
+            session = get_config('db_session')
             user = session.query(User).filter_by(username=username).first()
             callback(user)
         return result

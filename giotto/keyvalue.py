@@ -3,6 +3,7 @@ import datetime
 import pickle
 
 from sqlalchemy import Column, String, DateTime
+from giotto import get_config
 
 try:
     import pylibmc

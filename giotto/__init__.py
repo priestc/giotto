@@ -53,6 +53,15 @@ def initialize(config=None, secrets=None, machine=None):
         setattr(giotto._config, "db_engine", db_engine)
         setattr(giotto._config, "db_session", sessionmaker(bind=db_engine)())
 
+    auth_engine = get_config('auth_session_engine', None)
+    if auth_engine == 'database':
+        class_ =  giotto.utils.switchout_keyvalue(auth_engine)
+        e = class_(base=get_config('Base'))
+        setattr(giotto._config, "auth_session_engine", e)
+    elif auth_engine:
+        class_ =  giotto.utils.switchout_keyvalue(auth_engine)
+        setattr(giotto._config, "auth_session_engine", class_())
+
     cache_engine = get_config("cache_engine", None)
     if hasattr(cache_engine, 'lower'):
         # session engine was passed in as string, exchange for engine object.

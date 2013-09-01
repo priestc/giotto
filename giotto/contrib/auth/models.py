@@ -35,7 +35,7 @@ class User(Base):
             errors['username'] = {'message': 'Username not valid', 'value': self.username}
         if len(self.raw_password) < 4:
             errors['password'] = {'message': 'Password much be at least 4 characters'}
-        if get_config('session').query(User).filter_by(username=self.username).first():
+        if get_config('db_session').query(User).filter_by(username=self.username).first():
             errors['username'] = {'message': 'Username already exists', 'value': self.username}
 
         if errors:

@@ -19,14 +19,14 @@ Configuring Authentication
 
 In the config file of your application, add the following variables:
 
-* ``auth_session`` - To a instance of a GiottoKeyValue class. (See the cache documentation)
-* ``auth_regex`` - To a regular exression that represents what usernames can be.
+* ``auth_session_engine`` - To a instance of a GiottoKeyValue class (See the cache documentation), or the string 'database'.
+* ``auth_regex`` - To a regular expression that represents what usernames can be.
   If left blank, this will be set to ``^[\d\w]{4,30}$``.
 
 Enabling Authentication for your application
 ============================================
 
-An authenticated application typically contans three parts:
+An authenticated application typically contains all four of these components:
 
 1. A registration page.
 2. A login page.
