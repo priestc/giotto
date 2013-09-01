@@ -212,7 +212,12 @@ def make_app(manifest, model_mock=False, cache=None):
         """
         request = Request(environ)
         controller = HTTPController(request, manifest, model_mock=model_mock)
-        wsgi_response = controller.get_response()
+        try:
+            wsgi_response = controller.get_response()
+        except:
+            get_config('db_session').rollback()
+            raise
+
         return wsgi_response(environ, start_response)
 
     return application
