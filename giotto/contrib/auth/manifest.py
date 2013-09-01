@@ -82,7 +82,8 @@ def create_auth_manifest(**kwargs):
                 controllers=['http-post'],
                 model=[register],
                 view=BasicView(
-                    html=lambda m: Redirection('/', persist={'giotto_session': m['session_key']}),
+                    persist=lambda m: {'giotto_session': m['session_key']},
+                    html=lambda m: Redirection('/'),
                 ),
             ),
         ],
