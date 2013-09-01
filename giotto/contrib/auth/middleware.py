@@ -7,6 +7,7 @@ from giotto.exceptions import NotAuthorized
 from giotto.control import Redirection
 from giotto import get_config
 from giotto.middleware import GiottoOutputMiddleware, GiottoInputMiddleware
+from giotto.utils import switchout_keyvalue
 
 class AuthenticationMiddleware(GiottoInputMiddleware):
     """
@@ -20,7 +21,8 @@ class AuthenticationMiddleware(GiottoInputMiddleware):
         if not session_key and request.POST:
             session_key = request.POST.get('auth_session', None)
         if session_key:
-            username = get_config('auth_session').get(session_key)
+            auth_session = switchout_keyvalue(get_config('auth_engine'))
+            username = auth_session.get(session_key)
             user = get_config('session').query(User).filter_by(username=username).first()
 
         setattr(request, 'user', user)

@@ -32,10 +32,14 @@ if not config.debug:
     application = error_handler(application)
 
 if '--run' in sys.argv:
-    serve('127.0.0.1', 5000, application, use_debugger=True, use_reloader=True)"""
+    serve('127.0.0.1', 5000, application, ssl=None, use_debugger=True, use_reloader=True)
+
+if '--run-ssl' in sys.argv:
+    serve('127.0.0.1', 443, application, ssl='adhoc', use_debugger=True, use_reloader=True)
+"""
 
 
-def serve(ip, port, application, **kwargs):
+def serve(ip, port, application, ssl=None, **kwargs):
     """
     Serve a wsgi app (any wsgi app) through with either werkzeug's runserver
     or the one that comes with python.
@@ -43,7 +47,7 @@ def serve(ip, port, application, **kwargs):
     try:
         # use werkzeug if its there
         from werkzeug.serving import run_simple
-        run_simple(ip, port, application, **kwargs)
+        run_simple(ip, port, application, ssl_context=ssl, **kwargs)
         return
     except ImportError:
         pass

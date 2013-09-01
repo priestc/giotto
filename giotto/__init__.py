@@ -53,16 +53,10 @@ def initialize(config=None, secrets=None, machine=None):
         setattr(giotto._config, "db_engine", db_engine)
         setattr(giotto._config, "db_session", sessionmaker(bind=db_engine)())
 
-    auth_engine = get_config("auth_engine", None)
-    if hasattr(auth_engine, 'lower'):
-        # session engine was passed in as string, exchange for engine object.
-        e = switchout_keyvalue(auth_engine)
-        setattr(giotto._config, "auth_engine", e)
-
     cache_engine = get_config("cache_engine", None)
     if hasattr(cache_engine, 'lower'):
         # session engine was passed in as string, exchange for engine object.
-        class_ = switchout_keyvalue(cache_engine)
+        class_ = giotto.utils.switchout_keyvalue(cache_engine)
         e = class_(host=get_config("cache_host", "localhost"))
         setattr(giotto._config, "cache_engine", e)
 
@@ -78,16 +72,3 @@ def get_config(item, default=None):
     """
     import giotto
     return getattr(giotto._config, item, default) or default
-
-def switchout_keyvalue(engine):
-    from giotto import keyvalue
-    if engine == 'dummy':
-        return keyvalue.DummyKeyValue
-    if engine == 'locmem':
-        return keyvalue.LocMemKeyValue
-    if engine == 'database':
-        return keyvalue.DatabaseKeyValue
-    if engine == 'memcached':
-        return keyvalue.MemcacheKeyValue
-    if engine == 'redis':
-        return keyvalue.RedisKeyValue

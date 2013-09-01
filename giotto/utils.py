@@ -6,7 +6,7 @@ import re
 import unicodedata
 import six
 
-from giotto import get_config
+from giotto import get_config, keyvalue
 from collections import defaultdict
 
 class Mock(object):
@@ -206,7 +206,17 @@ def jsonify(obj):
             raise TypeError('Object of type %s with value of %s is not JSON serializable' % (type(obj), repr(obj)))
     return json.dumps(obj, default=handler)
 
-
+def switchout_keyvalue(engine):
+    if engine == 'dummy':
+        return keyvalue.DummyKeyValue
+    if engine == 'locmem':
+        return keyvalue.LocMemKeyValue
+    if engine == 'database':
+        return keyvalue.DatabaseKeyValue
+    if engine == 'memcached':
+        return keyvalue.MemcacheKeyValue
+    if engine == 'redis':
+        return keyvalue.RedisKeyValue
 
 
 
