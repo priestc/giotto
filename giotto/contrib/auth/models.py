@@ -97,11 +97,11 @@ def create_session(username, password):
     Create a session for the user, and then return the key.
     """
     user = User.get_user_by_password(username, password)
-    auth_session = get_auth_engine()
+    auth_session_engine = get_config('auth_session_engine')
     if not user:
         raise InvalidInput('Username or password incorrect')
     session_key = random_string(15)
-    while auth_session.get(session_key):
+    while auth_session_engine.get(session_key):
         session_key = random_string(15)
-    auth_session.set(session_key, user.username, get_config('auth_session_expire'))
+    auth_session_engine.set(session_key, user.username, get_config('auth_session_expire'))
     return {'session_key': session_key, 'user': user}
