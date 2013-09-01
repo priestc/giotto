@@ -8,6 +8,7 @@ from giotto import get_config
 Base = get_config('Base')
 
 from sqlalchemy import Column, String
+from utils import get_auth_engine
 
 class User(Base):
     username = Column(String, primary_key=True)
@@ -46,7 +47,7 @@ class User(Base):
         Given a username and a raw, unhashed password, get the corresponding
         user, retuns None if no match is found.
         """
-        user = get_config('session').query(cls).filter_by(username=username).first()
+        user = get_config('db_session').query(cls).filter_by(username=username).first()
 
         if not user:
             return None
@@ -58,7 +59,7 @@ class User(Base):
 
     @classmethod
     def get_user_by_hash(cls, username, hash_):
-        return get_config('session').query(cls)\
+        return get_config('db_session').query(cls)\
                      .filter_by(username=username, password=hash_)\
                      .first()
 
@@ -69,14 +70,14 @@ class User(Base):
         """
         user = cls(username=username, password=password)
         user.validate()
-        session = get_config('session')
+        session = get_config('db_session')
         session.add(user)
         session.commit()
         return user
 
     @classmethod
     def all(cls):
-        return get_config('session').query(cls).all()
+        return get_config('db_session').query(cls).all()
 
     def __repr__(self):
         return "<User('%s', '%s')>" % (self.username, self.password)
@@ -97,7 +98,7 @@ def create_session(username, password):
     Create a session for the user, and then return the key.
     """
     user = User.get_user_by_password(username, password)
-    auth_session = get_config('auth_session')
+    auth_session = get_auth_engine()
     if not user:
         raise InvalidInput('Username or password incorrect')
     session_key = random_string(15)

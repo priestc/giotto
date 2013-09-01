@@ -31,7 +31,7 @@ class GiottoKeyValue(object):
         raise NotImplementedError
 
 class DatabaseKeyValue(GiottoKeyValue):
-    def __init__(self, base, session):
+    def __init__(self, base):
         """
         Since we can't get the base class by importing it (base class defined in
         the config file, which is where this class is initialized). The base
@@ -41,6 +41,7 @@ class DatabaseKeyValue(GiottoKeyValue):
         """
         if not base:
             return
+
         class _DBKeyValue(base):
             __tablename__ = 'giotto_keyvalue'
             key = Column(String, primary_key=True)
@@ -51,12 +52,13 @@ class DatabaseKeyValue(GiottoKeyValue):
             def set(cls, key, obj, expire):
                 when_expire = datetime.datetime.now() + datetime.timedelta(seconds=expire)
                 new = cls(key=key, value=pickle.dumps(obj), expires=when_expire)
-                session.merge(new)
-                session.commit()
+                db_session = get_config('db_session')
+                db_session.merge(new)
+                db_session.commit()
 
             @classmethod
             def get(cls, key):
-                value = session.query(cls)\
+                value = get_config('db_session').query(cls)\
                                .filter_by(key=key)\
                                .filter(cls.expires > datetime.datetime.now())\
                                .first()
