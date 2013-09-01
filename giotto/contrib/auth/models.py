@@ -8,7 +8,6 @@ from giotto import get_config
 Base = get_config('Base')
 
 from sqlalchemy import Column, String
-from utils import get_auth_engine
 
 class User(Base):
     username = Column(String, primary_key=True)
