@@ -19,7 +19,7 @@ def create_auth_manifest(**kwargs):
         Decorated version of basic_register with a callback added.
         """
         result = basic_register(username, password, password2)
-        callback = kwargs.pop('post_register_callback', None)
+        callback = kwargs.get('post_register_callback', None)
         if callback:
             session = get_config('db_session')
             user = session.query(User).filter_by(username=username).first()
