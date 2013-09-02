@@ -4,7 +4,6 @@ import os
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from jinja2 import Environment, FileSystemLoader
 
 def initialize(config=None, secrets=None, machine=None):
     """
@@ -68,12 +67,6 @@ def initialize(config=None, secrets=None, machine=None):
         class_ = giotto.utils.switchout_keyvalue(cache_engine)
         e = class_(host=get_config("cache_host", "localhost"))
         setattr(giotto._config, "cache_engine", e)
-
-    td = get_config('jinja2_template_dir', None)
-    if td:
-        pp = get_config('project_path')
-        e = Environment(loader=FileSystemLoader(os.path.join(pp, 'html')))
-        setattr(giotto._config, "jinja2_env", e)
 
 def get_config(item, default=None):
     """

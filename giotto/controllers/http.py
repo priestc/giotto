@@ -48,7 +48,7 @@ def serve(ip, port, application, ssl=None, **kwargs):
     try:
         # use werkzeug if its there
         from werkzeug.serving import run_simple
-        run_simple(ip, port, application, ssl_context=ssl, **kwargs)
+        run_simple(ip, port, application, ssl_context=ssl, processes=3, **kwargs)
         return
     except ImportError:
         pass
