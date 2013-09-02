@@ -40,9 +40,6 @@ class DatabaseKeyValue(GiottoKeyValue):
         is then passed back into the mosule scope where it can be used
         by the DatabaseKeyValue backend.
         """
-        if not base:
-            return
-
         class _DBKeyValue(base):
             __tablename__ = 'giotto_keyvalue'
             key = Column(String, primary_key=True)

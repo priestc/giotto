@@ -19,7 +19,7 @@ class AuthenticationMiddleware(GiottoInputMiddleware):
         session_key = request.cookies.get('giotto_session', None)
         if not session_key and request.POST:
             session_key = request.POST.get('auth_session', None)
-        if session_key: 
+        if session_key:
             username = get_config('auth_session_engine').get(session_key)
             user = get_config('db_session').query(User).filter_by(username=username).first()
 
