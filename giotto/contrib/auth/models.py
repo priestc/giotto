@@ -5,13 +5,11 @@ from giotto.exceptions import InvalidInput
 from giotto.utils import random_string
 from giotto.primitives import LOGGED_IN_USER
 from giotto import get_config
-Base = get_config('Base')
+from django.db import models
 
-from sqlalchemy import Column, String
-
-class User(Base):
-    username = Column(String, primary_key=True)
-    password = Column(String)
+class User(models.Model):
+    username = models.TextField(primary_key=True)
+    password = models.TextField()
 
     def __init__(self, username, password):
         self.username = username
@@ -69,14 +67,8 @@ class User(Base):
         """
         user = cls(username=username, password=password)
         user.validate()
-        session = get_config('db_session')
-        session.add(user)
-        session.commit()
+        user.save()
         return user
-
-    @classmethod
-    def all(cls):
-        return get_config('db_session').query(cls).all()
 
     def __repr__(self):
         return "<User('%s', '%s')>" % (self.username, self.password)

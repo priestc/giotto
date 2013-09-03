@@ -1,6 +1,8 @@
 __version__ = '0.11.0'
 
 import os
+import imp
+import sys
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -25,7 +27,6 @@ def initialize(config=None, secrets=None, machine=None):
     """
     import giotto
     setattr(giotto, '_config', config)
-    os.environ["DJANGO_SETTINGS_MODULE"] = "config"
 
     if secrets:
         for item in dir(secrets):
@@ -36,6 +37,24 @@ def initialize(config=None, secrets=None, machine=None):
         for item in dir(machine):
             s_value = getattr(machine, item)
             setattr(giotto._config, item, s_value)
+
+    ##################
+    # Make a 'mock' module out of settings gleamed from config.py
+    # This is done in leiu of having a seperate django settings file
+    # for pointing DJANGO_SETTINGS_MODULE to. I18N and L10N are
+    # disabled because they apparently don't like our mock
+    # settings module method.
+    
+    giotto_django_bridge = imp.new_module("giotto_django_bridge")
+    settings = "%s;%s;USE_L10N = False;USE_I18N = False" % (
+        'DATABASES = %s' % str(get_config('DATABASES')),
+        'INSTALLED_APPS = ("models")',
+    )
+    exec settings in giotto_django_bridge.__dict__
+    sys.modules["giotto_django_bridge"] = giotto_django_bridge
+    os.environ["DJANGO_SETTINGS_MODULE"] = 'giotto_django_bridge'
+
+    ##################
 
     auth_engine = get_config('auth_session_engine', None)
     if auth_engine:

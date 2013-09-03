@@ -1,13 +1,13 @@
 from giotto.programs import Program, Manifest
 from giotto.programs.shell import shell
-from giotto.programs.tables import make_tables, blast_tables
+from giotto.programs.tables import syncdb, blast_tables
 from giotto.views import BasicView
 
 management_manifest = Manifest({
-    'make_tables': Program(
+    'syncdb': Program(
         name="Make Tables",
         controllers=['cmd'],
-        model=[make_tables],
+        model=[syncdb],
         view=BasicView()
     ),
     'blast_tables': Program(

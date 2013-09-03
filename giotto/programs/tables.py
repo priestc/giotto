@@ -1,17 +1,12 @@
 import six
 from giotto import get_config
+from django.core.management import call_command
 
-def make_tables():
+def syncdb():
     """
     Create all the tables for the models that have been added to the manifest.
     """
-    engine = get_config('db_engine')
-    Base = get_config('Base')
-    Base.metadata.create_all(engine)
-    print('Creating tables...')
-    for i, t in enumerate(Base.metadata.tables.keys()):
-        print(t)
-    return '%s tables created' % (i + 1)
+    call_command('syncdb', traceback=True)
 
 def blast_tables():
     """
@@ -25,11 +20,5 @@ def blast_tables():
     if yn.lower() != 'y':
         return "Aborting"
 
-
-    from django.core.management import call_command
-    call_command('syncdb')
-    #get_config('Base').metadata.drop_all(get_config('db_engine'))
-    
-
     print("blasting away all tables...")
-    #return make_tables()
+    return syncdb()

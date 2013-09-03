@@ -2,7 +2,7 @@ from collections import defaultdict
 import datetime
 import pickle
 
-from sqlalchemy import Column, String, DateTime
+from django.db import models
 from giotto import get_config
 
 try:
@@ -32,7 +32,7 @@ class GiottoKeyValue(object):
         raise NotImplementedError
 
 class DatabaseKeyValue(GiottoKeyValue):
-    def __init__(self, base):
+    def __init__(self):
         """
         Since we can't get the base class by importing it (base class defined in
         the config file, which is where this class is initialized). The base
@@ -40,26 +40,24 @@ class DatabaseKeyValue(GiottoKeyValue):
         is then passed back into the mosule scope where it can be used
         by the DatabaseKeyValue backend.
         """
-        class _DBKeyValue(base):
-            __tablename__ = 'giotto_keyvalue'
-            key = Column(String, primary_key=True)
-            value = Column(String)
-            expires = Column(DateTime)
+        class _DBKeyValue(models.Model):
+            key = models.TextField(primary_key=True)
+            value = models.TextField()
+            expires = models.DateTimeField()
 
             @classmethod
             def set(cls, key, obj, expire):
                 when_expire = datetime.datetime.now() + datetime.timedelta(seconds=expire)
-                new = cls(key=key, value=pickle.dumps(obj), expires=when_expire)
-                db_session = get_config('db_session')
-                db_session.merge(new)
-                db_session.commit()
+                new = cls.objects.get_or_create(key=key).update(
+                    value=pickle.dumps(obj),
+                    expires=when_expire
+                )
 
             @classmethod
             def get(cls, key):
-                value = get_config('db_session').query(cls)\
-                               .filter_by(key=key)\
-                               .filter(cls.expires > datetime.datetime.now())\
-                               .first()
+                value = cls.objects\
+                           .filter_by(key=key)\
+                           .filter(expires__gt=datetime.datetime.now())\
                 
                 if value:
                     return pickle.loads(str(value.value))
