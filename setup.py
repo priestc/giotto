@@ -8,7 +8,7 @@ REQUIRES = [
     'jinja2==2.6',
     'py-bcrypt==0.2',
     'python-mimeparse==0.1.4',
-    'sqlalchemy==0.8.2',
+    'django==1.4.5',
 ]
 
 if sys.version_info < (2, 7):
