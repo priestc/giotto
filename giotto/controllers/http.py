@@ -215,7 +215,8 @@ def make_app(manifest, model_mock=False, cache=None):
         try:
             wsgi_response = controller.get_response()
         except:
-            get_config('db_session').rollback()
+            # TODO: switch to django
+            #get_config('db_session').rollback()
             raise
 
         return wsgi_response(environ, start_response)

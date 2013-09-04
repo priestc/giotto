@@ -55,13 +55,12 @@ class DatabaseKeyValue(GiottoKeyValue):
 
             @classmethod
             def get(cls, key):
-                value = cls.objects\
-                           .filter_by(key=key)\
-                           .filter(expires__gt=datetime.datetime.now())\
-                
-                if value:
-                    return pickle.loads(str(value.value))
-                return None
+                try:
+                    value = cls.objects.filter(expires__gt=datetime.datetime.now()).get(key=key)
+                except cls.DoesNotExist:
+                    return
+
+                return pickle.loads(str(value.value))
 
         global DBKeyValue
         DBKeyValue = _DBKeyValue

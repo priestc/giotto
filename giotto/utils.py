@@ -82,32 +82,6 @@ def super_accept_to_mimetype(ext):
 def random_string(n):
     return ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(n))
 
-def better_base():
-    """
-    Return a better SQLAlchemy Base class, for making things a little easier to
-    work with.
-    """
-    from sqlalchemy.ext.declarative import declarative_base, declared_attr
-    from sqlalchemy.orm import class_mapper, ColumnProperty
-    Base = declarative_base()
-    class BetterBase(Base):
-        __abstract__ = True
-
-        @declared_attr
-        def __tablename__(cls):
-            return "giotto_" + cls.__name__.lower()
-
-        @classmethod
-        def attribute_names(cls):
-            return [prop.key for prop in class_mapper(cls).iterate_properties
-                if isinstance(prop, ColumnProperty)]
-
-        def todict(self):
-            attrs = self.attribute_names()
-            return dict((attr, getattr(self, attr)) for attr in attrs)
-
-    return BetterBase
-
 def htmlize(value):
     """
     Turn any object into a html viewable entity.

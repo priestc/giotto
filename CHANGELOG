@@ -6,3 +6,5 @@
 * Upgraded SQLAlchemy to 0.8.2, upgraded some other libraries to the latest versions.
 * Completely reworked how the config works. Now there are three configs: `secrets`, `config` and `machine`
 * Renamed `GiottoProgram` to just `Program`, also renamed `ProgramManifest` to just `Manifest`.
+* Got rid of any mention of jinja from settings, also force all templates into 'views' folder.
+* Removed sqlalchemy and added in Django ORM to replace it. This is a backwards incompatable change.
