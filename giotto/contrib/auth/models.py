@@ -7,7 +7,7 @@ from giotto.primitives import LOGGED_IN_USER
 from giotto import get_config
 from django.db import models
 
-class User(models.Model):
+class BasicUser(models.Model):
     username = models.TextField(primary_key=True)
     password = models.TextField()
 
@@ -32,7 +32,7 @@ class User(models.Model):
             errors['username'] = {'message': 'Username not valid', 'value': self.username}
         if len(self.raw_password) < 4:
             errors['password'] = {'message': 'Password much be at least 4 characters'}
-        if get_config('db_session').query(User).filter_by(username=self.username).first():
+        if User.objects.filter(username=self.username).exists():
             errors['username'] = {'message': 'Username already exists', 'value': self.username}
 
         if errors:
@@ -44,10 +44,7 @@ class User(models.Model):
         Given a username and a raw, unhashed password, get the corresponding
         user, retuns None if no match is found.
         """
-        user = get_config('db_session').query(cls).filter_by(username=username).first()
-
-        if not user:
-            return None
+        user = cls.objects.get(username=username)
 
         if bcrypt.hashpw(password, user.password) == user.password:
             return user
@@ -55,10 +52,8 @@ class User(models.Model):
             return None
 
     @classmethod
-    def get_user_by_hash(cls, username, hash_):
-        return get_config('db_session').query(cls)\
-                     .filter_by(username=username, password=hash_)\
-                     .first()
+    def get_user_by_hash(cls, username, hash):
+        return cls.objects.get(username=username, password=hash)
 
     @classmethod
     def create(cls, username, password):

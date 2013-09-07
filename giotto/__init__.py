@@ -43,23 +43,13 @@ def initialize(config=None, secrets=None, machine=None):
     else:
         logging.warning("No machine.py found")
 
-    ##################
-    # Make a 'mock' module out of settings gleamed from config.py
-    # This is done in leiu of having a seperate django settings file
-    # for pointing DJANGO_SETTINGS_MODULE to. I18N and L10N are
-    # disabled because they apparently don't like our mock
-    # settings module method.
-
-    giotto_django_bridge = imp.new_module("giotto_django_bridge")
-    settings = "%s;%s;USE_L10N = False;USE_I18N = False" % (
-        'DATABASES = %s' % str(get_config('DATABASES')),
-        'INSTALLED_APPS = ("models")',
+    from utils import random_string
+    from django.conf import settings
+    settings.configure(
+        SECRET_KEY=random_string(32),
+        DATABASES=get_config('DATABASES'),
+        INSTALLED_APPS=('models', 'giotto.contrib.auth')
     )
-    exec settings in giotto_django_bridge.__dict__
-    sys.modules["giotto_django_bridge"] = giotto_django_bridge
-    os.environ["DJANGO_SETTINGS_MODULE"] = 'giotto_django_bridge'
-
-    ##################
 
     auth_engine = get_config('auth_session_engine', None)
     if auth_engine:

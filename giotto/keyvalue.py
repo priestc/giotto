@@ -2,9 +2,6 @@ from collections import defaultdict
 import datetime
 import pickle
 
-from django.db import models
-from giotto import get_config
-
 try:
     import pylibmc
 except ImportError:
@@ -40,6 +37,7 @@ class DatabaseKeyValue(GiottoKeyValue):
         is then passed back into the mosule scope where it can be used
         by the DatabaseKeyValue backend.
         """
+        from django.db import models # have to import here because settings.configure has to be called first
         class _DBKeyValue(models.Model):
             key = models.TextField(primary_key=True)
             value = models.TextField()
