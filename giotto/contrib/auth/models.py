@@ -14,7 +14,7 @@ def basic_register(username, password, password2):
     if password != password2:
         raise InvalidInput(password={'message': "Passwords do not match"},
                            username={'value': username})
-    user = User.create(username, password)
+    user = User.objects.create_user(username, password)
     return create_session(user.username, password)
 
 def create_session(username, password):

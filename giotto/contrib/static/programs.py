@@ -21,7 +21,7 @@ class FileView(GiottoView):
     def cmd(self, result):
         return {'body': result.read(), 'mimetype': ''}
 
-def StaticServe(base_path='/static/'):
+def StaticServe(base_path='/views/static/'):
     """
     Meta program for serving any file based on the path
     """
