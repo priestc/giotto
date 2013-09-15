@@ -8,19 +8,6 @@ import logging
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-def switchout_keyvalue(engine):
-    from giotto import keyvalue
-    if engine == 'dummy':
-        return keyvalue.DummyKeyValue
-    if engine == 'locmem':
-        return keyvalue.LocMemKeyValue
-    if engine == 'database':
-        return keyvalue.DatabaseKeyValue
-    if engine == 'memcached':
-        return keyvalue.MemcacheKeyValue
-    if engine == 'redis':
-        return keyvalue.RedisKeyValue
-
 def initialize(config=None, secrets=None, machine=None):
     """
     Build the giotto settings object. This function gets called
@@ -43,12 +30,12 @@ def initialize(config=None, secrets=None, machine=None):
     else:
         logging.warning("No machine.py found")
 
-    from utils import random_string
+    from giotto.utils import random_string, switchout_keyvalue
     from django.conf import settings
     settings.configure(
         SECRET_KEY=random_string(32),
         DATABASES=get_config('DATABASES'),
-        INSTALLED_APPS=('models', 'giotto.contrib.auth')
+        INSTALLED_APPS=('models', 'giotto.djangoapp')
     )
 
     auth_engine = get_config('auth_session_engine', None)

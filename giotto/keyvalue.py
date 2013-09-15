@@ -2,6 +2,8 @@ from collections import defaultdict
 import datetime
 import pickle
 
+from giotto.djangoapp.models import DBKeyValue
+
 try:
     import pylibmc
 except ImportError:
@@ -11,8 +13,6 @@ try:
     import redis
 except ImportError:
     redis = None
-
-DBKeyValue = None
 
 class GiottoKeyValue(object):
     """
@@ -29,39 +29,6 @@ class GiottoKeyValue(object):
         raise NotImplementedError
 
 class DatabaseKeyValue(GiottoKeyValue):
-    def __init__(self):
-        """
-        Since we can't get the base class by importing it (base class defined in
-        the config file, which is where this class is initialized). The base
-        class must be passed in via this constructor. The SQLAlchemy model
-        is then passed back into the mosule scope where it can be used
-        by the DatabaseKeyValue backend.
-        """
-        from django.db import models # have to import here because settings.configure has to be called first
-        class _DBKeyValue(models.Model):
-            key = models.TextField(primary_key=True)
-            value = models.TextField()
-            expires = models.DateTimeField()
-
-            @classmethod
-            def set(cls, key, obj, expire):
-                when_expire = datetime.datetime.now() + datetime.timedelta(seconds=expire)
-                new = cls.objects.get_or_create(key=key).update(
-                    value=pickle.dumps(obj),
-                    expires=when_expire
-                )
-
-            @classmethod
-            def get(cls, key):
-                try:
-                    value = cls.objects.filter(expires__gt=datetime.datetime.now()).get(key=key)
-                except cls.DoesNotExist:
-                    return
-
-                return pickle.loads(str(value.value))
-
-        global DBKeyValue
-        DBKeyValue = _DBKeyValue
 
     def get(self, key):
         return DBKeyValue.get(key)

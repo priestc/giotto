@@ -4,7 +4,6 @@ import mimeparse
 import inspect
 
 from jinja2 import Template, DebugUndefined, Environment, PackageLoader, FileSystemLoader
-
 from jinja2.exceptions import TemplateNotFound
 
 from giotto import get_config
@@ -212,15 +211,17 @@ class BasicView(GiottoView):
 
         return "\n".join(out)
 
+def get_jinja_template(template_name):
+    pp = get_config('project_path')
+    env = Environment(loader=FileSystemLoader(os.path.join(pp, 'views'))) 
+    return env.get_template(template_name)
 
 def jinja_template(template_name, name='data', mimetype="text/html"):
     """
     Meta-renderer for rendering jinja templates
     """
     def jinja_renderer(result, errors):
-        pp = get_config('project_path')
-        env = Environment(loader=FileSystemLoader(os.path.join(pp, 'views'))) 
-        template = env.get_template(template_name)
+        template = get_jinja_template(template_name)
         context = {name: result or Mock(), 'errors': errors, 'enumerate': enumerate}
         rendered = template.render(**context)
         return {'body': rendered, 'mimetype': mimetype}
@@ -235,7 +236,7 @@ def partial_jinja_template(template_name, name='data', mimetype="text/html"):
     kept in the emplate intact.
     """
     def partial_jinja_renderer(result, errors):
-        template = get_config('jinja2_env').get_template(template_name)
+        template = get_jinja_template(template_name)
         old = template.environment.undefined
         template.environment.undefined = DebugUndefined
         context = {name: result or Mock(), 'errors': errors}
@@ -253,7 +254,7 @@ def lazy_jinja_template(template_name, name='data', mimetype='text/html'):
     middleware stread of any program that uses this renderer.
     """
     def lazy_jinja_renderer(result, errors):
-        template = get_config('jinja2_env').get_template(template_name)
+        template = get_jinja_template(template_name)
         context = {name: result or Mock(), 'errors': errors}
         data = ('jinja2', template, context)
         return {'body': data, 'mimetype': mimetype}

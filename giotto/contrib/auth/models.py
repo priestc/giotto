@@ -5,69 +5,7 @@ from giotto.exceptions import InvalidInput
 from giotto.utils import random_string
 from giotto.primitives import LOGGED_IN_USER
 from giotto import get_config
-from django.db import models
-
-class BasicUser(models.Model):
-    username = models.TextField(primary_key=True)
-    password = models.TextField()
-
-    def __init__(self, username, password):
-        self.username = username
-        hashed = ''
-        if not password == '':
-            # skip hashing process if the password field is left blank
-            # helpful for creating mock user objects without slowing things down.
-            hashed = bcrypt.hashpw(password, bcrypt.gensalt())
-        self.password = hashed
-        self.raw_password = password
-    
-    def validate(self):
-        """
-        Make sure this newly created user instance meets the username/password
-        requirements
-        """
-        r = get_config('auth_regex', r'^[\d\w]{4,30}$')
-        errors = {}
-        if not re.match(r, self.username):
-            errors['username'] = {'message': 'Username not valid', 'value': self.username}
-        if len(self.raw_password) < 4:
-            errors['password'] = {'message': 'Password much be at least 4 characters'}
-        if User.objects.filter(username=self.username).exists():
-            errors['username'] = {'message': 'Username already exists', 'value': self.username}
-
-        if errors:
-            raise InvalidInput("User data not valid", **errors)
-
-    @classmethod
-    def get_user_by_password(cls, username, password):
-        """
-        Given a username and a raw, unhashed password, get the corresponding
-        user, retuns None if no match is found.
-        """
-        user = cls.objects.get(username=username)
-
-        if bcrypt.hashpw(password, user.password) == user.password:
-            return user
-        else:
-            return None
-
-    @classmethod
-    def get_user_by_hash(cls, username, hash):
-        return cls.objects.get(username=username, password=hash)
-
-    @classmethod
-    def create(cls, username, password):
-        """
-        Create a new user instance
-        """
-        user = cls(username=username, password=password)
-        user.validate()
-        user.save()
-        return user
-
-    def __repr__(self):
-        return "<User('%s', '%s')>" % (self.username, self.password)
-
+from giotto.djangoapp.models import User
 
 def basic_register(username, password, password2):
     """

@@ -6,8 +6,21 @@ import re
 import unicodedata
 import six
 
-from giotto import get_config, keyvalue
+from giotto import get_config
 from collections import defaultdict
+
+def switchout_keyvalue(engine):
+    from giotto import keyvalue
+    if engine == 'dummy':
+        return keyvalue.DummyKeyValue
+    if engine == 'locmem':
+        return keyvalue.LocMemKeyValue
+    if engine == 'database':
+        return keyvalue.DatabaseKeyValue
+    if engine == 'memcached':
+        return keyvalue.MemcacheKeyValue
+    if engine == 'redis':
+        return keyvalue.RedisKeyValue
 
 class Mock(object):
     """
@@ -135,6 +148,8 @@ def render_error_page(code, exc, mimetype='text/html', traceback=''):
     """
     Render the error page
     """
+    from giotto.views import get_jinja_template
+
     if 'json' in mimetype:
         return json.dumps({
             'code': code,
@@ -145,7 +160,7 @@ def render_error_page(code, exc, mimetype='text/html', traceback=''):
     et = get_config('error_template')
     if not et:
         return "%s %s\n%s" % (code, str(exc), traceback)
-    template = get_config('jinja2_env').get_template(et)
+    template = get_jinja_template(et)
     return template.render(
         code=code,
         exception=exc.__class__.__name__,

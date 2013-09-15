@@ -21,7 +21,7 @@ class AuthenticationMiddleware(GiottoInputMiddleware):
             session_key = request.POST.get('auth_session', None)
         if session_key:
             username = get_config('auth_session_engine').get(session_key)
-            user = get_config('db_session').query(User).filter_by(username=username).first()
+            user = User.objects.get(username=username)
 
         setattr(request, 'user', user)
         return request
@@ -36,7 +36,7 @@ class AuthenticationMiddleware(GiottoInputMiddleware):
             print("Username:")
             username = raw_input()
             password = getpass.getpass()
-            user = User.get_user_by_password(username, password)
+            user = User.objects.get_user_by_password(username, password)
 
         setattr(request, 'user', user)
         return request
