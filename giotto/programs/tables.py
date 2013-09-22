@@ -8,7 +8,7 @@ def syncdb():
     """
     call_command('syncdb', traceback=True)
 
-def blast_tables():
+def flush():
     """
     Drop all existing tables in the database, and then recreate them.
     """
@@ -21,4 +21,4 @@ def blast_tables():
         return "Aborting"
 
     print("blasting away all tables...")
-    return syncdb()
+    return call_command('flush', traceback=True)

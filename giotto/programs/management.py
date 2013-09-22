@@ -1,6 +1,6 @@
 from giotto.programs import Program, Manifest
 from giotto.programs.shell import shell
-from giotto.programs.tables import syncdb, blast_tables
+from giotto.programs.tables import syncdb, flush
 from giotto.views import BasicView
 
 management_manifest = Manifest({
@@ -10,10 +10,10 @@ management_manifest = Manifest({
         model=[syncdb],
         view=BasicView()
     ),
-    'blast_tables': Program(
+    'flush': Program(
         name="Blast Tables",
         controllers=['cmd'],
-        model=[blast_tables],
+        model=[flush],
         view=BasicView(),
     ),
     'shell': Program(
