@@ -31,10 +31,10 @@ class GiottoKeyValue(object):
 class DatabaseKeyValue(GiottoKeyValue):
 
     def get(self, key):
-        return DBKeyValue.get(key)
+        return DBKeyValue.objects.cache_get(key)
 
     def set(self, key, obj, expire):
-        return DBKeyValue.set(key, obj, expire)
+        return DBKeyValue.objects.cache_set(key, obj, expire)
 
 locmem = {}
 class LocMemKeyValue(GiottoKeyValue):

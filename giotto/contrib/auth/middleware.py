@@ -21,8 +21,11 @@ class AuthenticationMiddleware(GiottoInputMiddleware):
             session_key = request.POST.get('auth_session', None)
         if session_key:
             username = get_config('auth_session_engine').get(session_key)
-            user = User.objects.get(username=username)
-
+            try:
+                user = User.objects.get(username=username)
+            except User.DoesNotExist:
+                user = None
+        
         setattr(request, 'user', user)
         return request
 

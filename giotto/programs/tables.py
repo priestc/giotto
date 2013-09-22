@@ -12,13 +12,4 @@ def flush():
     """
     Drop all existing tables in the database, and then recreate them.
     """
-    msg = "This will delete all data in your tables, are you sure? [yN]"
-    if six.PY3:
-        yn = input(msg)
-    else:
-        yn = raw_input(msg)
-    if yn.lower() != 'y':
-        return "Aborting"
-
-    print("blasting away all tables...")
     return call_command('flush', traceback=True)
