@@ -66,6 +66,7 @@ class User(models.Model):
             hashed = bcrypt.hashpw(password, bcrypt.gensalt())
         self.password = hashed
         self.raw_password = password
+        super(User, self).__init__(username, password)
     
     def validate(self):
         """

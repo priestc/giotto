@@ -40,15 +40,16 @@ if '--run-ssl' in sys.argv:
 """
 
 
-def serve(ip, port, application, ssl=None, **kwargs):
+def serve(ip, port, application, ssl=None, processes=1, **kwargs):
     """
     Serve a wsgi app (any wsgi app) through with either werkzeug's runserver
-    or the one that comes with python.
+    or the one that comes with python. Setting `processes` to anything other than 1
+    will prevent the debigger from working.
     """
     try:
         # use werkzeug if its there
         from werkzeug.serving import run_simple
-        run_simple(ip, port, application, ssl_context=ssl, processes=3, **kwargs)
+        run_simple(ip, port, application, ssl_context=ssl, processes=processes, **kwargs)
         return
     except ImportError:
         pass
