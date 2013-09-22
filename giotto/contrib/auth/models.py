@@ -21,7 +21,7 @@ def create_session(username, password):
     """
     Create a session for the user, and then return the key.
     """
-    user = User.get_user_by_password(username, password)
+    user = User.objects.get_user_by_password(username, password)
     auth_session_engine = get_config('auth_session_engine')
     if not user:
         raise InvalidInput('Username or password incorrect')

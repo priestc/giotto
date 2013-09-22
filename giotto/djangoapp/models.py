@@ -44,7 +44,6 @@ class UserManager(models.Manager):
     def get_user_by_hash(self, username, hash):
         return self.get(username=username, password=hash)
 
-class UserManager(models.Manager):
     def create_user(self, username, password):
         user = User(username, password)
         user.validate()
