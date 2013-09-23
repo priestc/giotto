@@ -11,12 +11,12 @@ def initialize(module_name):
     Build the giotto settings object. This function gets called
     at the very begining of every request cycle.
     """
+    secrets = importlib.import_module("%s.controllers.secrets" % module_name)
+    machine = importlib.import_module("%s.controllers.machine" % module_name)
+    config = importlib.import_module("%s.controllers.config" % module_name)
+
     import giotto
     setattr(giotto, '_config', config)
-
-    secrets = importlib.import_module("%s.secrets" % module_name)
-    machine = importlib.import_module("%s.machine" % module_name)
-    config = importlib.import_module("%s.config" % module_name)
 
     if secrets:
         for item in dir(secrets):

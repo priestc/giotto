@@ -44,7 +44,7 @@ def get_profile(key):
         raise Exception("Can't find .giottorc, please run `giotto create-profile`")
 
     try:
-        obj = json.loads(j)[key]
+        obj = json.loads(j)
     except:
         raise Exception(".giottorc file not valid json")
 
@@ -55,9 +55,12 @@ def get_profile(key):
 
 @arg("project_name")
 @arg("module_name")
-@arg("controllers")
+@arg("--http", default=False)
+@arg("--cmd", default=False)
+@arg("--irc", default=False)
 @arg('--github', default=False)
 def create_project(args):
+    xx = args
     project_name = args.project_name
     module_name = args.module_name
 
@@ -70,6 +73,7 @@ def create_project(args):
 
     subprocess.call(['touch', os.path.join(project_name, module_name, "__init__.py")])
     subprocess.call(['touch', os.path.join(project_name, module_name, "models/__init__.py")])
+    subprocess.call(['touch', os.path.join(project_name, module_name, "controllers/__init__.py")])
 
     def write_to_file(pathlist, contents):
         with open(os.path.join(project_name, *pathlist), "w") as f:
@@ -159,35 +163,34 @@ error_template = None
     template_controller = '''#!/usr/bin/env python
 # coding: utf-8
 from giotto import initialize
-initialize(%(module_name)s)
+initialize("%(module_name)s")
 
 from %(module_name)s.manifest import manifest
 ''' % {'module_name': module_name}
 
-    for controller in args.controllers:
-        if controller == 'http':
-            from giotto.controllers.http import http_execution_snippet
-            filename = os.path.join(project_name, module_name, 'controllers', 'http_controller.py')
-            f = open(filename, 'w')
-            st = os.stat(filename)
-            f.write(template_controller + http_execution_snippet)
-            os.chmod(filename, st.st_mode | stat.S_IEXEC)
+    if args.http:
+        from giotto.controllers.http import http_execution_snippet
+        filename = os.path.join(project_name, module_name, 'controllers', 'http_controller.py')
+        f = open(filename, 'w')
+        st = os.stat(filename)
+        f.write(template_controller + http_execution_snippet)
+        os.chmod(filename, st.st_mode | stat.S_IEXEC)
 
-        if controller == 'irc':
-            from giotto.controllers.irc_ import irc_execution_snippet
-            filename = os.path.join(project_name, module_name, 'controllers', 'irc_controller.py')
-            f = open(filename, 'w')
-            f.write(template_controller + irc_execution_snippet)
-            st = os.stat(filename)
-            os.chmod(filename, st.st_mode | stat.S_IEXEC)
+    if args.irc:
+        from giotto.controllers.irc_ import irc_execution_snippet
+        filename = os.path.join(project_name, module_name, 'controllers', 'irc_controller.py')
+        f = open(filename, 'w')
+        f.write(template_controller + irc_execution_snippet)
+        st = os.stat(filename)
+        os.chmod(filename, st.st_mode | stat.S_IEXEC)
 
-        if controller == 'cmd':
-            from giotto.controllers.cmd import cmd_execution_snippet
-            filename = os.path.join(project_name, module_name, 'controllers', 'cmd_controller.py')
-            f = open(filename, 'w')
-            f.write(template_controller + cmd_execution_snippet)
-            st = os.stat(filename)
-            os.chmod(filename, st.st_mode | stat.S_IEXEC)
+    if args.cmd:
+        from giotto.controllers.cmd import cmd_execution_snippet
+        filename = os.path.join(project_name, module_name, 'controllers', 'cmd_controller.py')
+        f = open(filename, 'w')
+        f.write(template_controller + cmd_execution_snippet)
+        st = os.stat(filename)
+        os.chmod(filename, st.st_mode | stat.S_IEXEC)
 
     if args.github:
         username = get_profile("github_username")
@@ -236,6 +239,12 @@ def suggest(path=''):
 
 def http(run=False, run_ssl=False, py3=False, *args):
     args = ["python3" if py3 else "python", "controllers/http_controller.py"]
+    if run:
+        args = args + ["--run"]
+    if run_ssl:
+        args = args + ["--run-ssl"]
+
+    #import debug
     process = subprocess.Popen(args)
     try:
         process.wait()
@@ -243,7 +252,7 @@ def http(run=False, run_ssl=False, py3=False, *args):
         pass
 
 def irc(run=False, run_ssl=False, py3=False, *args):
-    args = ["python3" if py3 else "python", "controllers/http_controller.py"]
+    args = ["python3" if py3 else "python", "controllers/irc_controller.py"]
     process = subprocess.Popen(args)
     try:
         process.wait()
@@ -251,7 +260,7 @@ def irc(run=False, run_ssl=False, py3=False, *args):
         pass
 
 def cmd(py3=False, *args):
-    args = ["python3" if py3 else "python", "controllers/http_controller.py"]
+    args = ["python3" if py3 else "python", "controllers/cmd_controller.py"]
     process = subprocess.Popen(args)
     try:
         process.wait()

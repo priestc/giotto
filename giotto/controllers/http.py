@@ -23,7 +23,7 @@ from webob.exc import (
     HTTPNotFound, HTTPForbidden
 )
 
-http_execution_snippet = """
+http_execution_snippet = """import sys
 mock = '--model-mock' in sys.argv
 from giotto.controllers.http import make_app, fancy_error_template_middleware, serve
 
