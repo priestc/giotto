@@ -14,6 +14,7 @@ REQUIRES = [
 
 if sys.version_info < (2, 7):
     REQUIRES.append('ordereddict')
+    REQUIRES.append('importlib')
 
 setup(
     name='giotto',

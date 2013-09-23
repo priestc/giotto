@@ -1,20 +1,22 @@
 __version__ = '0.11.0'
 
+import importlib
 import os
 import imp
 import sys
 import logging
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-
-def initialize(config=None, secrets=None, machine=None):
+def initialize(module_name):
     """
     Build the giotto settings object. This function gets called
     at the very begining of every request cycle.
     """
     import giotto
     setattr(giotto, '_config', config)
+
+    secrets = importlib.import_module("%s.secrets" % module_name)
+    machine = importlib.import_module("%s.machine" % module_name)
+    config = importlib.import_module("%s.config" % module_name)
 
     if secrets:
         for item in dir(secrets):
@@ -35,7 +37,7 @@ def initialize(config=None, secrets=None, machine=None):
     settings.configure(
         SECRET_KEY=random_string(32),
         DATABASES=get_config('DATABASES'),
-        INSTALLED_APPS=('models', 'giotto.djangoapp')
+        INSTALLED_APPS=(module_name, 'giotto')
     )
 
     auth_engine = get_config('auth_session_engine', None)

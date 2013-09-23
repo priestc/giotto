@@ -158,22 +158,8 @@ error_template = None
 
     template_controller = '''#!/usr/bin/env python
 # coding: utf-8
-
 from giotto import initialize
-
-try:
-    from %(module_name)s.controllers import secrets
-except ImportError:
-    secrets = None
-
-try:
-    from %(module_name)s.controllers import machine
-except ImportError:
-    machine = None
-
-from %(module_name)s.controllers import config
-
-initialize(config, secrets, machine)
+initialize(%(module_name)s)
 
 from %(module_name)s.manifest import manifest
 ''' % {'module_name': module_name}
