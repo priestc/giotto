@@ -14,7 +14,11 @@ import requests
 def create_profile():
     home = os.path.expanduser("~")
     rc = os.path.join(home, ".giottorc")
-    with open(rc, "w") as f:
+    try:
+        f = open(rc, "r")
+    except IOError:
+        # file does not exist, create it
+        f = open(rc, "w")
         f.write("""{
     "github_personal_access_token": null,
     "github_username": null,
@@ -26,6 +30,9 @@ def create_profile():
 }
 """
         )
+    else:
+        # don't do anything if rc file seems to already exist
+        return ".giottorc file already exists at %s" % rc
 
 def get_profile(key):
     """
@@ -83,24 +90,17 @@ manifest = Manifest({
     )
 
     import giotto
-    write_to_file(['setup.py'], """
-
-from setuptools import setup
-import sys
+    write_to_file(['setup.py'], """from setuptools import setup
 
 setup(
     name='%(module_name)s',
     version='0.1.0',
     description='',
-    long_description=open('README.rst').read(),
+    long_description=open('README.md').read(),
     author='',
     author_email='',
     url='',
-    packages=[
-        'controllers',
-        'manifest',
-    ],
-    scripts=['bin/giotto'],
+    packages=['%(module_name)s'],
     include_package_data=True,
     license='LICENSE',
     classifiers=[
@@ -232,6 +232,8 @@ from %(module_name)s.manifest import manifest
         subprocess.call(['git', 'add', '.gitignore'])
         subprocess.call(['git', 'commit', '-m', 'Initial Project Creation'])
         subprocess.call(['git', 'push'])
+
+    subprocess.call(['python', 'setup.py', 'develop'])
 
 def suggest(path=''):
     try:
