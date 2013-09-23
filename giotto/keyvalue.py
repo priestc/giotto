@@ -2,8 +2,6 @@ from collections import defaultdict
 import datetime
 import pickle
 
-from giotto.djangoapp.models import DBKeyValue
-
 try:
     import pylibmc
 except ImportError:
@@ -31,9 +29,11 @@ class GiottoKeyValue(object):
 class DatabaseKeyValue(GiottoKeyValue):
 
     def get(self, key):
+        from giotto.djangoapp.models import DBKeyValue
         return DBKeyValue.objects.cache_get(key)
 
     def set(self, key, obj, expire):
+        from giotto.djangoapp.models import DBKeyValue
         return DBKeyValue.objects.cache_set(key, obj, expire)
 
 locmem = {}

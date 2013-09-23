@@ -2,89 +2,74 @@
 
 import sys
 import stat
+import json
 import subprocess
 import os
 
-subcommand = sys.argv[1]
+from argh.decorators import arg
+from argh import ArghParser
 
-if subcommand == 'suggest':
-    try:
-        sys.path.append(os.getcwd())
-        from giotto import initialize
-        import config
-        initialize(config)
-        from manifest import manifest
-        if len(sys.argv) > 2:
-            item = sys.argv[2]
-        else:
-            item = ''
+import requests
 
-        suggestions = manifest.get_suggestion(item)
-        print(" ".join(suggestions))
-    except:
-        pass    
-
-    raise SystemExit()
-
-if subcommand == 'create':
-    controllers = sys.argv[2:]
-    config_template = '''import os
-from giotto.utils import better_base
-
-Base = better_base()
-
-project_path = os.path.dirname(os.path.abspath(__file__))
-auth_session_expire = 3600 * 24 * 7
-error_template = None'''
-
-    machine_template = """# Put settings in this file that will change depending on the
-# machine, such as database hosts and external resource paths.
-# One of these files exist for each enviornment this app will run in.
-
-debug = True
-cache_engine = 'dummy' # or 'redis', 'locmem', 'database'
-cache_host = 'localhost'
-
-auth_engine = 'database' # or a `keyvalue` object.
-
-db_engine = 'sqlite3'
-db_name = 'sqlite.db'
-
-#db_engine = 'postgresql' # or 'mysql'
-#db_name = 'my_project'
-#db_port = 5434
-#db_host = 'localhost'
-#db_username = 'postgres'
-#db_password = 'password'
+def create_profile():
+    home = os.path.expanduser("~")
+    rc = os.path.join(home, ".giottorc")
+    with open(rc, "w") as f:
+        f.write("""{
+    "github_personal_access_token": null,
+    "github_username": null,
+    "bitbucket_username": null,
+    "aws_secret": null,
+    "aws_key": null,
+    "digitalocean_client_id": null,
+    "digitalocean_api_key": null
+}
 """
+        )
 
-    template_controller = '''\
-#!/usr/bin/env python
-# coding: utf-8
+def get_profile(key):
+    """
+    Get information from the user's .giottorc file.
+    """
+    try:
+        j = open(os.path.join(os.path.expanduser("~"), ".giottorc"), "r").read()
+    except:
+        raise Exception("Can't find .giottorc, please run `giotto create-profile`")
 
-import argparse
-import sys
-from giotto import initialize
+    try:
+        obj = json.loads(j)[key]
+    except:
+        raise Exception(".giottorc file not valid json")
 
-try:
-    import secrets
-except ImportError:
-    secrets = None
-    print("Warning: no secrets.py found.")
+    try:
+        return obj[key]
+    except IndexError:
+        raise Exception("Missing '%s' in .giottorc" % key)
 
-try:
-    import machine
-except ImportError:
-    machine = None
-    print("Warning: no machine.py found.")
+@arg("project_name")
+@arg("module_name")
+@arg("controllers")
+@arg('--github', default=False)
+def create_project(args):
+    project_name = args.project_name
+    module_name = args.module_name
 
-import config
-initialize(config, secrets, machine)
+    os.mkdir(project_name)
+    os.mkdir(os.path.join(project_name, module_name))
+    os.mkdir(os.path.join(project_name, module_name, "controllers"))
+    os.mkdir(os.path.join(project_name, module_name, "models"))
+    os.mkdir(os.path.join(project_name, module_name, "views"))
+    os.mkdir(os.path.join(project_name, module_name, "views", "static"))
 
-from manifest import manifest
-'''
+    subprocess.call(['touch', os.path.join(project_name, module_name, "__init__.py")])
+    subprocess.call(['touch', os.path.join(project_name, module_name, "models/__init__.py")])
 
-    blank_application = '''from giotto.programs import Program, Manifest
+    def write_to_file(pathlist, contents):
+        with open(os.path.join(project_name, *pathlist), "w") as f:
+            f.write(contents)
+
+    write_to_file([module_name, 'manifest.py'],
+'''from giotto.programs import Program, Manifest
 from giotto.programs.management import management_manifest
 from giotto.views import BasicView
 
@@ -95,45 +80,108 @@ manifest = Manifest({
     ),
     'mgt': management_manifest,
 })'''
+    )
 
-    from giotto.demo import demo_application
+    import giotto
+    write_to_file(['setup.py'], """
 
-    try:
-        open('manifest.py', 'r')
-    except IOError:
-        # create a blank manifest file (if one doesn't already exist)
-        f = open('manifest.py', 'w')
-        if '--demo' in controllers:
-            f.write(demo_application)
-        else:
-            f.write(blank_application)
+from setuptools import setup
+import sys
 
-    try:
-        open('machine.py', 'r')
-    except IOError:
-        # create a blank config file (if one doesn't already exist)
-        f = open('machine.py', 'w')
-        f.write(machine_template)
+setup(
+    name='%(module_name)s',
+    version='0.1.0',
+    description='',
+    long_description=open('README.rst').read(),
+    author='',
+    author_email='',
+    url='',
+    packages=[
+        'controllers',
+        'manifest',
+    ],
+    scripts=['bin/giotto'],
+    include_package_data=True,
+    license='LICENSE',
+    classifiers=[
+        "Programming Language :: Python",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+    ],
+    install_requires=[
+        'giotto==%(this_giotto_version)s',
+    ],
+)
+""" % {
+        "this_giotto_version": giotto.__version__,
+        "module_name": module_name,
+    })
 
-    try:
-        open('secrets.py', 'r')
-    except IOError:
-        # create a blank config file (if one doesn't already exist)
-        f = open('secrets.py', 'w')
-        f.write("""# Put settings in this file that are secret (such as API keys).
-# Remember to exclude this file from source control.""")
+    write_to_file([module_name, 'controllers', 'machine.py'],
+"""# Put settings in this file that will change depending on the
+# machine, such as database hosts and external resource paths.
+# One of these files exist for each enviornment this app will run in.
 
-    try:
-        open('config.py', 'r')
-    except IOError:
-        # create a blank config file (if one doesn't already exist)
-        f = open('config.py', 'w')
-        f.write(config_template)
+debug = True
+cache_engine = 'dummy' # or 'redis', 'locmem', 'database'
+cache_host = 'localhost'
 
-    for controller in controllers:
+auth_engine = 'database' # or a `keyvalue` object.
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3', # 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': 'database.sqlite3',             # Or path to database file if using sqlite3.
+        # The following settings are not used with sqlite3:
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'PORT': '',                      # Set to empty string for default.
+    }
+}
+"""
+    )
+
+    write_to_file([module_name, 'controllers', 'secrets.py'],
+"""# Put settings in this file that are secret (such as API keys).
+# Remember to exclude this file from source control.
+"""
+    )
+
+    write_to_file([module_name, 'controllers', 'config.py'],
+'''import os
+
+project_path = os.path.dirname(os.path.abspath(__file__))
+auth_session_expire = 3600 * 24 * 7
+error_template = None
+'''
+    )
+
+    template_controller = '''#!/usr/bin/env python
+# coding: utf-8
+
+from giotto import initialize
+
+try:
+    from %(module_name)s.controllers import secrets
+except ImportError:
+    secrets = None
+
+try:
+    from %(module_name)s.controllers import machine
+except ImportError:
+    machine = None
+
+from %(module_name)s.controllers import config
+
+initialize(config, secrets, machine)
+
+from %(module_name)s.manifest import manifest
+''' % {'module_name': module_name}
+
+    for controller in args.controllers:
         if controller == 'http':
             from giotto.controllers.http import http_execution_snippet
-            filename = 'http_controller.py'
+            filename = os.path.join(project_name, module_name, 'controllers', 'http_controller.py')
             f = open(filename, 'w')
             st = os.stat(filename)
             f.write(template_controller + http_execution_snippet)
@@ -141,7 +189,7 @@ manifest = Manifest({
 
         if controller == 'irc':
             from giotto.controllers.irc_ import irc_execution_snippet
-            filename = 'irc_controller.py'
+            filename = os.path.join(project_name, module_name, 'controllers', 'irc_controller.py')
             f = open(filename, 'w')
             f.write(template_controller + irc_execution_snippet)
             st = os.stat(filename)
@@ -149,21 +197,81 @@ manifest = Manifest({
 
         if controller == 'cmd':
             from giotto.controllers.cmd import cmd_execution_snippet
-            filename = 'cmd_controller.py'
+            filename = os.path.join(project_name, module_name, 'controllers', 'cmd_controller.py')
             f = open(filename, 'w')
             f.write(template_controller + cmd_execution_snippet)
             st = os.stat(filename)
             os.chmod(filename, st.st_mode | stat.S_IEXEC)
 
-    raise SystemExit()
+    if args.github:
+        username = get_profile("github_username")
+        data = {
+            "auto_init": True,
+            "gitignore_template": 'Python',
+            "name": project_name,
+        }
+        response = requests.post(
+            "https://api.github.com/user/repos",
+            headers={'Content-type': 'application/json'},
+            auth=(get_profile("github_personal_access_token"), 'x-oauth-basic'),
+            data=json.dumps(data)
+        )
+        j = response.json()
+        ssh_url = j['ssh_url']
+        os.chdir(project_name)
 
-command = ["python"] + ["%s_controller.py" % subcommand] + sys.argv[2:]
-process = subprocess.Popen(command)
-try:
-    process.wait()
-except KeyboardInterrupt:
-    pass
+        subprocess.call(['git', "init"])
+        subprocess.call(['git', 'remote', 'add', 'origin', ssh_url])
+        subprocess.call(['git', 'pull', 'origin', 'master'])
 
+        with open(".gitignore", "a") as f:
+            f.write("\n# Giotto secret keys\n%s/controllers/secrets.py" % module_name)
 
+        subprocess.call(['git', 'add', 'setup.py'])
+        subprocess.call(['git', 'add', module_name])
+        subprocess.call(['git', 'add', '.gitignore'])
+        subprocess.call(['git', 'commit', '-m', 'Initial Project Creation'])
+        subprocess.call(['git', 'push'])
 
+def suggest(path=''):
+    try:
+        sys.path.append(os.getcwd())
+        from giotto import initialize
+        import config
+        initialize(config)
+        from manifest import manifest
 
+        suggestions = manifest.get_suggestion(path)
+        print(" ".join(suggestions))
+    except:
+        pass
+
+def http(run=False, run_ssl=False, py3=False, *args):
+    args = ["python3" if py3 else "python", "controllers/http_controller.py"]
+    process = subprocess.Popen(args)
+    try:
+        process.wait()
+    except KeyboardInterrupt:
+        pass
+
+def irc(run=False, run_ssl=False, py3=False, *args):
+    args = ["python3" if py3 else "python", "controllers/http_controller.py"]
+    process = subprocess.Popen(args)
+    try:
+        process.wait()
+    except KeyboardInterrupt:
+        pass
+
+def cmd(py3=False, *args):
+    args = ["python3" if py3 else "python", "controllers/http_controller.py"]
+    process = subprocess.Popen(args)
+    try:
+        process.wait()
+    except KeyboardInterrupt:
+        pass
+
+parser = ArghParser()
+parser.add_commands([create_project, create_profile, suggest, http, irc, cmd])
+
+if __name__ == '__main__':
+    parser.dispatch()
