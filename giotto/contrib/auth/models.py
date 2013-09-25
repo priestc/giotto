@@ -5,7 +5,7 @@ from giotto.exceptions import InvalidInput
 from giotto.utils import random_string
 from giotto.primitives import LOGGED_IN_USER
 from giotto import get_config
-from giotto.djangoapp.models import User
+from giotto.models import User
 
 def basic_register(username, password, password2):
     """

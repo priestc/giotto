@@ -13,15 +13,15 @@ To run your Giotto application through HTTP,
 you first must create a concrete controller file for this controller class.
 Run this command from your project's root folder::
 
-    $ giotto_project --http
+    $ giotto new_controller http
 
-This will add a file into your project folder named ``giotto-http``.
+This will add a file into your controllers folder named ``http_controller.py``.
 To run the development server, run the following command::
 
-    $ ./giotto-http --run
+    $ giotto http --run
 
 To change the port and hostname of the development server,
-edit the last line of the concrete controller file.
+edit the call to `serve` in the concrete controller file.
 
 All requests are rendered with the ``text/html`` mimetype unless the accept headers are set otherwise.
 Also, for any request that comes in through an ajax request,
@@ -34,12 +34,12 @@ To run your Giotto application through the command line,
 you first must create a concrete controller file for this controller class.
 Run this command from your project's root folder::
 
-    $ giotto_project --cmd
+    $ giotto new_controller cmd
 
-This will add a file into your project folder named ``giotto-cmd``.
+This will add a file into your controllers folder named ``cmd_controller.py``.
 To invoke your application, run this generated script (called a concrete controller) like so::
 
-    $ ./giotto-cmd path/to/myprogram --var1=foo --var2=bar
+    $ giotto cmd path/to/myprogram --var1=foo --var2=bar
 
 This will call the ``myprogram`` program with ``var1`` and ``var2`` as arguments.
 
@@ -53,15 +53,15 @@ To run your Giotto application through IRC,
 you first must create a concrete controller file for this controller class.
 Run this command from your project's root folder::
 
-    $ giotto_project --irc
+    $ giotto new_controller irc
 
-This will add a file into your project folder named ``giotto-irc``.
+This will add a file into your controllers folder named ``irc_controller.py``.
 Edit the generated file and add the username of the bot,
 the hostname of th server you want to connect to,
 and any other details you want.
 To invoke your application, run this generated script (called a concrete controller) like so::
 
-    $ ./giotto-irc
+    $ giotto irc
 
 Once the bot has been connected to the server, to invoke programs, enter a channel and type the following::
 
@@ -86,7 +86,7 @@ Whenever you invoke a program, the mimetype used to render the model data is det
 The default mimetypes for the HTTP, IRC and CMD controllers are ``text/html``, ``text/irc``, and ``text/cmd`` respectively.
 To override this, just add the extension of your preferred type to the end of the program name::
 
-    ./giotto-cmd path/to/program.json --x=4
+    $ giotto cmd path/to/program.json --x=4
 
 This will return the result of ``program`` in JSON format instead of the default ``text/cmd``.
 This also works for positional arguments::
