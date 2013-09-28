@@ -111,8 +111,12 @@ setup(
         "Programming Language :: Python",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
+    dependency_links=[
+        # include repo URLs for requirements here (setup.py in toplevel)
+    ],
     install_requires=[
         'giotto==%(this_giotto_version)s',
+        # include additional pypi package requirements here
     ],
 )
 """ % {
