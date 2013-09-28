@@ -44,14 +44,14 @@ def get_profile(key):
         raise Exception("Can't find .giottorc, please run `giotto create-profile`")
 
     try:
-        obj = json.loads(j)
+        rc = json.loads(j)
     except:
         raise Exception(".giottorc file not valid json")
 
-    try:
-        return obj[key]
-    except IndexError:
+    ret = rc.get(key, None)
+    if not ret:    
         raise Exception("Missing '%s' in .giottorc" % key)
+    return ret
 
 @arg("project_name")
 @arg("module_name")
@@ -126,10 +126,9 @@ setup(
 # One of these files exist for each enviornment this app will run in.
 
 debug = True
-cache_engine = 'dummy' # or 'redis', 'locmem', 'database'
-cache_host = 'localhost'
+cache = 'dummy' # or 'redis', 'locmem', 'database', or 'memcache'.
 
-auth_engine = 'database' # or a `keyvalue` object.
+session_store = 'database' # or a `keyvalue` object.
 
 DATABASES = {
     'default': {
@@ -154,7 +153,6 @@ DATABASES = {
     write_to_file([module_name, 'controllers', 'config.py'],
 '''import os
 
-project_path = os.path.dirname(os.path.abspath(__file__))
 auth_session_expire = 3600 * 24 * 7
 error_template = None
 '''
@@ -244,12 +242,13 @@ def http(run=False, run_ssl=False, py3=False, *args):
     if run_ssl:
         args = args + ["--run-ssl"]
 
-    #import debug
     process = subprocess.Popen(args)
     try:
         process.wait()
     except KeyboardInterrupt:
         pass
+    except Exception as exc:
+        import debug
 
 def irc(run=False, run_ssl=False, py3=False, *args):
     args = ["python3" if py3 else "python", "controllers/irc_controller.py"]

@@ -11,24 +11,27 @@ def initialize(module_name):
     Build the giotto settings object. This function gets called
     at the very begining of every request cycle.
     """
-    secrets = importlib.import_module("%s.controllers.secrets" % module_name)
-    machine = importlib.import_module("%s.controllers.machine" % module_name)
-    config = importlib.import_module("%s.controllers.config" % module_name)
-
+    project_module = importlib.import_module(module_name)
+    secrets = getattr(project_module.controllers, 'secrets', None)
+    machine = getattr(project_module.controllers, 'machine', None)
+    config = getattr(project_module.controllers, 'config', None)
+    
     import giotto
     setattr(giotto, '_config', config)
 
+    setattr(giotto._config, 'project_path', os.path.dirname(project_module.__file__))
+
     if secrets:
         for item in dir(secrets):
-            s_value = getattr(secrets, item)
-            setattr(giotto._config, item, s_value)
+            setting_value = getattr(secrets, item)
+            setattr(giotto._config, item, setting_value)
     else:
         logging.warning("No secrets.py found")
 
     if machine:
         for item in dir(machine):
-            s_value = getattr(machine, item)
-            setattr(giotto._config, item, s_value)
+            setting_value = getattr(machine, item)
+            setattr(giotto._config, item, setting_value)
     else:
         logging.warning("No machine.py found")
 
@@ -40,12 +43,12 @@ def initialize(module_name):
         INSTALLED_APPS=(module_name, 'giotto')
     )
 
-    auth_engine = get_config('auth_session_engine', None)
+    auth_engine = get_config('session_store', None)
     if auth_engine:
         class_ = switchout_keyvalue(auth_engine)
-        setattr(giotto._config, "auth_session_engine", class_())
+        setattr(giotto._config, "session_store", class_())
 
-    cache_engine = get_config("cache_engine", None)
+    cache_engine = get_config("cache", None)
     if hasattr(cache_engine, 'lower'):
         # session engine was passed in as string, exchange for engine object.
         class_ = switchout_keyvalue(cache_engine)

@@ -12,7 +12,6 @@ try:
 except ImportError:
     from io import StringIO
 
-from giotto import get_config
 from giotto.exceptions import NoViewMethod, InvalidInput, NotAuthorized, DataNotFound, ProgramNotFound
 from giotto.controllers import GiottoController
 from giotto.control import Redirection
@@ -25,6 +24,7 @@ from webob.exc import (
 
 http_execution_snippet = """import sys
 mock = '--model-mock' in sys.argv
+from giotto import get_config
 from giotto.controllers.http import make_app, fancy_error_template_middleware, serve
 
 application = make_app(manifest, model_mock=mock)

@@ -11,6 +11,8 @@ Configuring cache
 =================
 To enable caching for your application, set a value for the ``cache`` variable in your project's ``config.py`` file.
 The value must be an instance of a class derived from the ``GiottoKeyValue`` class.
+Additionally, if you are only going to use default settings (localhost, default port), you can set it to just a string,
+e.g. "redis", "memcache", "database", etc.
 
 RedisKeyValue
 -------------
@@ -19,6 +21,10 @@ To change this, pass in connection data to the constructor::
 
     from giotto.keyvalue import RedisKeyValue
     cache = RedisKeyValue(host="10.10.0.5", port=4000)
+
+Or, if just using the defaults::
+
+    cache = "memcache"
 
 MemcacheKeyValue
 ----------------
@@ -37,10 +43,9 @@ DatabaseKeyValue
 You can also use a cache backend that stores its data onto the database::
 
     from giotto.keyvalue import DatabaseKeyValue
-    cache = DatabaseKeyValue(Base, session)
+    cache = DatabaseKeyValue()
 
-You must pass in the SQLAlchemy ``Base`` class, as well as the SQLAlchemy session object.
-Before this backend can be used, you must run the ``make_tables`` program to create the database tables.
+Before this backend can be used, you must run the ``syncdb`` program to create the database tables.
 
 LocMemKeyValue
 --------------
