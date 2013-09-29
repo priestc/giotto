@@ -5,6 +5,9 @@ import logging
 import os
 import sys
 
+class GiottoSettings(object):
+    pass
+
 def initialize(module_name):
     """
     Build the giotto settings object. This function gets called
@@ -15,12 +18,17 @@ def initialize(module_name):
     from django.conf import settings
     
     project_module = importlib.import_module(module_name)
-    secrets = getattr(project_module.controllers, 'secrets', None)
+    secrets = getattr(getattr(project_module, "controllers"), 'secrets', None)
     machine = getattr(project_module.controllers, 'machine', None)
     config = getattr(project_module.controllers, 'config', None)
     
-    setattr(giotto, '_config', config)
+    setattr(giotto, '_config', GiottoSettings())
     setattr(giotto._config, 'project_path', os.path.dirname(project_module.__file__))
+
+    if config:
+        for item in dir(config):
+            setting_value = getattr(secrets, item)
+            setattr(giotto._config, item, setting_value)
 
     if secrets:
         for item in dir(secrets):

@@ -6,7 +6,7 @@ REQUIRES = [
     'six==1.2.0',
     'irc==5.0.1',
     'jinja2==2.6',
-    'py-bcrypt==0.2',
+    'py-bcrypt==0.4',
     'python-mimeparse==0.1.4',
     'django==1.5.4',
     'argh==0.23.3',

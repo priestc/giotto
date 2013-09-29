@@ -103,7 +103,7 @@ setup(
     author='',
     author_email='',
     url='',
-    packages=['%(module_name)s'],
+    packages=['%(module_name)s', '%(module_name)s.controllers', '%(module_name)s.models', '%(module_name)s.views'],
     include_package_data=True,
     license='LICENSE',
     classifiers=[
@@ -241,17 +241,16 @@ def suggest(path=''):
 def http(run=False, run_ssl=False, py3=False, *args):
     args = ["python3" if py3 else "python", "controllers/http_controller.py"]
     if run:
-        args = args + ["--run"]
+        args.append("--run")
     if run_ssl:
-        args = args + ["--run-ssl"]
+        args.append("--run-ssl")
 
     process = subprocess.Popen(args)
     try:
         process.wait()
     except KeyboardInterrupt:
         pass
-    except Exception as exc:
-        import debug
+
 
 def irc(run=False, run_ssl=False, py3=False, *args):
     args = ["python3" if py3 else "python", "controllers/irc_controller.py"]
