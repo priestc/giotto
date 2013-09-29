@@ -1,24 +1,25 @@
 __version__ = '0.11.0'
 
 import importlib
-import os
-import imp
-import sys
 import logging
+import os
+import sys
 
 def initialize(module_name):
     """
     Build the giotto settings object. This function gets called
     at the very begining of every request cycle.
     """
+    import giotto
+    from giotto.utils import random_string, switchout_keyvalue
+    from django.conf import settings
+    
     project_module = importlib.import_module(module_name)
     secrets = getattr(project_module.controllers, 'secrets', None)
     machine = getattr(project_module.controllers, 'machine', None)
     config = getattr(project_module.controllers, 'config', None)
     
-    import giotto
     setattr(giotto, '_config', config)
-
     setattr(giotto._config, 'project_path', os.path.dirname(project_module.__file__))
 
     if secrets:
@@ -35,17 +36,15 @@ def initialize(module_name):
     else:
         logging.warning("No machine.py found")
 
-    from giotto.utils import random_string, switchout_keyvalue
-    from django.conf import settings
     settings.configure(
         SECRET_KEY=random_string(32),
         DATABASES=get_config('DATABASES'),
         INSTALLED_APPS=(module_name, 'giotto')
     )
 
-    auth_engine = get_config('session_store', None)
-    if auth_engine:
-        class_ = switchout_keyvalue(auth_engine)
+    ss = get_config('session_store', None)
+    if ss:
+        class_ = switchout_keyvalue(ss)
         setattr(giotto._config, "session_store", class_())
 
     cache_engine = get_config("cache", None)

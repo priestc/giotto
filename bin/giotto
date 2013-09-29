@@ -60,7 +60,6 @@ def get_profile(key):
 @arg("--irc", default=False)
 @arg('--github', default=False)
 def create_project(args):
-    xx = args
     project_name = args.project_name
     module_name = args.module_name
 
