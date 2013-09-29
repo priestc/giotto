@@ -18,7 +18,8 @@ def initialize(module_name):
     from django.conf import settings
     
     project_module = importlib.import_module(module_name)
-    secrets = getattr(getattr(project_module, "controllers"), 'secrets', None)
+    controllers = importlib.import_module("%s.controllers" % module_name)
+    secrets = getattr(project_module.controllers, 'secrets', None)
     machine = getattr(project_module.controllers, 'machine', None)
     config = getattr(project_module.controllers, 'config', None)
     
