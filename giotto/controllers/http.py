@@ -46,9 +46,11 @@ def serve(ip, port, application, ssl=None, processes=1, **kwargs):
     or the one that comes with python. Setting `processes` to anything other than 1
     will prevent the debigger from working.
     """
+
     try:
         # use werkzeug if its there
         from werkzeug.serving import run_simple
+        print("Using Werkzeug run_simple")
         run_simple(ip, port, application, ssl_context=ssl, processes=processes, **kwargs)
         return
     except ImportError:
@@ -57,7 +59,7 @@ def serve(ip, port, application, ssl=None, processes=1, **kwargs):
     # otherwise just use python's built in wsgi webserver
     from wsgiref.simple_server import make_server
     server = make_server(ip, port, application)
-    print("Serving on %s:%s" % (ip, port))
+    print("Serving on %s:%s, using built in Python server" % (ip, port))
     try:
         server.serve_forever()
     except KeyboardInterrupt:

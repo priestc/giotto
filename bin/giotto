@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import importlib
 import sys
 import stat
 import json
@@ -33,6 +34,11 @@ def create_profile():
     else:
         # don't do anything if rc file seems to already exist
         return ".giottorc file already exists at %s" % rc
+
+def goto(module_name):
+    module = importlib.import_module(module_name)
+    dirr = os.path.dirname(module.__file__)
+    return os.chdir(dirr)
 
 def get_profile(key):
     """
@@ -229,7 +235,7 @@ def suggest(path=''):
     try:
         sys.path.append(os.getcwd())
         from giotto import initialize
-        import config
+        from controllers import config
         initialize(config)
         from manifest import manifest
 
@@ -251,7 +257,6 @@ def http(run=False, run_ssl=False, py3=False, *args):
     except KeyboardInterrupt:
         pass
 
-
 def irc(run=False, run_ssl=False, py3=False, *args):
     args = ["python3" if py3 else "python", "controllers/irc_controller.py"]
     process = subprocess.Popen(args)
@@ -260,8 +265,8 @@ def irc(run=False, run_ssl=False, py3=False, *args):
     except KeyboardInterrupt:
         pass
 
-def cmd(py3=False, *args):
-    args = ["python3" if py3 else "python", "controllers/cmd_controller.py"]
+def cmd(py3=False, *zzargs):
+    args = ["python3" if py3 else "python", "controllers/cmd_controller.py"] + list(zzargs)
     process = subprocess.Popen(args)
     try:
         process.wait()
@@ -269,7 +274,7 @@ def cmd(py3=False, *args):
         pass
 
 parser = ArghParser()
-parser.add_commands([create_project, create_profile, suggest, http, irc, cmd])
+parser.add_commands([create_project, create_profile, suggest, http, irc, cmd, goto])
 
 if __name__ == '__main__':
     parser.dispatch()
