@@ -3,9 +3,6 @@ import unittest
 from giotto.programs import Manifest, Program
 from giotto.exceptions import ProgramNotFound
 
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, String
-
 both = Program(name='both', controllers=['irc', 'http-get'])
 blank = Program(name='optional_blank')
 double_get = Program(name="getter", controllers=['http-get'])

@@ -3,8 +3,6 @@ from giotto.exceptions import NoViewMethod
 from giotto.views import GiottoView, BasicView, renders
 from giotto.control import Redirection
 
-from sqlalchemy import String, Column, Integer
-
 class Blog(object):
     def __init__(self, id=None, title=None, body=None):
         self.id = id
