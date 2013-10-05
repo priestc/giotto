@@ -6,11 +6,15 @@ from giotto.control import Redirection
 from sqlalchemy import String, Column, Integer
 
 class Blog(object):
-    def __init__(self, id, title, body):
-        pass
+    def __init__(self, id=None, title=None, body=None):
+        self.id = id
+        self.title = title
+        self.body = body
+
+    def __repr__(self):
+        return "%s %s %s" % (self.id, self.title, self.body)
 
 class RendererTests(unittest.TestCase):
-
     giotto_view = GiottoView()
     basic_view = BasicView()
 
