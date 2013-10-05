@@ -3,13 +3,11 @@ from giotto.exceptions import NoViewMethod
 from giotto.views import GiottoView, BasicView, renders
 from giotto.control import Redirection
 
-from giotto.utils import better_base
 from sqlalchemy import String, Column, Integer
-Base = better_base()
-class Blog(Base):
-    id = Column(Integer, primary_key=True)
-    title = Column(String)
-    body = Column(String)
+
+class Blog(object):
+    def __init__(self, id, title, body):
+        pass
 
 class RendererTests(unittest.TestCase):
 
