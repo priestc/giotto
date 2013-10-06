@@ -1,11 +1,10 @@
 import traceback
 import base64
-import urllib2
 
 try:
-    from urllib.parse import urlencode
+    from urllib.parse import urlencode, unquote
 except ImportError:
-    from urllib import urlencode
+    from urllib import urlencode, unquote
 
 try:
     from StringIO import StringIO
@@ -184,7 +183,7 @@ class HTTPController(GiottoController):
         if primitive == 'LOGGED_IN_USER':
             return self.request.user
         if primitive == 'RAW_INVOCATION_ARGS':
-            return urllib2.unquote('/'.join(self.path_args))
+            return unquote('/'.join(self.path_args))
 
         raise Exception("Primitive not supported")
 
