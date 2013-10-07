@@ -24,17 +24,24 @@ def initialize(module_name=None):
         return
 
     project_module = importlib.import_module(module_name)
-    controllers = importlib.import_module("%s.controllers" % module_name)
-    secrets = getattr(project_module.controllers, 'secrets', None)
-    machine = getattr(project_module.controllers, 'machine', None)
-    config = getattr(project_module.controllers, 'config', None)
     project_path = os.path.dirname(project_module.__file__)
-
     setattr(giotto._config, 'project_path', project_path)
+
+    try:
+        secrets = importlib.import_module("%s.controllers.secrets" % module_name)
+    except ImportError:
+        secrets = None
+
+    try:
+        machine = importlib.import_module("%s.controllers.machine" % module_name)
+    except ImportError:
+        machine = None
+
+    config = importlib.import_module("%s.controllers.config" % module_name)
 
     if config:
         for item in dir(config):
-            setting_value = getattr(secrets, item)
+            setting_value = getattr(config, item)
             setattr(giotto._config, item, setting_value)
 
     if secrets:

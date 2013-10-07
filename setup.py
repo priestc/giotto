@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 import sys
 
 REQUIRES = [
@@ -25,18 +25,10 @@ setup(
     author='Chris Priest',
     author_email='cp368202@ohiou.edu',
     url='https://github.com/priestc/giotto',
-    packages=[
-        'giotto',
-        'giotto.controllers',
-        'giotto.programs',
-        'giotto.contrib',
-        'giotto.contrib.auth',
-        'giotto.contrib.static',
-        'giotto.views'
-    ],
+    packages=find_packages(),
     scripts=['bin/giotto'],
     include_package_data=True,
-    license='LICENSE',
+    license='LICENSE',  
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         "Programming Language :: Python",

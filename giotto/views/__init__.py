@@ -212,8 +212,8 @@ class BasicView(GiottoView):
         return "\n".join(out)
 
 def get_jinja_template(template_name):
-    pp = get_config('project_path')
-    env = Environment(loader=FileSystemLoader(os.path.join(pp, 'views'))) 
+    ppx = get_config('project_path')
+    env = Environment(loader=FileSystemLoader(os.path.join(ppx, 'views'))) 
     return env.get_template(template_name)
 
 def jinja_template(template_name, name='data', mimetype="text/html"):

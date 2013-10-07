@@ -244,8 +244,11 @@ def suggest(path=''):
     except:
         pass
 
-def http(run=False, run_ssl=False, py3=False, *args):
-    args = ["python3" if py3 else "python", "controllers/http_controller.py"]
+def http(module_name, run=False, run_ssl=False, py3=False, *args):
+    base = os.path.dirname(importlib.import_module(module_name).__file__)
+    path = os.path.join(base, "controllers/http_controller.py")
+    
+    args = ["python3" if py3 else "python", path]
     if run:
         args.append("--run")
     if run_ssl:
