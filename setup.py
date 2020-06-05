@@ -8,7 +8,7 @@ REQUIRES = [
     'jinja2==2.6',
     'py-bcrypt==0.4',
     'python-mimeparse==0.1.4',
-    'django==1.5.4',
+    'django==1.11.29',
     'argh==0.23.3',
     'requests==1.2.3'
 ]
