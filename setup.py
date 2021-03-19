@@ -5,7 +5,7 @@ REQUIRES = [
     'webob==1.2.3',
     'six==1.2.0',
     'irc==5.0.1',
-    'jinja2==2.6',
+    'jinja2==2.11.3',
     'py-bcrypt==0.4',
     'python-mimeparse==0.1.4',
     'django==1.5.4',
