@@ -10,7 +10,7 @@ REQUIRES = [
     'python-mimeparse==0.1.4',
     'django==1.5.4',
     'argh==0.23.3',
-    'requests==1.2.3'
+    'requests==2.20.0'
 ]
 
 if sys.version_info < (2, 7):
